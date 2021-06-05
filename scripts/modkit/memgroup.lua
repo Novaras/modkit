@@ -13,6 +13,10 @@
 
 if (modkit == nil) then modkit = {}; end
 
+if (modkit.table == nil) then
+	dofilepath("data:scripts/modkit/table_util.lua");
+end
+
 if (modkit.MemGroup == nil) then
 	modkit.MemGroup = {
 		_groups = {},
@@ -66,6 +70,9 @@ if (modkit.MemGroup == nil) then
 			end
 			function new_group:delete(entityID)
 				self._entities[entityID] = nil;
+			end
+			function new_group:find(predicate)
+				return modkit.table.find(self._entities, predicate);
 			end
 			return new_group;
 		end,
