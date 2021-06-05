@@ -6,15 +6,15 @@ A collection of functions and utilties for use when modding HWRM.
 
 There are two main functionalities:
 
-- `modkit.lua` Provides all the modding utilities and functions
-- `driver.lua` Provides a mechanism to unify all script calls (see section below)
+- `modkit.lua`: Provides all the modding utilities and functions
+- `driver.lua`: [[Usage](Driver.md)] Provides a mechanism to unify all script calls (see section below)
 
 ## `modkit.lua`:
 
 Consists of distinct modules:
 
 - `sobgroup.lua`: populates the global scope with extra user-defined `SobGroup_` functions
-- `memgroup.lua`: MemGroup is a state management system, which allows you to maintain state between script calls in a well-defined pattern
+- `memgroup.lua`: [[Usage](MemGroup.md)] MemGroup is a state management system, which allows you to maintain state between script calls in a well-defined pattern
 - `math_util.lua`, `table_util.lua`: Maths and table utilities (especially table utilies)
 
 You may import this file into whatever script you like:
@@ -43,7 +43,7 @@ modkit.table;		-- Table utils
 modkit.memgroup;	-- State management utils
 ```
 
-The table and math utils are simple to understand, as they're just collections of functions which are documented in their files. The state management utility, `memgroup`, is a little more complicated:
+The table and math utils are simple to understand, as they're just collections of functions which are documented in their files (todo). The state management utility, `memgroup`, is a little more complicated:
 
 #### MemGroup:
 
