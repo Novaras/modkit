@@ -26,9 +26,9 @@ if (H_DRIVER == nil) then
 
 			return modkit.table.merge(
 				{
-					definition.create,
-					definition.update,
-					definition.destroy
+					create = definition.create,
+					update = definition.update,
+					destroy = definition.destroy
 				},
 				attribs
 			);
