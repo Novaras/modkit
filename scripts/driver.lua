@@ -1,15 +1,21 @@
+-- driver.lua
 -- Ships hook here instead of their own nested scripts
+-- Do not edit unless you know what you're doing.
 
 function NOOP() end
 
 if (H_DRIVER == nil) then
-	print("go driver");
+
 	if (modkit == nil) then
 		dofilepath("data:scripts/modkit.lua");
 	end
 
 	if (CUSTOM_CODE == nil) then
 		dofilepath("data:scripts/custom_code/custom_code.lua");
+	end
+
+	if (GLOBAL_PROTOTYPE == nil or GLOBAL_PROTO_KEY == nil) then
+		dofilepath("data:scripts/custom_code/global_attribs.lua");
 	end
 
 	function GetCustomAttribs(type_group, player, id)
@@ -24,14 +30,21 @@ if (H_DRIVER == nil) then
 				attribs = definition.attribs(type_group, player, id);
 			end
 
-			return modkit.table.merge(
-				{
-					create = definition.create,
-					update = definition.update,
-					destroy = definition.destroy
-				},
+			-- ensure typed
+			if (attribs.type_group == nil) then
+				attribs.type_group = type_group;
+			end
+
+			if (attribs.own_group == nil) then
+				attribs.own_group = SobGroup_Fresh(type_group .. "-" .. id)
+			end
+
+			local result = modkit.table.merge(
+				definition,
 				attribs
 			);
+			result.attribs = nil; -- remove constructor from output
+			return result;
 		end
 		return {};
 	end
@@ -41,12 +54,8 @@ if (H_DRIVER == nil) then
 		local caller = GLOBAL_REGISTER:set(
 			id,
 			modkit.table.merge(
-				{
-					type_group = type_group,
-					own_group = SobGroup_Clone(type_group, type_group .. "-" .. id),
-					player = player
-				},
-				GetCustomAttribs(type_group) -- attribs and create/update/destroy custom fns
+				GetCustomAttribs(GLOBAL_PROTO_KEY, player, id),		-- stuff set in global_attribs
+				GetCustomAttribs(type_group, player, id)			-- attribs and create/update/destroy custom fns,
 			)
 		);
 		-- ensure non-nil when calling these
@@ -55,24 +64,19 @@ if (H_DRIVER == nil) then
 				caller[v] = NOOP;
 			end
 		end
-		caller.create(caller);
+		caller:create();
 	end
 
 	function update(c, p, s)
 		local caller = GLOBAL_REGISTER:get(s);
-		SobGroup_SobGroupAdd(caller.own_group, c);
+		SobGroup_SobGroupAdd(caller.own_group, c); -- ensure own group is filled on update
 
-		print("\n\n\n");
-		modkit.table.printTbl(caller);
-		print("\n\n\n");
-
-		print(type(caller.update));
-		caller.update(caller);
+		caller:update();
 	end
 
 	function destroy(c, p, s)
 		local caller = GLOBAL_REGISTER:get(s);
-		caller.destroy(caller);
+		caller:destroy();
 
 		GLOBAL_REGISTER:delete(s);
 	end
