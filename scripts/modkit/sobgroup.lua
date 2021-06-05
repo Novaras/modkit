@@ -35,7 +35,7 @@ if (H_SOBGROUP ~= 1) then
 	function SobGroup_Clone(original, new_name)
 		new_name = new_name or (original .. "-clone");
 		SobGroup_CreateAndClear(new_name);
-		SobGroup_SobGroupAdd(original, new_name);
+		SobGroup_SobGroupAdd(new_name, original);
 		return new_name;
 	end
 
