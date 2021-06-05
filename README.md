@@ -67,7 +67,7 @@ You can now use `degit` to create new projects using this repo as a template:
 degit novaras/modkit my-mod
 ```
 
-Simple as that.
+Simple as that. Feel free to delete these readme files after.
 
 Otherwise, a normal clone will work, just make sure to remove the `.git` directory, or retarget the origin.
 
