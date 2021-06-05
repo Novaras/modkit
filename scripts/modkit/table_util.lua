@@ -55,6 +55,9 @@ if (modkit.table == nil) then
 			return out;
 		end,
 		merge = function (tbl_a, tbl_b, merger)
+			merger = merger or function (a, b)
+				return (b or a);
+			end
 			if (tbl_a == nil and tbl_b ~= nil) then
 				return tbl_b;
 			elseif (tbl_a ~= nil and tbl_b == nil) then
@@ -103,7 +106,7 @@ if (modkit.table == nil) then
 		end
 		local temp_table = {};
 		temp_table[label] = table;
-		_printTbl(table);
+		_printTbl(temp_table);
 	end
 
 	modkit.table = {};
