@@ -4,6 +4,8 @@ MemGroup is a state management utility.
 
 It is designed to allow a modder to maintain state about ships through successive script calls, and even between different scripts.
 
+Fundamentally, MemGroup is a concept which allows modders to work with ships as objects, instead of working with them indirectly through SobGroups.
+
 ## Example Usage
 
 > **NOTE:** This example shows direct usage of MemGroup, which is a non-standard, albiet highly appropriate usage for simple/small scripts. See [Driver.md](Driver.md) for a more turbocharged system.
