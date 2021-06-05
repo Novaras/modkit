@@ -188,6 +188,15 @@ if (H_SOBGROUP ~= 1) then
 		end
 	end
 
+	--- Gets the current HP of the group (as a fraction, ala SobGroup_SetHealth).
+	-- @param group [string] The SobGroup who's health to check
+	-- @return [number] The current health as a fraction of the total
+	function SobGroup_GetHealth(group)
+		local max_health = SobGroup_MaxHealthTotal(group);
+		local current_health = SobGroup_CurrentHealthTotal(group);
+		return (current_health / max_health);
+	end
+
 	DEFAULT_SOBGROUP = SobGroup_CreateAndClear("__PLAYERSPATCH_EMPTY_GROUP")
 
 	print("executed: sobgroup.lua")
