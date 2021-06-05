@@ -68,3 +68,11 @@ degit novaras/modkit my-mod
 ```
 
 Simple as that.
+
+Otherwise, a normal clone will work, just make sure to remove the `.git` directory, or retarget the origin.
+
+```bash 
+git clone https://github.com/Novaras/modkit.git my-mod
+```
+
+Forking is also fine.
