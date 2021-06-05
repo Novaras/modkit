@@ -1,3 +1,7 @@
+-- custom_code.lua
+-- Imports all the custom attrib code from the race files.
+-- Do not edit unless you know what you're doing.
+
 if (H_CUSTOM_CODE == nil) then
 	CUSTOM_CODE = {};
 
