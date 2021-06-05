@@ -17,8 +17,8 @@ if (modkit.table == nil) then
 	dofilepath("data:scripts/modkit/table_util.lua");
 end
 
-if (modkit.MemGroup == nil) then
-	modkit.MemGroup = {
+if (modkit.memgroup == nil) then
+	modkit.memgroup = {
 		_groups = {},
 		-- _new
 		-- 1: group_name: string
@@ -85,10 +85,10 @@ if (modkit.MemGroup == nil) then
 		-- 'Soft' creation of group. If the group already exists, the already
 		-- present group is returned instead.
 		Create = function (group_name, custom_attribs)
-			if (modkit.MemGroup._groups[group_name] == nil) then
-				return modkit.MemGroup.ForceCreate(group_name, custom_attribs);
+			if (modkit.memgroup._groups[group_name] == nil) then
+				return modkit.memgroup.ForceCreate(group_name, custom_attribs);
 			end
-			return modkit.MemGroup._groups[group_name];
+			return modkit.memgroup._groups[group_name];
 		end,
 
 		-- ForceCreate
@@ -103,8 +103,8 @@ if (modkit.MemGroup == nil) then
 			if custom_attribs == nil then
 				custom_attribs = {};
 			end
-			modkit.MemGroup._groups[group_name] = modkit.MemGroup._new(group_name, custom_attribs);
-			return modkit.MemGroup._groups[group_name];
+			modkit.memgroup._groups[group_name] = modkit.memgroup._new(group_name, custom_attribs);
+			return modkit.memgroup._groups[group_name];
 		end,
 
 		-- Get
@@ -114,7 +114,7 @@ if (modkit.MemGroup == nil) then
 		--
 		-- Returns the group indexed by group_name.
 		Get = function (group_name)
-			return modkit.MemGroup._groups[group_name];
+			return modkit.memgroup._groups[group_name];
 		end,
 
 		-- Exists
@@ -124,7 +124,7 @@ if (modkit.MemGroup == nil) then
 		--
 		-- Checks the existence of the group indexed by group_name
 		Exists = function (group_name)
-			return modkit.MemGroup._groups[group_name] ~= nil;
+			return modkit.memgroup._groups[group_name] ~= nil;
 		end
 	}
 
