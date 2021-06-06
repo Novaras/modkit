@@ -65,7 +65,11 @@ if (modkit.table == nil) then
 			elseif (tbl_b == nil and tbl_b == nil) then
 				return {};
 			end
-			local out = tbl_a;
+			local out = {};
+			-- basic copy
+			for k, v in tbl_a do
+				out[k] = v;
+			end
 			for k, v in tbl_b do
 				if (out[k] == nil) then
 					out[k] = v;
