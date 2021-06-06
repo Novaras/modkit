@@ -19,6 +19,7 @@ if (H_DRIVER == nil) then
 	end
 
 	function GetCustomAttribs(type_group, player, id)
+		
 		local as_lower = strlower(type_group);
 		if (CUSTOM_CODE[as_lower]) then
 			local definition = CUSTOM_CODE[as_lower];
@@ -72,6 +73,18 @@ if (H_DRIVER == nil) then
 		SobGroup_SobGroupAdd(caller.own_group, c); -- ensure own group is filled on update
 
 		caller:update();
+
+		local past_self = {};
+		for k, v in caller do
+			if (k ~= 'past_self') then -- very important to prevent memory pileup!
+				if type(v) == 'function' then
+					past_self[k] = caller[k](caller); -- collapse getters into values
+				else
+					past_self[k] = v;
+				end
+			end
+		end
+		caller.past_self = past_self; -- for next run comparisons
 	end
 
 	function destroy(c, p, s)
