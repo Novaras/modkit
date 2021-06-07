@@ -30,6 +30,8 @@ if (modkit == nil) then modkit = {}; end
 
 if (modkit.table == nil) then
 
+	-- The functions here are intentionally designed to mimick their JS counterparts for Arrays:
+	-- https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array
 	local table = {
 		filter = function (table, predicate)
 			local out = {};
@@ -101,6 +103,31 @@ if (modkit.table == nil) then
 					return v;
 				end
 			end
+		end,
+		length = function (table)
+			local n = 0;
+			for k, v in table do
+				n = n + 1;
+			end
+			return n;
+		end,
+		keys = function (table)
+			local keys = {};
+			local count = 1;
+			for k, v in table do
+				keys[count] = k;
+				count = count + 1;
+			end
+			return keys;
+		end,
+		values = function (table)
+			local values = {};
+			local count = 1;
+			for k, v in table do
+				values[count] = v;
+				count = count + 1;
+			end
+			return values;
 		end
 	};
 
