@@ -17,8 +17,8 @@ if (modkit.table == nil) then
 	dofilepath("data:scripts/modkit/table_util.lua");
 end
 
-if (modkit.memgroup == nil) then
-	modkit.memgroup = {
+if (modkit.MemGroup == nil) then
+	modkit.MemGroup = {
 		_groups = {},
 		-- _new
 		-- 1: group_name: string
@@ -44,14 +44,16 @@ if (modkit.memgroup == nil) then
 				new_group[i] = v;
 			end
 			function new_group:get(entityID)
-				return self._entities[entityID];
+				return self:find(function (entity)
+					return entity.id == %entityID;
+				end);
 			end
 			function new_group:set(entityID, entity)
 				if (entity == nil) then
 					entity = {};
 				end
-				self._entities[entityID] = entity;
-				local e = self._entities[entityID];
+				self._entities[getn(self._entities) + 1] = entity;
+				local e = self._entities[getn(self._entities)];
 				e.id = entityID;
 				if (e._tick == nil) then
 					e._tick = 0;
@@ -85,10 +87,10 @@ if (modkit.memgroup == nil) then
 		-- 'Soft' creation of group. If the group already exists, the already
 		-- present group is returned instead.
 		Create = function (group_name, custom_attribs)
-			if (modkit.memgroup._groups[group_name] == nil) then
-				return modkit.memgroup.ForceCreate(group_name, custom_attribs);
+			if (modkit.MemGroup._groups[group_name] == nil) then
+				return modkit.MemGroup.ForceCreate(group_name, custom_attribs);
 			end
-			return modkit.memgroup._groups[group_name];
+			return modkit.MemGroup._groups[group_name];
 		end,
 
 		-- ForceCreate
@@ -103,8 +105,8 @@ if (modkit.memgroup == nil) then
 			if custom_attribs == nil then
 				custom_attribs = {};
 			end
-			modkit.memgroup._groups[group_name] = modkit.memgroup._new(group_name, custom_attribs);
-			return modkit.memgroup._groups[group_name];
+			modkit.MemGroup._groups[group_name] = modkit.MemGroup._new(group_name, custom_attribs);
+			return modkit.MemGroup._groups[group_name];
 		end,
 
 		-- Get
@@ -114,7 +116,7 @@ if (modkit.memgroup == nil) then
 		--
 		-- Returns the group indexed by group_name.
 		Get = function (group_name)
-			return modkit.memgroup._groups[group_name];
+			return modkit.MemGroup._groups[group_name];
 		end,
 
 		-- Exists
@@ -124,7 +126,7 @@ if (modkit.memgroup == nil) then
 		--
 		-- Checks the existence of the group indexed by group_name
 		Exists = function (group_name)
-			return modkit.memgroup._groups[group_name] ~= nil;
+			return modkit.MemGroup._groups[group_name] ~= nil;
 		end
 	}
 
