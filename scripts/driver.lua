@@ -18,7 +18,7 @@ if (H_DRIVER == nil) then
 		dofilepath("data:scripts/custom_code/global_attribs.lua");
 	end
 
-	function GetCustomAttribs(type_group, player, id)
+	function GetCustomAttribs(type_group, player, id, type_alias)
 		
 		local as_lower = strlower(type_group);
 		if (CUSTOM_CODE[as_lower]) then
@@ -28,7 +28,7 @@ if (H_DRIVER == nil) then
 			if (type(definition.attribs) == "table") then
 				attribs = definition.attribs;
 			else
-				attribs = definition.attribs(type_group, player, id);
+				attribs = definition.attribs(type_alias or type_group, player, id);
 			end
 
 			-- ensure typed
@@ -55,8 +55,8 @@ if (H_DRIVER == nil) then
 		local caller = GLOBAL_REGISTER:set(
 			id,
 			modkit.table.merge(
-				GetCustomAttribs(GLOBAL_PROTO_KEY, player, id),		-- stuff set in global_attribs
-				GetCustomAttribs(type_group, player, id)			-- attribs and create/update/destroy custom fns,
+				GetCustomAttribs(GLOBAL_PROTO_KEY, player, id, type_group),		-- stuff set in global_attribs
+				GetCustomAttribs(type_group, player, id)						-- attribs and create/update/destroy custom fns,
 			)
 		);
 		-- ensure non-nil when calling these
