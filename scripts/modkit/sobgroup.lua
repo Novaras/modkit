@@ -164,7 +164,7 @@ if (H_SOBGROUP ~= 1) then
 				SobGroup_Disable(target_group, 0)
 				SobGroup_SetSpeed(target_group, 1)
 			end
-			local ability_status = modulo(stunned + 1, 2) -- 0 -> 1, 1 -> 0, 2 -> 1, ...
+			local ability_status = mod(stunned + 1, 2) -- 0 -> 1, 1 -> 0, 2 -> 1, ...
 			for _, ability in STUN_EFFECT_ABILITIES do
 				SobGroup_AbilityActivate(target_group, ability, ability_status)
 			end
