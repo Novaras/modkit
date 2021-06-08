@@ -54,20 +54,6 @@ if (modkit.MemGroup == nil) then
 				end
 				self._entities[getn(self._entities) + 1] = entity;
 				local e = self._entities[getn(self._entities)];
-				e.id = entityID;
-				if (e._tick == nil) then
-					e._tick = 0;
-				end
-				function e:NextTick()
-					self._tick = self._tick + 1;
-					if (self._tick >= 127) then
-						self._tick = 0;
-					end
-					return self._tick;
-				end
-				function e:GetTick()
-					return self._tick;
-				end
 				return e;
 			end
 			function new_group:delete(entityID)
@@ -75,6 +61,14 @@ if (modkit.MemGroup == nil) then
 			end
 			function new_group:find(predicate)
 				return modkit.table.find(self._entities, predicate);
+			end
+			function new_group:all()
+				return modkit.table.filter(
+					self._entities,
+					function (ship)
+						return SobGroup_Count(ship.own_group) > 0;
+					end
+				);
 			end
 			return new_group;
 		end,
