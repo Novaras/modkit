@@ -56,46 +56,19 @@ if (modkit.table == nil) then
 			end
 			return out;
 		end,
-		merge = function (tbl_a, tbl_b, merger)
-			merger = merger or function (a, b)
-				return (b or a);
-			end
-			if (tbl_a == nil and tbl_b ~= nil) then
-				return tbl_b;
-			elseif (tbl_a ~= nil and tbl_b == nil) then
-				return tbl_a;
-			elseif (tbl_b == nil and tbl_b == nil) then
-				return {};
-			end
-			local out = {};
-			-- basic copy
-			for k, v in tbl_a do
-				out[k] = v;
-			end
-			for k, v in tbl_b do
-				if (out[k] == nil) then
-					out[k] = v;
-				else
-					out[k] = merger(out[k], tbl_b[k]);
-				end
-			end
-			return out;
-		end,
 		includesValue = function (table, value)
 			for i, v in table do
 				if v == value then
-					return true;
+					return 1;
 				end
 			end
-			return false;
 		end,
 		includesKey = function (table, value)
 			for i, v in table do
 				if i == value then
-					return true;
+					return 1;
 				end
 			end
-			return false;
 		end,
 		find = function (table, predicate)
 			for i, v in table do
@@ -138,6 +111,36 @@ if (modkit.table == nil) then
 		local temp_table = {};
 		temp_table[label] = table;
 		_printTbl(temp_table);
+	end
+
+	function table:merge(tbl_a, tbl_b, merger)
+		merger = merger or function (a, b)
+			if (type(a) == "table" and type(b) == "table") then
+				return table:merge(a, b);
+			else
+				return (b or a);
+			end
+		end
+		if (tbl_a == nil and tbl_b ~= nil) then
+			return tbl_b;
+		elseif (tbl_a ~= nil and tbl_b == nil) then
+			return tbl_a;
+		elseif (tbl_b == nil and tbl_b == nil) then
+			return {};
+		end
+		local out = {};
+		-- basic copy
+		for k, v in tbl_a do
+			out[k] = v;
+		end
+		for k, v in tbl_b do
+			if (out[k] == nil) then
+				out[k] = v;
+			else
+				out[k] = merger(out[k], tbl_b[k]);
+			end
+		end
+		return out;
 	end
 
 	modkit.table = {};
