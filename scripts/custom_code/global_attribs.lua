@@ -10,11 +10,20 @@ if (H_GLOBAL_ATTRIBS == nil) then
 				-- These keys are essential for the driver code to work - beyond that, you can do anything.
 				type_group = type_group,
 				own_group = SobGroup_Fresh(type_group, type_group .. "-" .. id),
-				player_index = player_index
+				player_index = player_index,
+				tick = 0,
 				-- your keys here or below...
 			};
 		end
 	};
+
+	-- ships tick is incremented by 1 each update (see driver.lua)
+	function proto:tick(set)
+		if (set) then
+			self.tick = set;
+		end
+		return self.tick;
+	end
 
 	-- ==========================================================
 	-- |   DEFINE YOUR OWN FUNCTIONS/ETC. AS YOU SEE FIT HERE   |
