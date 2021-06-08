@@ -129,18 +129,18 @@ if (H_SOBGROUP ~= 1) then
 	end
 
 	STUN_EFFECT_ABILITIES = {
-		-- AB_Cloak,
+		AB_Cloak,
 		-- AB_AcceptDocking,
 		-- AB_Builder,
-		-- AB_Hyperspace,
-		-- AB_FormHyperspaceGate,
-		-- AB_HyperspaceViaGate,
+		AB_Hyperspace,
+		AB_FormHyperspaceGate,
+		AB_HyperspaceViaGate,
 		AB_SpecialAttack,
-		-- AB_DefenseField,
-		-- AB_DefenseFieldShield,
+		AB_DefenseField,
+		AB_DefenseFieldShield,
 		AB_Steering,
 		AB_Targeting,
-		-- AB_Lights,
+		AB_Lights,
 	}
 	STUN_EFFECT_EVENT = "PowerOff"
 
@@ -148,21 +148,15 @@ if (H_SOBGROUP ~= 1) then
 	-- See globals `STUN_EFFECT_ABILITIES` and `STUN_EFFECT_EVENT`.
 	-- @param target_group [string] The group to stun/unstun
 	-- @param stunned [number] Whether or not to stun the group (1 = stun, 0 = free)
-	-- @param duration [number] The duration of the stun effect if applied
 	-- @return [string] The affected group
-	function SobGroup_SetGroupStunned(target_group, stunned, duration)
-		if (duration == nil) then
-			duration = 99
-		end
+	function SobGroup_SetGroupStunned(target_group, stunned)
 		if (SobGroup_Count(target_group) > 0) then
 			if (stunned == 1) then
 				FX_StartEvent(target_group, STUN_EFFECT_EVENT)
-				SobGroup_Disable(target_group, duration)
-				SobGroup_SetSpeed(target_group, 0)
+				SobGroup_Disable(target_group, 1)
 			else
 				FX_StopEvent(target_group, STUN_EFFECT_EVENT)
 				SobGroup_Disable(target_group, 0)
-				SobGroup_SetSpeed(target_group, 1)
 			end
 			local ability_status = mod(stunned + 1, 2) -- 0 -> 1, 1 -> 0, 2 -> 1, ...
 			for _, ability in STUN_EFFECT_ABILITIES do
