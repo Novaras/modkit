@@ -1,6 +1,7 @@
 --Table utility functions.
 
-function _printTbl(table, indent)
+function _printTbl(table, indent, output)
+	output = output or print;
 	if (indent == nil) then
 		indent = 0;
 	end
@@ -14,14 +15,14 @@ function _printTbl(table, indent)
 	end
 	for k, v in table do
 		if type(v) == "table" then
-			print(indent_str .. "\"" .. k .. "\": {");
+			output(indent_str .. "\"" .. k .. "\": {");
 			_printTbl(v, indent + 1);
-			print(indent_str .. "},");
+			output(indent_str .. "},");
 		else
 			if (type(v) ~= "number") then
 				v = "\"" .. tostring(v) .. "\"";
 			end
-			print(indent_str .. "\"" .. k .. "\": " .. v .. ',');
+			output(indent_str .. "\"" .. k .. "\": " .. v .. ',');
 		end
 	end
 end
@@ -101,6 +102,10 @@ if (modkit.table == nil) then
 				count = count + 1;
 			end
 			return values;
+		end,
+		push = function (table, value)
+			table[getn(table) + 1] = value;
+			return table;
 		end
 	};
 
@@ -114,9 +119,12 @@ if (modkit.table == nil) then
 	end
 
 	function table:merge(tbl_a, tbl_b, merger)
+		if (self == nil) then
+			print("\n[modkit] Error: table:merge must be called as a method (table:merge vs table.merge)");
+		end
 		merger = merger or function (a, b)
 			if (type(a) == "table" and type(b) == "table") then
-				return table:merge(a, b);
+				return %self:merge(a, b);
 			else
 				return (b or a);
 			end
@@ -137,7 +145,7 @@ if (modkit.table == nil) then
 			if (out[k] == nil) then
 				out[k] = v;
 			else
-				out[k] = merger(out[k], tbl_b[k]);
+				out[k] = merger(out[k], v);
 			end
 		end
 		return out;
