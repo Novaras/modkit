@@ -5,17 +5,10 @@ if (H_SOBGROUP ~= 1) then
 	--- Creates a new sobgroup if one doesn't exist, then clears the group to ensure the group referenced by the return string is clear.
 	-- @param name [string] The name of the SobGroup to create/clear.
 	-- @return [string] The name provided
-	function SobGroup_CreateAndClear(name)
+	function SobGroup_Fresh(name)
 		SobGroup_CreateIfNotExist(name);
 		SobGroup_Clear(name);
 		return name;
-	end
-
-	--- Alias for `SobGroup_CreateAndClear`.
-	-- @param name [string] The name of the SobGroup to create/clear
-	-- @retrun [string] The name provided
-	function SobGroup_Fresh(name)
-		return SobGroup_CreateAndClear(name);
 	end
 
 	--- Overwrites `target_group` with the content of `incoming_group`.
@@ -34,7 +27,7 @@ if (H_SOBGROUP ~= 1) then
 	-- @return [string] The name of the new group.
 	function SobGroup_Clone(original, new_name)
 		new_name = new_name or (original .. "-clone");
-		SobGroup_CreateAndClear(new_name);
+		SobGroup_Fresh(new_name);
 		SobGroup_SobGroupAdd(new_name, original);
 		return new_name;
 	end
@@ -70,7 +63,7 @@ if (H_SOBGROUP ~= 1) then
 	-- @return [string] The group
 	function SobGroup_AnyBeingCaptured(group)
 		local group_being_captured = group .. "_being_captured"
-		SobGroup_CreateAndClear(group_being_captured)
+		SobGroup_Fresh(group_being_captured)
 		SobGroup_GetSobGroupBeingCapturedGroup(group, group_being_captured)
 		if (SobGroup_Count(group_being_captured) > 0) then
 			return 1
@@ -83,7 +76,7 @@ if (H_SOBGROUP ~= 1) then
 	-- @return [string] The group
 	function SobGroup_AnyAreAttacking(group)
 		local group_attacking = group .. "_attacking"
-		SobGroup_CreateAndClear(group_attacking)
+		SobGroup_Fresh(group_attacking)
 		SobGroup_GetCommandTargets(group_attacking, group, COMMAND_Attack)
 		if (SobGroup_Count(group_attacking) > 0) then
 			return 1
@@ -191,7 +184,7 @@ if (H_SOBGROUP ~= 1) then
 		return (current_health / max_health);
 	end
 
-	DEFAULT_SOBGROUP = SobGroup_CreateAndClear("__PLAYERSPATCH_EMPTY_GROUP")
+	DEFAULT_SOBGROUP = SobGroup_Fresh("__")
 
 	print("executed: sobgroup.lua")
 	H_SOBGROUP = 1
