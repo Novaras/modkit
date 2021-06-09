@@ -10,6 +10,21 @@ function modkit_ship:age()
 	return (Universe_GameTime() - self.created_at);
 end
 
+function modkit_ship:HP(hp)
+	if (hp) then
+		SobGroup_SetHealth(self.own_group, hp);
+	end
+	return SobGroup_GetHealth(self.own_group);
+end
+
+function modkit_ship:maxActualHP()
+	return SobGroup_MaxHealthTotal(self.own_group);
+end
+
+function modkit_ship:currentActualHP()
+	return SobGroup_CurrentHealthTotal(self.own_group);
+end
+
 function modkit_ship:distanceTo(other)
 	return SobGroup_GetDistanceToSobGroup(self.own_group, other.own_group);
 end
@@ -72,6 +87,20 @@ function modkit_ship:stunned(stunned)
 	end
 	SobGroup_SetGroupStunned(self.own_group, stunned);
 	return self._stunned;
+end
+
+function modkit_ship:canDoAbility(which, enable)
+	enable = enable or SobGroup_CanDoAbility(self.own_group, which);
+	SobGroup_AbilityActivate(self.own_group, which, enable);
+	return SobGroup_CanDoAbility(self.own_group, which);
+end
+
+function modkit_ship:canHyperspace(enable)
+	return self:canDoAbility(AB_Hyperspace, enable);
+end
+
+function modkit_ship:canHyperspaceViaGate(enable)
+	return self:canDoAbility(AB_HyperspaceViaGate, enable);
 end
 
 -- === FX stuff ===
