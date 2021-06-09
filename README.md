@@ -9,7 +9,7 @@ There are two main functionalities:
 - `modkit.lua`: Provides all the modding utilities and functions
 - `driver.lua`: [[Usage](Driver.md)] Provides a mechanism to unify all script calls (see section below)
 
-## `modkit.lua`:
+## `modkit.lua` as a standalone utility:
 
 Consists of distinct modules:
 
@@ -55,7 +55,9 @@ See [MemGroup.md](MemGroup.md) for a quick example / tutorial.
 
 ## Use as a mod template
 
-If you have `npm` and `node` installed on your system (which is likely, but get them [here](https://nodejs.org/en/) if needed, note that `npm` is installed alongside `node`), you can install a tool called [degit](https://www.npmjs.com/package/degit):
+Install [degit](https://www.npmjs.com/package/degit):
+
+> Note: You need both Node and npm to use modkit this way. You can get Node (and npm with it) here: https://nodejs.org/en/
 
 ```bash
 npm install -g degit
