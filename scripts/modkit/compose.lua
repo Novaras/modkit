@@ -53,10 +53,6 @@ if (modkit.compose == nil) then
 
 	modkit.compose = compose;
 
+	doscanpath("data:scripts/custom_code", "*.lua");
 	doscanpath("data:scripts/custom_code/lib", "*.lua");
-
-	doscanpath("data:scripts/custom_code/hgn", "*.lua");
-	doscanpath("data:scripts/custom_code/vgr", "*.lua");
-	doscanpath("data:scripts/custom_code/kus", "*.lua");
-	doscanpath("data:scripts/custom_code/tai", "*.lua");
 end
