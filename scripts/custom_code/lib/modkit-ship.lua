@@ -42,39 +42,75 @@ function modkit_ship:attackFamily()
 	end
 end
 
-function modkit_ship:isFighter()
-	for k, v in {
-		"fighter",
-		"fighter_hw1"
-	} do
+function modkit_ship:isAnyFamilyOf(families)
+	for k, v in families do
 		if (self:attackFamily() == v) then
 			return 1;
 		end
 	end
 end
 
+function modkit_ship:isFighter()
+	return self:isAnyFamilyOf({
+		"fighter",
+		"fighter_hw1"
+	});
+end
+
 function modkit_ship:isCorvette()
-	for k, v in {
+	return self:isAnyFamilyOf({
 		"corvette",
 		"corvette_hw1"
-	} do
-		if (self:attackFamily() == v) then
-			return 1;
-		end
-	end
+	});
+end
+
+function modkit_ship:isFrigate()
+	return self:isAnyFamilyOf({
+		"frigate"
+	});
+end
+
+function modkit_ship:isCapital()
+	return self:isAnyFamilyOf({
+		"smallcapitalship",
+		"bigcapitalship",
+		"mothership"
+	});
 end
 
 -- === Ship type queries ===
 
-function modkit_ship:isSalvager()
-	for k, v in {
-		"kus_salvagecorvette",
-		"tai_salvagecorvette"
-	} do
-		if (self:attackFamily() == v) then
-			return 1;
+function modkit_ship:isAnyTypeOf(ship_types)
+	for k, v in ship_types do
+		if (self.type_group == v) then
+			return v;
 		end
 	end
+end
+
+function modkit_ship:isSalvager()
+	return self:isAnyTypeOf({
+		"tai_salvagecorvette",
+		"kus_salvagecorvette"
+	});
+end
+
+function modkit_ship:isDestroyer()
+	return self:isAnyTypeOf({
+		"hgn_destroyer",
+		"vgr_destroyer",
+		"kus_destroyer",
+		"tai_destroyer"
+	});
+end
+
+function modkit_ship:isCruiser()
+	return self:isAnyTypeOf({
+		"hgn_battlecruiser",
+		"vgr_battlecruiser",
+		"kus_heavycruiser",
+		"tai_heavycruiser"
+	});
 end
 
 -- === State setters ===
