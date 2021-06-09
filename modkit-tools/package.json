@@ -1,0 +1,17 @@
+{
+  "name": "modkit-tools",
+  "version": "1.0.0",
+  "description": "",
+  "main": "link.js",
+  "author": {
+    "name": "Novaras (Fear)",
+    "email": "tfear091@gmail.com"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "degit": "^2.8.4",
+    "globby": "^11.0.3",
+    "prompts": "^2.4.1",
+    "rimraf": "^3.0.2"
+  }
+}
