@@ -4,7 +4,7 @@ modkit_base = {
 		return {
 			id = s,
 			type_group = g,
-			own_group = SobGroup_Fresh(g .. "-" .. s),
+			own_group = SobGroup_Clone(g, g .. "-" .. s),
 			player_index = p,
 			_tick = 0,
 			created_at = Universe_GameTime()
