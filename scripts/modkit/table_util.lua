@@ -106,8 +106,35 @@ if (modkit.table == nil) then
 		push = function (table, value)
 			table[getn(table) + 1] = value;
 			return table;
+		end,
+		firstKey = function (tbl)
+			local lowest_k = getn(tbl); -- highest k
+			for k, v in tbl do
+				if (k < lowest_k) then
+					lowest_k = k;
+				end
+			end
+			return lowest_k;
 		end
 	};
+
+	function table.pack(tbl)
+		local out_tbl = {};
+		local index = 1;
+		for k, v in tbl do
+			out_tbl[index] = v;
+			index = index + 1;
+		end
+		return out_tbl;
+	end
+
+	function table.firstValue(tbl)
+		return tbl[%table.firstKey(tbl)];
+	end
+
+	function table.first(tbl)
+		return tbl[%table.firstKey(tbl)];
+	end
 
 	function table.printTbl(table, label)
 		if (label == nil) then
