@@ -43,10 +43,6 @@ if (modkit.compose == nil) then
 			end
 		end
 
-		print("out:");
-		modkit.table.printTbl(out_ship);
-		print("/out");
-
 		return out_ship;
 	end
 
