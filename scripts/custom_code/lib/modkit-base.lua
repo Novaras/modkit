@@ -7,7 +7,7 @@ modkit_base = {
 		return {
 			type_group = g,
 			own_group = SobGroup_Clone(g, g .. "-" .. s),
-			player = p,
+			player = player,
 			_tick = 0,
 			created_at = Universe_GameTime()
 		};

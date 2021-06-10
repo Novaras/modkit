@@ -45,7 +45,7 @@ if (modkit.research == nil) then
 		return modkit.table.find(
 			self,
 			function (research_item) -- research item or a method like resolveName
-				return type(research_item) == "table" and research_item.name == item.name;
+				return type(research_item) == "table" and research_item.name == %item.name;
 			end
 		).name; -- we return the name
 	end

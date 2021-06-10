@@ -53,7 +53,7 @@ if (modkit.MemGroup == nil) then
 					};
 				end
 				self._entities[entityID] = entity;
-				local e = self._entities[getn(self._entities)];
+				local e = self._entities[entityID];
 				return e;
 			end
 			function new_group:delete(entityID)
