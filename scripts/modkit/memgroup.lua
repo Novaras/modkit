@@ -50,7 +50,9 @@ if (modkit.MemGroup == nil) then
 			end
 			function new_group:set(entityID, entity)
 				if (entity == nil) then
-					entity = {};
+					entity = {
+						id = entityID
+					};
 				end
 				self._entities[getn(self._entities) + 1] = entity;
 				local e = self._entities[getn(self._entities)];
