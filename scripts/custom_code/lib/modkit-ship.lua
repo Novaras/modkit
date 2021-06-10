@@ -1,6 +1,7 @@
 modkit_ship = {
 	attribs = {
-		_stunned = 0
+		_stunned = 0,
+		_ab_targets = {}
 	}
 };
 
@@ -17,6 +18,13 @@ function modkit_ship:HP(hp)
 	return SobGroup_GetHealth(self.own_group);
 end
 
+function modkit_ship:speed(speed)
+	if (speed) then
+		SobGroup_SetSpeed(self.own_group, speed);
+	end
+	return SobGroup_GetSpeed(self.own_group);
+end
+
 function modkit_ship:maxActualHP()
 	return SobGroup_MaxHealthTotal(self.own_group);
 end
@@ -25,8 +33,33 @@ function modkit_ship:currentActualHP()
 	return SobGroup_CurrentHealthTotal(self.own_group);
 end
 
+function modkit_ship:subsHP(subs_name)
+	if (subs_name) then
+		SobGroup_SetHardPointHealth(self.own_group, subs_name);
+	end
+	return SobGroup_GetHardPointHealth(self.own_group, subs_name);
+end
+
+
 function modkit_ship:distanceTo(other)
 	return SobGroup_GetDistanceToSobGroup(self.own_group, other.own_group);
+end
+
+function modkit_ship:attack(other)
+	return SobGroup_Attack(self.own_group, other.own_group);
+end
+
+function modkit_ship:attackPlayer(player)
+	return SobGroup_AttackPlayer(self.own_group, player.id);
+end
+
+function modkit_ship:guard(other)
+	return SobGroup_GuardSobGroup(self.own_group, other.own_group);
+end
+
+function modkit_ship:parade(other, mode)
+	mode = mode or 0;
+	return SobGroup_ParadeSobGroup(self.own_group, other.own_group, mode);
 end
 
 -- === Attack family queries ===
@@ -113,7 +146,35 @@ function modkit_ship:isCruiser()
 	});
 end
 
--- === State setters ===
+function modkit_ship:isCarrier()
+	return self:isAnyTypeOf({
+		"hgn_carrier",
+		"vgr_carrier",
+		"kus_carrier",
+		"tai_carrier"
+	});
+end
+
+function modkit_ship:isMothership()
+	return self:isAnyTypeOf({
+		"hgn_mothership",
+		"vgr_mothership",
+		"kus_mothership",
+		"tai_mothership"
+	});
+end
+
+function modkit_ship:isResearchShip()
+	local types = {};
+	for _, race in { "kus", "tai" } do
+		for i = 1, 5 do
+			types[getn(types) + 1] = race .. "_researchship_" .. i;
+		end
+	end
+	return self:isAnyTypeOf(types);
+end
+
+-- === State queries ===
 
 --- Get or set the stunned status of the ship.
 -- Returns whether or not the ship should currently be stunned (if stunned previously via :stunned)
@@ -125,10 +186,19 @@ function modkit_ship:stunned(stunned)
 	return self._stunned;
 end
 
-function modkit_ship:canDoAbility(which, enable)
-	enable = enable or SobGroup_CanDoAbility(self.own_group, which);
-	SobGroup_AbilityActivate(self.own_group, which, enable);
-	return SobGroup_CanDoAbility(self.own_group, which);
+function modkit_ship:docked(with)
+	if (with) then
+		return SobGroup_SobGroupDocked(self.own_group, with.own_group);
+	end
+	return SobGroup_Docked(self.own_group);
+end
+
+-- === Ability stuff ===
+
+function modkit_ship:canDoAbility(ability, enable)
+	enable = enable or SobGroup_CanDoAbility(self.own_group, ability);
+	SobGroup_AbilityActivate(self.own_group, ability, enable);
+	return SobGroup_CanDoAbility(self.own_group, ability);
 end
 
 function modkit_ship:canHyperspace(enable)
@@ -137,6 +207,14 @@ end
 
 function modkit_ship:canHyperspaceViaGate(enable)
 	return self:canDoAbility(AB_HyperspaceViaGate, enable);
+end
+
+function modkit_ship:isDoingAbility(ability)
+	return SobGroup_IsDoingAbility(self.own_group, ability);
+end
+
+function modkit_ship:isDocking()
+	return self:isDoingAbility(AB_Dock);
 end
 
 -- === FX stuff ===
