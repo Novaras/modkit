@@ -62,6 +62,23 @@ function modkit_ship:parade(other, mode)
 	return SobGroup_ParadeSobGroup(self.own_group, other.own_group, mode);
 end
 
+function modkit_ship:dock(target, stay_docked)
+	if (target == nil) then -- if no target, target = closest ship
+		local all_our_production_ships = GLOBAL_SHIPS:filter(function (ship)
+			return ship.player.id == %self.player.id and ship:canDoAbility(AB_AcceptDocking);
+		end);
+		sort(all_our_production_ships, function (ship_a, ship_b)
+			return %self:distanceTo(ship_a) < %self:distanceTo(ship_b);
+		end);
+		target = all_our_production_ships[1];
+	end
+	if (stay_docked) then
+		SobGroup_DockSobGroupAndStayDocked(self.own_group, target.own_group);
+	else
+		SobGroup_DockSobGroup(self.own_group, target.own_group);
+	end
+end
+
 -- === Attack family queries ===
 
 function modkit_ship:attackFamily()
