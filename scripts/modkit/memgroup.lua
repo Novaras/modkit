@@ -48,12 +48,13 @@ if (modkit.MemGroup == nil) then
 			end
 			function new_group:set(entityID, entity)
 				if (entity == nil) then
-					entity = {
-						id = entityID
-					};
+					entity = {};
 				end
 				self._entities[entityID] = entity;
 				local e = self._entities[entityID];
+				if (e.id == nil) then
+					e.id = entityID;
+				end
 				return e;
 			end
 			function new_group:delete(entityID)
