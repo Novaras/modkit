@@ -44,9 +44,7 @@ if (modkit.MemGroup == nil) then
 				new_group[i] = v;
 			end
 			function new_group:get(entityID)
-				return self:find(function (entity)
-					return entity.id == %entityID;
-				end);
+				return self._entities[entityID];
 			end
 			function new_group:set(entityID, entity)
 				if (entity == nil) then
@@ -54,15 +52,12 @@ if (modkit.MemGroup == nil) then
 						id = entityID
 					};
 				end
-				self._entities[getn(self._entities) + 1] = entity;
+				self._entities[entityID] = entity;
 				local e = self._entities[getn(self._entities)];
 				return e;
 			end
 			function new_group:delete(entityID)
 				self._entities[entityID] = nil;
-			end
-			function new_group:find(predicate)
-				return modkit.table.find(self._entities, predicate);
 			end
 			function new_group:all()
 				return modkit.table.filter(
@@ -71,6 +66,15 @@ if (modkit.MemGroup == nil) then
 						return SobGroup_Count(ship.own_group) > 0;
 					end
 				);
+			end
+			function new_group:find(predicate)
+				return modkit.table.find(self._entities, predicate);
+			end
+			function new_group:filter(predicate)
+				return modkit.table.filter(self._entities, predicate);
+			end
+			function new_group:length()
+				return modkit.table.length(self._entities);
 			end
 			return new_group;
 		end,
