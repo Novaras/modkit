@@ -1,6 +1,7 @@
 modkit_ship = {
 	attribs = {
-		_stunned = 0
+		_stunned = 0,
+		_ab_targets = {}
 	}
 };
 
@@ -17,6 +18,13 @@ function modkit_ship:HP(hp)
 	return SobGroup_GetHealth(self.own_group);
 end
 
+function modkit_ship:speed(speed)
+	if (speed) then
+		SobGroup_SetSpeed(self.own_group, speed);
+	end
+	return SobGroup_GetSpeed(self.own_group);
+end
+
 function modkit_ship:maxActualHP()
 	return SobGroup_MaxHealthTotal(self.own_group);
 end
@@ -25,8 +33,50 @@ function modkit_ship:currentActualHP()
 	return SobGroup_CurrentHealthTotal(self.own_group);
 end
 
+function modkit_ship:subsHP(subs_name, HP)
+	if (HP) then
+		SobGroup_SetHardPointHealth(self.own_group, subs_name, HP);
+	end
+	return SobGroup_GetHardPointHealth(self.own_group, subs_name);
+end
+
+
 function modkit_ship:distanceTo(other)
 	return SobGroup_GetDistanceToSobGroup(self.own_group, other.own_group);
+end
+
+function modkit_ship:attack(other)
+	return SobGroup_Attack(self.own_group, other.own_group);
+end
+
+function modkit_ship:attackPlayer(player)
+	return SobGroup_AttackPlayer(self.own_group, player.id);
+end
+
+function modkit_ship:guard(other)
+	return SobGroup_GuardSobGroup(self.own_group, other.own_group);
+end
+
+function modkit_ship:parade(other, mode)
+	mode = mode or 0;
+	return SobGroup_ParadeSobGroup(self.own_group, other.own_group, mode);
+end
+
+function modkit_ship:dock(target, stay_docked)
+	if (target == nil) then -- if no target, target = closest ship
+		local all_our_production_ships = GLOBAL_SHIPS:filter(function (ship)
+			return ship.player.id == %self.player.id and ship:canDoAbility(AB_AcceptDocking);
+		end);
+		sort(all_our_production_ships, function (ship_a, ship_b)
+			return %self:distanceTo(ship_a) < %self:distanceTo(ship_b);
+		end);
+		target = all_our_production_ships[1];
+	end
+	if (stay_docked) then
+		SobGroup_DockSobGroupAndStayDocked(self.own_group, target.own_group);
+	else
+		SobGroup_DockSobGroup(self.own_group, target.own_group);
+	end
 end
 
 -- === Attack family queries ===
@@ -113,7 +163,42 @@ function modkit_ship:isCruiser()
 	});
 end
 
--- === State setters ===
+function modkit_ship:isCarrier()
+	return self:isAnyTypeOf({
+		"hgn_carrier",
+		"vgr_carrier",
+		"kus_carrier",
+		"tai_carrier"
+	});
+end
+
+function modkit_ship:isMothership()
+	return self:isAnyTypeOf({
+		"hgn_mothership",
+		"vgr_mothership",
+		"kus_mothership",
+		"tai_mothership"
+	});
+end
+
+-- need to do this for above fns also...
+modkit.ship_types = {};
+
+-- res ship types
+local res_ship_types = {};
+for _, race in { "kus", "tai" } do
+	res_ship_types[getn(res_ship_types) + 1] = race .. "_researchship";
+	for i = 1, 5 do
+		res_ship_types[getn(res_ship_types) + 1] = race .. "_researchship_" .. i;
+	end
+end
+modkit.ship_types.research_ships = res_ship_types;
+
+function modkit_ship:isResearchShip()
+	return self:isAnyTypeOf(self.ship_types.research_ships);
+end
+
+-- === State queries ===
 
 --- Get or set the stunned status of the ship.
 -- Returns whether or not the ship should currently be stunned (if stunned previously via :stunned)
@@ -125,10 +210,19 @@ function modkit_ship:stunned(stunned)
 	return self._stunned;
 end
 
-function modkit_ship:canDoAbility(which, enable)
-	enable = enable or SobGroup_CanDoAbility(self.own_group, which);
-	SobGroup_AbilityActivate(self.own_group, which, enable);
-	return SobGroup_CanDoAbility(self.own_group, which);
+function modkit_ship:docked(with)
+	if (with) then
+		return SobGroup_IsDockedSobGroup(self.own_group, with.own_group);
+	end
+	return SobGroup_IsDocked(self.own_group);
+end
+
+-- === Ability stuff ===
+
+function modkit_ship:canDoAbility(ability, enable)
+	enable = enable or SobGroup_CanDoAbility(self.own_group, ability);
+	SobGroup_AbilityActivate(self.own_group, ability, enable);
+	return SobGroup_CanDoAbility(self.own_group, ability);
 end
 
 function modkit_ship:canHyperspace(enable)
@@ -139,9 +233,18 @@ function modkit_ship:canHyperspaceViaGate(enable)
 	return self:canDoAbility(AB_HyperspaceViaGate, enable);
 end
 
+function modkit_ship:isDoingAbility(ability)
+	return SobGroup_IsDoingAbility(self.own_group, ability);
+end
+
+function modkit_ship:isDocking()
+	return self:isDoingAbility(AB_Dock);
+end
+
 -- === FX stuff ===
 
 function modkit_ship:startEvent(which)
+	print("start ev: " .. (which or "{nil}"));
 	FX_StartEvent(self.own_group, which);
 end
 

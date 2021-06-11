@@ -20,7 +20,7 @@ const linkCode = (type) => `addCustomCode(NewShipType, "data:scripts/driver.lua"
 
 	const src_ships_dir = path.resolve(__dirname, `./ship`);
 
-	const full_content = await prompts([
+	const full_content = (await prompts([
 		{
 			type: `select`,
 			name: `full`,
@@ -36,7 +36,7 @@ const linkCode = (type) => `addCustomCode(NewShipType, "data:scripts/driver.lua"
 				}
 			]
 		}
-	]);
+	])).full;
 	
 	console.log(full_content);
 
@@ -51,7 +51,7 @@ const linkCode = (type) => `addCustomCode(NewShipType, "data:scripts/driver.lua"
 			console.log(info.message);
 		});
 		
-		await emitter.clone(`./`);
+		await emitter.clone(__dirname);
 
 		console.log('done');
 
@@ -66,12 +66,9 @@ const linkCode = (type) => `addCustomCode(NewShipType, "data:scripts/driver.lua"
 		}
 	}
 
-	console.log(only);
-
 	try {
 		if (full_content) {
 			const paths = await globby([path.resolve(__dirname, `ship/**/*.ship`)]);
-			console.log(paths);
 			for (const file_path of paths) {
 				const parts = file_path.split(`/`);
 				const target_file = path.resolve(__dirname, `../ship/${parts.slice(-2).join(`/`)}`);
@@ -96,7 +93,7 @@ const linkCode = (type) => `addCustomCode(NewShipType, "data:scripts/driver.lua"
 			}
 			rimraf.sync(path.resolve(__dirname, `/ship`));
 		}
-		console.log(`remove src: ${src_ships_dir}`);
+		console.log(`[modkit] link.js: remove src: ${src_ships_dir}`);
 		rimraf.sync(src_ships_dir);
 		console.log("[modkit] link.js: finished! ✨")
 	} catch (err) {

@@ -1,11 +1,13 @@
+dofilepath("data:scripts/modkit/player.lua"); -- stuff for players like GLOBAL_PLAYERS
+dofilepath("data:scripts/modkit/research.lua"); -- research...
 
 modkit_base = {
 	attribs = function (g, p, s)
+		local player = GLOBAL_PLAYERS:get(p) or GLOBAL_PLAYERS:set(p, modkit_player_proto);
 		return {
-			id = s,
 			type_group = g,
 			own_group = SobGroup_Clone(g, g .. "-" .. s),
-			player_index = p,
+			player = player,
 			_tick = 0,
 			created_at = Universe_GameTime()
 		};
