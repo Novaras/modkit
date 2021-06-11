@@ -33,9 +33,9 @@ function modkit_ship:currentActualHP()
 	return SobGroup_CurrentHealthTotal(self.own_group);
 end
 
-function modkit_ship:subsHP(subs_name)
-	if (subs_name) then
-		SobGroup_SetHardPointHealth(self.own_group, subs_name);
+function modkit_ship:subsHP(subs_name, HP)
+	if (HP) then
+		SobGroup_SetHardPointHealth(self.own_group, subs_name, HP);
 	end
 	return SobGroup_GetHardPointHealth(self.own_group, subs_name);
 end
@@ -181,14 +181,21 @@ function modkit_ship:isMothership()
 	});
 end
 
-function modkit_ship:isResearchShip()
-	local types = {};
-	for _, race in { "kus", "tai" } do
-		for i = 1, 5 do
-			types[getn(types) + 1] = race .. "_researchship_" .. i;
-		end
+-- need to do this for above fns also...
+modkit.ship_types = {};
+
+-- res ship types
+local res_ship_types = {};
+for _, race in { "kus", "tai" } do
+	res_ship_types[getn(res_ship_types) + 1] = race .. "_researchship";
+	for i = 1, 5 do
+		res_ship_types[getn(res_ship_types) + 1] = race .. "_researchship_" .. i;
 	end
-	return self:isAnyTypeOf(types);
+end
+modkit.ship_types.research_ships = res_ship_types;
+
+function modkit_ship:isResearchShip()
+	return self:isAnyTypeOf(self.ship_types.research_ships);
 end
 
 -- === State queries ===
@@ -205,9 +212,9 @@ end
 
 function modkit_ship:docked(with)
 	if (with) then
-		return SobGroup_SobGroupDocked(self.own_group, with.own_group);
+		return SobGroup_IsDockedSobGroup(self.own_group, with.own_group);
 	end
-	return SobGroup_Docked(self.own_group);
+	return SobGroup_IsDocked(self.own_group);
 end
 
 -- === Ability stuff ===
@@ -237,6 +244,7 @@ end
 -- === FX stuff ===
 
 function modkit_ship:startEvent(which)
+	print("start ev: " .. (which or "{nil}"));
 	FX_StartEvent(self.own_group, which);
 end
 
