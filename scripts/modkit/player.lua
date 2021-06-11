@@ -143,7 +143,7 @@ if (modkit_player_proto == nil) then
 			if (restrict == 1) then
 				Player_RestrictBuildOption(self.id, option);
 			else
-				Player_UnRestrictBuildOption(self.id, option);
+				Player_UnrestrictBuildOption(self.id, option);
 			end
 		end
 		return Player_BuildOptionIsRestricted(self.id, option);

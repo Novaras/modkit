@@ -20,7 +20,7 @@ if (modkit.research == nil) then
 		research = nil; -- make sure unset before import
 		dofilepath(def_research_path); -- sets 'research'
 	
-		modkit.table.merge(
+		modkit.table:merge(
 			research_proto,
 			modkit.table.map( -- merge it, but also cast all the keys of the research items to lowercase
 				research,
