@@ -25,6 +25,13 @@ function modkit_ship:speed(speed)
 	return SobGroup_GetSpeed(self.own_group);
 end
 
+function modkit_ship:position(pos)
+	if (pos) then
+		SobGroup_SetPosition(self.own_group, pos);
+	end
+	return SobGroup_GetPosition(self.own_group);
+end
+
 function modkit_ship:maxActualHP()
 	return SobGroup_MaxHealthTotal(self.own_group);
 end
