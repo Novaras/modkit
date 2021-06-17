@@ -88,20 +88,19 @@ if (H_SOBGROUP ~= 1) then
 	-- @param target_group [string | nil] A group which will be filled with all the Universe ships. If not provided, is ignored and a new group is used.
 	-- @return [string] Either the provided group, or a newly created group.
 	function Universe_GetAllActiveShips(target_group)
-		local all_ships = "all-ships"
-		SobGroup_CreateIfNotExist(all_ships)
+		local all_ships = SobGroup_Fresh("all-ships");
 		for i = 0, Universe_PlayerCount() - 1 do
 			if (Player_IsAlive(i)) then
-				SobGroup_SobGroupAdd(all_ships, "Player_Ships" .. i)
+				SobGroup_SobGroupAdd(all_ships, "Player_Ships" .. i);
 			end
 		end
 		if (target_group ~= nil) then
-			SobGroup_CreateIfNotExist(target_group)
-			SobGroup_Clear(target_group)
-			SobGroup_SobGroupAdd(target_group, all_ships)
-			return target_group
+			SobGroup_CreateIfNotExist(target_group);
+			SobGroup_Clear(target_group);
+			SobGroup_SobGroupAdd(target_group, all_ships);
+			return target_group;
 		end
-		return all_ships
+		return all_ships;
 	end
 
 	--- Multiplies the group's max-speed multiplier by 'mult'.
