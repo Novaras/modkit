@@ -41,6 +41,7 @@ if (H_DRIVER == nil) then
 				caller[v] = NOOP;
 			end
 		end
+		caller.auto_exec = {};
 
 		return caller;
 	end
@@ -70,17 +71,9 @@ if (H_DRIVER == nil) then
 
 		caller:update(); -- run the caller's custom update hook
 
-		-- local past_self = {};
-		-- for k, v in caller do
-		-- 	if (k ~= 'past_self') then -- very important to prevent memory pileup!
-		-- 		if type(v) == 'function' then
-		-- 			past_self[k] = caller[k](caller); -- collapse getters into values
-		-- 		else
-		-- 			past_self[k] = v;
-		-- 		end
-		-- 	end
-		-- end
-		-- caller.past_self = past_self; -- for next run comparisons
+		for k, v in caller.auto_exec do
+			v(caller, k);
+		end
 
 		return caller;
 	end
