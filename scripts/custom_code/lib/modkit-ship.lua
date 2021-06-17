@@ -1,8 +1,14 @@
 modkit_ship = {
-	attribs = {
-		_stunned = 0,
-		_ab_targets = {}
-	}
+	attribs = function (c, p, s)
+		return {
+			_stunned = 0,
+			_ab_targets = {},
+			_current_dmg_mult = 1,
+			_despawned_at_volume = "despawn-vol-" .. s,
+			_reposition_volume = "reposition-vol-" .. s,
+			_default_vol = "vol-default-" .. s,
+		};
+	end
 };
 
 -- === Util ===
@@ -32,6 +38,16 @@ function modkit_ship:position(pos)
 	return SobGroup_GetPosition(self.own_group);
 end
 
+function modkit_ship:damageMult(mult)
+	if (mult) then
+		local restore_mult = (-1 * self._current_dmg_mult) + 2;
+		SobGroup_SetDamageMultiplier(self.own_group, restore_mult); -- clear previous
+		self._current_dmg_mult = mult;
+		SobGroup_SetDamageMultiplier(self.own_group, self._current_dmg_mult);
+	end
+	return self._current_dmg_mult;
+end
+
 function modkit_ship:maxActualHP()
 	return SobGroup_MaxHealthTotal(self.own_group);
 end
@@ -49,15 +65,35 @@ end
 
 
 function modkit_ship:distanceTo(other)
-	return SobGroup_GetDistanceToSobGroup(self.own_group, other.own_group);
+	if (type(other.own_group) == "string") then -- assume ship
+		return SobGroup_GetDistanceToSobGroup(self.own_group, other.own_group);
+	else -- a position
+		local a = self:position();
+		local b = other;
+		return sqrt(
+			(b[1] - a[1]) ^ 2 +
+			(b[2] - a[2]) ^ 2 +
+			(b[3] - a[3]) ^ 2
+		);
+	end
 end
 
 function modkit_ship:attack(other)
-	return SobGroup_Attack(self.own_group, other.own_group);
+	return SobGroup_Attack(self.player().id, self.own_group, other.own_group);
 end
 
 function modkit_ship:attackPlayer(player)
 	return SobGroup_AttackPlayer(self.own_group, player.id);
+end
+
+function modkit_ship:move(where)
+	if (type(where) == "string") then -- a volume
+		SobGroup_Move(self.player().id, self.own_group, where);
+	else -- a position
+		Volume_AddSphere(self._default_vol, where, 1);
+		SobGroup_Move(self.player().id, self.own_group, self._default_vol);
+		Volume_Delete(self._default_vol);
+	end
 end
 
 function modkit_ship:guard(other)
@@ -188,6 +224,20 @@ function modkit_ship:isMothership()
 	});
 end
 
+function modkit_ship:isProbe()
+	return self:isAnyTypeOf({
+		"hgn_probe",
+		"hgn_ecmprobe",
+		"hgn_proximitysensor",
+		"vgr_probe",
+		"vgr_probe_ecm",
+		"kus_probe",
+		"kus_proximitysensor",
+		"tai_probe",
+		"tai_proximitysensor"
+	});
+end
+
 -- need to do this for above fns also...
 modkit.ship_types = {};
 
@@ -224,6 +274,16 @@ function modkit_ship:docked(with)
 	return SobGroup_IsDocked(self.own_group);
 end
 
+function modkit_ship:attacking(target)
+	local targets_group = SobGroup_Fresh("targets-group-" .. self.id .. "-" .. COMMAND_Attack);
+	SobGroup_GetCommandTargets(targets_group, self.own_group, COMMAND_Attack);
+	if (target) then
+		return SobGroup_GroupInGroup(target.own_group, targets_group) == 1;
+	else
+		return SobGroup_Count(targets_group) > 0;
+	end
+end
+
 -- === Ability stuff ===
 
 function modkit_ship:canDoAbility(ability, enable)
@@ -251,12 +311,37 @@ end
 -- === FX stuff ===
 
 function modkit_ship:startEvent(which)
-	print("start ev: " .. (which or "{nil}"));
 	FX_StartEvent(self.own_group, which);
 end
 
 function modkit_ship:stopEvent(which)
 	FX_StopEvent(self.own_group, which);
+end
+
+function modkit_ship:playEffect(name)
+	FX_PlayEffect(name, self.own_group, 1);
+end
+
+-- === Spawning ===
+
+function modkit_ship:spawn(spawn, volume)
+	if (spawn == 1) then
+		SobGroup_Spawn(self.own_group, self._despawned_at_volume);
+		Volume_Delete(self._despawned_at_volume);
+	elseif (spawn == 0) then
+		Volume_AddSphere(self._despawned_at_volume, self:position(), 1);
+		SobGroup_Despawn(self.own_group);
+	end
+end
+
+function modkit_ship:spawnShip(type, position, spawn_group)
+	position = position or self:position();
+	local volume_name = "spawner-vol-" .. self.id;
+	local spawn_group = spawn_group or SobGroup_Fresh("spawner-group-" .. self.id);
+	Volume_AddSphere(volume_name, position, 0);
+	SobGroup_SpawnNewShipInSobGroup(self.player().id, type, "-", spawn_group, volume_name);
+	Volume_Delete(volume_name);
+	return spawn_group;
 end
 
 modkit.compose:addBaseProto(modkit_ship);
