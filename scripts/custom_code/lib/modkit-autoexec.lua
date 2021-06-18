@@ -18,16 +18,17 @@ end
 --- Returns the next moveaction (the current destination).
 -- This will always be a table with 'position' and 'action' properties - if you
 -- passed in a raw position table it will be packed into the 'position' property.
-function _ma:next()
+function _ma:next(caller)
 	local next = self.move_actions[self.index];
 	if (next == nil) then
 		return next;
 	end
-	if (next.position == nil) then -- 'next' is just a position, create a moveaction out of it
+	if (next.position == nil and next.action == nil) then -- 'next' is just a position, create a moveaction out of it
 		next = {
 			position = next
 		};
 	end
+	next.position = next.position or caller:position();
 	next.action = next.action or function () end
 	-- default finish predicate just checks to see if the ship arrived at least 4 ticks ago
 	next.finished = next.finished or self.defaultPredicate;
@@ -62,24 +63,25 @@ function modkit_autoexec:moveActionQueue(move_actions, distance_threshold, defau
 
 	-- attach this fn to the auto exec list (so the base update fn doesn't need to call anything)
 	local runner = function (caller)
-		local next = %MA:next();
+		local next = %MA:next(caller);
 		if (next) then
-			if (%MA.actioning == 0 and %self:distanceTo(next.position) <= %MA.distance_threshold) then -- if not actioning and out of range
+			if (%MA.actioning == 0 and caller:distanceTo(next.position) <= %MA.distance_threshold) then -- if not actioning and out of range
 				%MA.actioning = 1;
-				%MA.arrived_tick = %self:tick();
-				next.action(%self);
-			elseif (%MA:finished(%self) and modkit.table.length(%MA.move_actions) > %MA.index) then -- finished action and not final move-action
+				%MA.arrived_tick = caller:tick();
+				next.action(caller);
+			elseif (%MA:finished(caller) and modkit.table.length(%MA.move_actions) > %MA.index) then -- finished action and not final move-action
 				%MA.index = %MA.index + 1;
 				%MA.actioning = 0;
-				%self:move(%MA:next().position);
+				caller:move(%MA:next(caller).position);
 			elseif (%MA.index == 1) then -- first move-action, just go
-				%self:move(%MA:next().position);
+				caller:move(%MA:next(caller).position);
 			end
 		end
 	end
 
 	self.auto_exec["move-actions" .. self.id] = runner; -- hook to autoexec
 
+	return self._move_action;
 end
 
 modkit.compose:addBaseProto(modkit_autoexec);
