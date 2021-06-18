@@ -4,6 +4,7 @@ modkit_ship = {
 			_stunned = 0,
 			_ab_targets = {},
 			_current_dmg_mult = 1,
+			_current_tumble = { 0, 0, 0 },
 			_despawned_at_volume = "despawn-vol-" .. s,
 			_reposition_volume = "reposition-vol-" .. s,
 			_default_vol = "vol-default-" .. s,
@@ -36,6 +37,20 @@ function modkit_ship:position(pos)
 		SobGroup_SetPosition(self.own_group, pos);
 	end
 	return SobGroup_GetPosition(self.own_group);
+end
+
+function modkit_ship:tumble(tumble)
+	if (tumble) then
+		if (type(tumble) == "table") then
+			SobGroup_Tumble(self.own_group, tumble);
+			for k, v in tumble do
+				self._current_tumble[k] = v;
+			end
+		elseif (tumble == 0) then -- pass 0 to call _ClearTumble
+			SobGroup_ClearTumble(self.own_group);
+		end
+	end
+	return self._current_tumble;
 end
 
 function modkit_ship:damageMult(mult)
