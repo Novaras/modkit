@@ -4,7 +4,16 @@ dofilepath("data:scripts/modkit/research.lua"); -- research...
 modkit_base = {
 	attribs = function (g, p, s)
 		local player = function ()
-			return %GLOBAL_PLAYERS:get(%p) or GLOBAL_PLAYERS:set(%p, modkit_player_proto)
+			return
+				%GLOBAL_PLAYERS:get(%p) or
+				GLOBAL_PLAYERS:set(%p,
+					modkit.table.merge(
+						modkit_player_proto,
+						{
+							id = %p
+						}
+					)
+				);
 		end;
 		return {
 			type_group = g,
