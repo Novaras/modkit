@@ -5,7 +5,7 @@ modkit_base = {
 	attribs = function (g, p, s)
 		local player = function ()
 			return
-				%GLOBAL_PLAYERS:get(%p) or
+				GLOBAL_PLAYERS:get(%p) or
 				GLOBAL_PLAYERS:set(%p,
 					modkit.table:merge(
 						modkit_player_proto,

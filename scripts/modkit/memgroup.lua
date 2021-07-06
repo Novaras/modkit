@@ -60,13 +60,10 @@ if (modkit.MemGroup == nil) then
 			function new_group:delete(entityID)
 				self._entities[entityID] = nil;
 			end
+			--- Returns all ships in this MemGroup.
+			---@return table
 			function new_group:all()
-				return modkit.table.filter(
-					self._entities,
-					function (ship)
-						return SobGroup_Count(ship.own_group) > 0;
-					end
-				);
+				return self._entities;
 			end
 			function new_group:find(predicate)
 				return modkit.table.find(self._entities, predicate);
