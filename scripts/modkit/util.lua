@@ -1,0 +1,11 @@
+--- Adds all the ships in `ships` to a new sobgroup `group_name`.
+---@param group_name string
+---@param ships table
+---@return string
+function SobGroup_FromShips(group_name, ships)
+	local new_group = SobGroup_Fresh(group_name);
+	for _, ship in ships do
+		SobGroup_SobGroupAdd(new_group, ship.own_group);
+	end
+	return new_group;
+end
