@@ -16,7 +16,7 @@ if (modkit.compose == nil) then
 
 	-- this function is the one which constructs ships out of prototypes
 	-- it runs every time a new ship is created!
-	function compose:instantiate(type_group, player, id)
+	function compose:instantiate(type_group, player_index, id)
 		local out_ship = {};
 
 		-- append custom proto to the base ones:
@@ -34,7 +34,7 @@ if (modkit.compose == nil) then
 				if (k == "attribs") then
 					local result = {};
 					if (type(prop) == "function") then -- resolve attribs if fn
-						result = prop(type_group, player, id);
+						result = prop(type_group, player_index, id);
 					else
 						result = prop;
 					end
