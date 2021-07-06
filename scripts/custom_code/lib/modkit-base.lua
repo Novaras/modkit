@@ -7,7 +7,7 @@ modkit_base = {
 			return
 				%GLOBAL_PLAYERS:get(%p) or
 				GLOBAL_PLAYERS:set(%p,
-					modkit.table.merge(
+					modkit.table:merge(
 						modkit_player_proto,
 						{
 							id = %p
