@@ -139,13 +139,23 @@ if (modkit_player_proto == nil) then
 	end
 
 	function modkit_player_proto:restrictBuildOption(option, restrict)
-		if (restrict) then
-			if (restrict == 1) then
-				Player_RestrictBuildOption(self.id, option);
-			else
-				Player_UnrestrictBuildOption(self.id, option);
+		if (type(option) ~= "table") then
+			option = { option };
+		end
+		local after = {};
+		for _, opt in option do
+			if (restrict) then
+				if (restrict == 0) then
+					Player_UnrestrictBuildOption(self.id, opt);
+					after[opt] = 0;
+				else
+					Player_RestrictBuildOption(self.id, opt);
+					after[opt] = 1;
+				end
 			end
 		end
-		return Player_BuildOptionIsRestricted(self.id, option);
+
+
+		return after;
 	end
 end

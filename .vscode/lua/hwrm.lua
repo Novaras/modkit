@@ -290,3 +290,17 @@ end
 ---@param selection_name string
 function SobGroup_CreateSelection(selection_name)
 end
+
+--- Spawn stuff
+
+--- Spawns a `ship_type` squadron named `new_squad_name`, and adds it to `target_group`. The squad is spawned at `volume_name`.
+--- Note: A 'squad' can contain one ship; this function is not limited to HW2 strikecraft squadrons.
+---
+---@param player_index integer
+---@param ship_type string
+---@param new_squad_name string
+---@param target_group string
+---@param volume_name string
+---@return nil
+function SobGroup_SpawnNewShipInSobGroup(player_index, ship_type, new_squad_name, target_group, volume_name)
+end

@@ -183,6 +183,28 @@ if (H_SOBGROUP ~= 1) then
 		return (current_health / max_health);
 	end
 
+	--- Creates a new volume of type `vol_type` ("sphere", "cube") named `name` with radius `radius` at position `position`.
+	--- Only a `name` is required. By default, `position` is `{ 0, 0, 0 }`, `radius` is `10` and `vol_type` is `"sphere"`.
+	--- Returns the supplied `name`.
+	---
+	---@param name any
+	---@param position table
+	---@param radius integer
+	---@param vol_type string
+	---@return string
+	function Volume_Fresh(name, position, radius, vol_type)
+		position = position or { 0, 0, 0 };
+		radius = radius or 10;
+		vol_type = vol_type or "sphere";
+		Volume_Delete(name);
+		local vol_type_calls = {
+			sphere = function() return Volume_AddSphere(%name, %position, %radius); end,
+			cube = function () return Volume_AddCube(%name, %position, %radius); end
+		};
+		vol_type_calls[vol_type]();
+		return name;
+	end
+
 	DEFAULT_SOBGROUP = SobGroup_Fresh("__")
 
 	print("executed: sobgroup.lua")

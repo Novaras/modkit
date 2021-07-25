@@ -9,3 +9,25 @@ function SobGroup_FromShips(group_name, ships)
 	end
 	return new_group;
 end
+
+--- Returns a collection of all ships _not_ belonging to `player`.
+---
+---@param player table
+---@return table
+function Universe_GetOtherPlayerShips(player)
+	local others = GLOBAL_SHIPS:filter(function (ship)
+		return ship.player().id ~= %player.id;
+	end);
+	return others;
+end
+
+--- Returns a collection of all ships belonging to `player`.
+---
+---@param player table
+---@return table
+function Universe_GetPlayerShips(player)
+	local ships = GLOBAL_SHIPS:filter(function (ship)
+		return ship.player().id == %player.id;
+	end);
+	return ships;
+end

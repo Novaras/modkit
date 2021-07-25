@@ -1,14 +1,9 @@
 {
+	"Lua.diagnostics.disable": [
+		"undefined-global",
+		"lowercase-global"
+	],
 	"editor.semanticHighlighting.enabled": true,
 	"Lua.runtime.plugin": ".vscode/lua/plugin.lua",
-	"Lua.diagnostics.globals": [
-		"globals",
-		"strsub",
-		"strlower",
-		"dofilepath",
-		"doscanpath",
-		"modkit",
-		"getn"
-	],
 	"Lua.color.mode": "Semantic"
 }
