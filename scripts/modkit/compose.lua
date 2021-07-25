@@ -57,6 +57,5 @@ if (modkit.compose == nil) then
 	doscanpath("data:scripts/custom_code", "*.lua");
 	doscanpath("data:scripts/custom_code/lib", "*.lua");
 
-	doscanpath("data:scripts/custom_code/mpp", "*.lua");
-	doscanpath("data:scripts/custom_code/mpp/hw1", "*.lua");
+	-- include custom imports here
 end
