@@ -37,20 +37,19 @@ const linkCode = (type) => `addCustomCode(NewShipType, "data:scripts/driver.lua"
 			]
 		}
 	])).full;
-	
+
 	console.log(full_content);
 
 	if (full_content) {
 		const emitter = degit(`novaras/ships-vanilla`, {
-			cache: true,
 			force: true,
 			verbose: true,
 		});
-		
+
 		emitter.on('info', info => {
 			console.log(info.message);
 		});
-		
+
 		await emitter.clone(__dirname);
 
 		console.log('done');
