@@ -20,14 +20,16 @@ if (modkit.compose == nil) then
 
 	-- this function is the one which constructs ships out of prototypes
 	-- it runs every time a new ship is created!
-	function compose:instantiate(type_group, player_index, id)
-		local out_ship = {};
+	function compose:instantiate(type_group, player_index, id, type_override)
+		local out_ship = {
+			ship_type = type_override or type_group
+		};
 
 		local base_protos = modkit.table.map(
 			modkit.table.filter(
 				self._base,
 				function (base)
-					local tg = %type_group;
+					local tg = %out_ship.ship_type;
 					return base.filter == nil or modkit.table.find(base.filter, function (ship_type)
 						return ship_type == %tg;
 					end)
@@ -42,7 +44,7 @@ if (modkit.compose == nil) then
 		local source = modkit.table:merge(
 			base_protos,
 			{
-				[getn(self._base) + 1] = self._ship[type_group]
+				[getn(self._base) + 1] = self._ship[out_ship.ship_type]
 			}
 		);
 

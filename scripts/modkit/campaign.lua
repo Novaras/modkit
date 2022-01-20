@@ -21,10 +21,12 @@ if (H_CAMPAIGN == nil) then
 		---@field _entities Rule[]
 		---@field __runner function|nil
 		---@field __listeners table
+		---@field __level_path string
 		GLOBAL_RULES = modkit.MemGroup.Create("mg-rules-global", {
 			__runner = nil,
 			__rule_pattern = nil,
 			__listeners = {},
+			__level_path = nil
 		});
 
 		function GLOBAL_RULES:add(id, rule_fn, interval, state)
@@ -144,6 +146,15 @@ if (H_CAMPAIGN == nil) then
 		};
 	end
 
+	function rules:init(level_path)
+		GLOBAL_RULES.__level_path = level_path;
+
+		if (MISSION_SHIPS == nil) then
+			RegisterShips(level_path);
+			print("INIT MISSION SOBGROUPS");
+		end
+	end
+
 	function modkit_campaign_driver()
 		for _, listener in GLOBAL_RULES.__listeners do
 			print("listening for " .. listener.pattern .. "(" .. listener.exec() .. ")...");
@@ -162,14 +173,14 @@ if (H_CAMPAIGN == nil) then
 		end
 	end
 
-	campaign.rules = rules;
-	modkit.campaign = campaign;
-
 	if (OnInit == nil) then
 		OnInit = function ()
 			Rule_AddInterval("modkit_campaign_driver", %rules.min_poll_interval);
 		end;
 	end
+
+	campaign.rules = rules;
+	modkit.campaign = campaign;
 
 	H_CAMPAIGN = 1;
 end

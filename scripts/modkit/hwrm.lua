@@ -153,6 +153,13 @@ if (nil) then
 	function SobGroup_FilterExclude(group_to_fill, source_group, filter_key, filter_val)
 	end
 
+	--- Returns the number of squadrons (usuall 1-1 with number of ships) within group `source_group`.
+	---
+	---@param source_group string
+	---@return integer
+	function SobGroup_Count(source_group)
+	end
+
 	--- Useful as a shortcut for `SobGroup_FilterExclude`, where we don't want to create a new group and count it, but just want the count directly.
 	---
 	---@param source_group string
