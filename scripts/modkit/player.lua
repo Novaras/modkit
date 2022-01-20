@@ -3,17 +3,62 @@
 
 if (modkit == nil) then modkit = {}; end
 if (modkit.MemGroup == nil) then dofilepath("data:scripts/modkit/memgroup.lua"); end
+if (GLOBAL_TEAMS == nil) then dofilepath("data:scripts/modkit/team.lua"); end
 
 if (modkit_player_proto == nil) then
 
 	-- global memgroup for players
-	GLOBAL_PLAYERS = modkit.MemGroup.Create("mg-players-global");
+	
+	function initPlayers()
+		if (GLOBAL_PLAYERS == nil) then
+			---@class GLOBAL_PLAYERS : MemGroup
+			---@field _entities Player[]
+			GLOBAL_PLAYERS = modkit.MemGroup.Create("mg-players-global");
+		
+			for i = 0, Universe_PlayerCount() - 1 do
+				GLOBAL_PLAYERS:set(i, modkit.table:merge(
+					modkit_player_proto,
+					{
+						id = i
+					}
+				));
+			end
 
+			-- map/ambient units
+			GLOBAL_PLAYERS:set(-1, modkit.table:merge(
+				modkit_player_proto,
+				{
+					id = -1
+				}
+			));
+
+			function GLOBAL_PLAYERS:all()
+				local out = {};
+				for i, player in self._entities do
+					if (i >= 0) then
+						out[i] = player;
+					end
+				end
+				return out;
+			end
+
+			function GLOBAL_PLAYERS:alive()
+				return modkit.table.filter(self:all(), function (player)
+					return player:isAlive();
+				end);
+			end
+		end
+	end
+
+	-- Note that the `id` field is only set later when the player is actually constructed later
+
+	---@class Player
+	---@field id integer
 	modkit_player_proto = {};
 
 	--- Gets the player's ships (alive ships)
 	function modkit_player_proto:ships()
-		return GLOBAL_SHIPS:find(function (ship)
+		return GLOBAL_SHIPS:allied(function (ship)
 			return ship.player.id == %self.id;
 		end);
 	end
@@ -24,6 +69,7 @@ if (modkit_player_proto == nil) then
 	end
 
 	-- Whether or not the player is human
+	---@return bool
 	function modkit_player_proto:isHuman()
 		return self:difficulty() == 0;
 	end
@@ -107,13 +153,63 @@ if (modkit_player_proto == nil) then
 
 	-- === end of research stuff ===
 
-	-- Returns this player's team.
-	-- Note: the team numbers we record internally may not match those chosen in lobby.
-	-- Functionally, this won't matter.
+	--- Return `1` if this player is allied with the `other`. `0` otherwise.
+	---@param other Player
+	---@return bool
+	function modkit_player_proto:alliedWith(other)
+		if (self.id == -1 or other.id == -1) then
+			return nil;
+		end
+		return self.id == other.id or AreAllied(self.id, other.id) == 1;
+	end
+
+	--- Returns the players team, which is a high level type just like players and ships.
+	--- When this function is called, if there is team containing this player or an ally of this player,
+	--- then a new team is created for it. If there is a team with only allies, this player is added to the team.
+	---@return table
+	---@deprecated
 	function modkit_player_proto:team()
-		local team = GLOBAL_PLAYERS:filter(function (player)
-			return AreAllied(player.id, %self.id);
+		local team = GLOBAL_TEAMS:find(function (team)
+			local only_allies = 1;
+			local belongs_to_team = nil;
+			for _, player in team.players do
+				if (%self.id == player().id) then
+					only_allies = 0;
+					belongs_to_team = 1;
+					break;
+				elseif (%self:alliedWith(player())) then
+					belongs_to_team = 1; -- any non-nil return will pass
+				end
+			end
+			if (only_allies) then -- we need to add this player to this team
+				local outer_self = %self; -- lua :)
+				team.players = modkit.table:merge(
+					team.players,
+					{
+						[%self.id] = function ()
+							return %outer_self;
+						end
+					}
+				)
+			end
+			return belongs_to_team;
 		end);
+
+		-- undiscovered team, add it
+		if (team == nil) then
+			team = GLOBAL_TEAMS:set(GLOBAL_TEAMS:length() + 1, modkit.table:merge(
+				modkit_teams_proto,
+				{
+					players = {
+						[self.id] = function ()
+							return %self;
+						end
+					}
+				}
+			))
+		end
+
+		return team;
 	end
 
 	--- Kills this player.
@@ -122,8 +218,9 @@ if (modkit_player_proto == nil) then
 	end
 
 	--- Whether or not the player is alive.
+	---@return bool
 	function modkit_player_proto:isAlive()
-		return Player_IsAlive(self.id);
+		return Player_IsAlive(self.id) == 1;
 	end
 
 	--- Returns whether or not the player has this subsystem.

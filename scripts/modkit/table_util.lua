@@ -34,6 +34,11 @@ if (modkit.table == nil) then
 	-- The functions here are intentionally designed to mimick their JS counterparts for Arrays:
 	-- https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array
 	local table = {
+		--- Returns a new table comprised of elements in `table` which pass the given `predicate` function (any non-`nil` return is considered a 'pass').
+		---
+		---@param table table
+		---@param predicate fun(val: any, index: any, tbl: table)
+		---@return table
 		filter = function (table, predicate)
 			local out = {};
 			for i, v in table do
@@ -71,10 +76,17 @@ if (modkit.table == nil) then
 				end
 			end
 		end,
+		---@return 'nil'|'any'
 		find = function (table, predicate)
 			for i, v in table do
-				if (predicate(v, i, table) ~= nil) then
-					return v;
+				if (type(predicate) == "function") then
+					if (predicate(v, i, table) ~= nil) then
+						return v;
+					end
+				else
+					if (v == predicate) then
+						return v;
+					end
 				end
 			end
 		end,
@@ -104,24 +116,49 @@ if (modkit.table == nil) then
 			return values;
 		end,
 		push = function (table, value)
-			table[getn(table) + 1] = value;
+			table[modkit.table.length(table) + 1] = value;
 			return table;
 		end,
 		firstKey = function (tbl)
-			local lowest_k = getn(tbl); -- highest k
+			local lowest_k = modkit.table.length(tbl); -- highest k
 			for k, v in tbl do
 				if (k < lowest_k) then
 					lowest_k = k;
 				end
 			end
 			return lowest_k;
+		end,
+		any = function (tbl, predicate)
+			for k, v in tbl do
+				if (predicate(v, k, tbl)) then
+					return 1;
+				end
+			end
+			return nil;
+		end,
+		all = function (tbl, predicate)
+			for k, v in tbl do
+				if (predicate(v, k, tbl) == nil) then
+					return nil;
+				end
+			end
+			return 1;
+		end,
+		--- Difference: Any elements in `tbl_a`, which are not found in `tbl_b`.
+		---
+		---@param tbl_a table
+		---@param tbl_b table
+		difference = function (tbl_a, tbl_b)
+			return modkit.table.filter(tbl_a, function (a_val)
+				return modkit.table.find(%tbl_b, a_val) == nil; -- elements in A, but not B
+			end);
 		end
 	};
 
 	function table.pack(tbl)
 		local out_tbl = {};
 		local index = 1;
-		for k, v in tbl do
+		for _, v in tbl do
 			out_tbl[index] = v;
 			index = index + 1;
 		end
@@ -146,7 +183,7 @@ if (modkit.table == nil) then
 	end
 
 	function table:merge(tbl_a, tbl_b, merger)
-		if (self == nil) then
+		if (self.merge == nil) then
 			print("\n[modkit] Error: table:merge must be called as a method (table:merge vs table.merge)");
 		end
 		merger = merger or function (a, b)
@@ -178,10 +215,7 @@ if (modkit.table == nil) then
 		return out;
 	end
 
-	modkit.table = {};
-	for k, v in table do
-		modkit.table[k] = v;
-	end
+	modkit.table = table;
 
 	print("table_util init");
 end

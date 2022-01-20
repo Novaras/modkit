@@ -36,6 +36,7 @@ if (modkit.MemGroup == nil) then
 		-- In addition, the entities will also host the attributes defined
 		-- in custom_attributes.
 		_new = function(group_name, custom_attribs)
+			---@class MemGroup
 			local new_group = {
 				_entities = {},
 				group_name = group_name,
@@ -61,16 +62,17 @@ if (modkit.MemGroup == nil) then
 				self._entities[entityID] = nil;
 			end
 			--- Returns all ships in this MemGroup.
-			---@return table
 			function new_group:all()
 				return self._entities;
 			end
 			function new_group:find(predicate)
 				return modkit.table.find(self._entities, predicate);
 			end
+			---@return table
 			function new_group:filter(predicate)
 				return modkit.table.filter(self._entities, predicate);
 			end
+			---@return integer
 			function new_group:length()
 				return modkit.table.length(self._entities);
 			end

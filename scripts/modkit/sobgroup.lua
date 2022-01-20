@@ -3,8 +3,8 @@
 
 if (H_SOBGROUP ~= 1) then
 	--- Creates a new sobgroup if one doesn't exist, then clears the group to ensure the group referenced by the return string is clear.
-	-- @param name [string] The name of the SobGroup to create/clear.
-	-- @return [string] The name provided
+	---@param name string The name of the SobGroup to create/clear.
+	---@return string
 	function SobGroup_Fresh(name)
 		SobGroup_CreateIfNotExist(name);
 		SobGroup_Clear(name);
@@ -12,9 +12,9 @@ if (H_SOBGROUP ~= 1) then
 	end
 
 	--- Overwrites `target_group` with the content of `incoming_group`.
-	-- @param target_group [string] The name of the group to overwrite
-	-- @param incoming_group [string] The name of the group which will overwrite `target_group`
-	-- @return [string] The target group
+	---@param target_group string The name of the group to overwrite
+	---@param incoming_group string The name of the group which will overwrite `target_group`
+	---@return string
 	function SobGroup_Overwrite(target_group, incoming_group)
 		SobGroup_Clear(target_group)
 		SobGroup_SobGroupAdd(target_group, incoming_group)
@@ -22,9 +22,9 @@ if (H_SOBGROUP ~= 1) then
 	end
 
 	--- Creates a new SobGroup, named with `new_name`, or '<original-name>-clone', if a new name is not provided for the group.
-	-- @param original [string] The original group
-	-- @param new_name [string] The name of the new SobGroup created
-	-- @return [string] The name of the new group.
+	---@param original string The original group
+	---@param new_name string The name of the new SobGroup created
+	---@return string
 	function SobGroup_Clone(original, new_name)
 		new_name = new_name or (original .. "-clone");
 		SobGroup_Fresh(new_name);
@@ -34,15 +34,15 @@ if (H_SOBGROUP ~= 1) then
 
 	--- Disable scuttle while a captured unit is being dropped off by salvage corvettes.
 	-- Actually polls whether the group is performing AB_Dock to perform this check.
-	-- @param group [string] The group which will have its AB_Scuttle ability disabled
+	---@param group string The group which will have its AB_Scuttle ability disabled
 	function SobGroup_NoSalvageScuttle(group)
 		SobGroup_AbilityActivate(group, AB_Scuttle, 1 - SobGroup_IsDoingAbility(group, AB_Dock));
 		return group;
 	end
 
 	--- When a docking squadron is under attack, they sometimes glitch and stop. This issues another dock order to dock with the closest ship.
-	-- @param group [string] The group which will be polled, and then issued a new dock command under certain conditions
-	-- @return [string] The group
+	---@param group string The group which will be polled, and then issued a new dock command under certain conditions
+	---@return string
 	function SobGroup_UnderAttackReissueDock(group)
 		if (SobGroup_GetCurrentOrder(group) == COMMAND_Dock) then -- en route to dock
 			if (SobGroup_UnderAttack(group)) then -- under attack
@@ -59,8 +59,8 @@ if (H_SOBGROUP ~= 1) then
 	end
 
 	--- Checks to see if any ship in `group` is being captured.
-	-- @param group [string] The group to check
-	-- @return [string] The group
+	---@param group string The group to check
+	---@return string
 	function SobGroup_AnyBeingCaptured(group)
 		local group_being_captured = group .. "_being_captured"
 		SobGroup_Fresh(group_being_captured)
@@ -72,8 +72,8 @@ if (H_SOBGROUP ~= 1) then
 	end
 
 	--- Checks to see if any ship in `group` has attack targets.
-	-- @param group [string] The group to check
-	-- @return [string] The group
+	---@param group string The group to check
+	---@return string
 	function SobGroup_AnyAreAttacking(group)
 		local group_attacking = group .. "_attacking"
 		SobGroup_Fresh(group_attacking)
@@ -85,8 +85,8 @@ if (H_SOBGROUP ~= 1) then
 	end
 
 	--- Returns a group of all active ships for all players.
-	-- @param target_group [string | nil] A group which will be filled with all the Universe ships. If not provided, is ignored and a new group is used.
-	-- @return [string] Either the provided group, or a newly created group.
+	---@param target_group string | nil A group which will be filled with all the Universe ships. If not provided, is ignored and a new group is used.
+	---@return string
 	function Universe_GetAllActiveShips(target_group)
 		local all_ships = SobGroup_Fresh("all-ships");
 		for i = 0, Universe_PlayerCount() - 1 do
@@ -104,9 +104,9 @@ if (H_SOBGROUP ~= 1) then
 	end
 
 	--- Multiplies the group's max-speed multiplier by 'mult'.
-	-- @param target_group [string] The group to modify
-	-- @param mult [number] A factor which is multiplied with the *current* speed multiplier, then applied with `SobGroup_SetSpeed`.
-	-- @return [string] The modified group
+	---@param target_group string The group to modify
+	---@param mult number A factor which is multiplied with the *current* speed multiplier, then applied with `SobGroup_SetSpeed`.
+	---@return string
 	function SobGroup_AlterSpeedMult(target_group, mult)
 		if (mult == nil) then
 			mult = 1/2
@@ -133,14 +133,21 @@ if (H_SOBGROUP ~= 1) then
 		AB_Steering,
 		AB_Targeting,
 		AB_Lights,
+		AB_Move,
+		AB_Mine,
+		AB_Custom,
+		AB_Dock,
+		AB_Parade,
+		AB_Retire,
+		AB_Repair
 	}
 	STUN_EFFECT_EVENT = "PowerOff"
 
 	--- Sets whether the given group should be 'stunned' or not (AB_Move/AB_Steering/AB_Attack/AB_Targeting).
 	-- See globals `STUN_EFFECT_ABILITIES` and `STUN_EFFECT_EVENT`.
-	-- @param target_group [string] The group to stun/unstun
-	-- @param stunned [number] Whether or not to stun the group (1 = stun, 0 = free)
-	-- @return [string] The affected group
+	---@param target_group string The group to stun/unstun
+	---@param stunned number Whether or not to stun the group (1 = stun, 0 = free)
+	---@return string
 	function SobGroup_SetGroupStunned(target_group, stunned)
 		if (SobGroup_Count(target_group) > 0) then
 			if (stunned == 1) then
@@ -160,9 +167,9 @@ if (H_SOBGROUP ~= 1) then
 
 	--- Gets the distance (as an integer) between two SobGroups.
 	-- (Presumable) Credits to SunTzu: https://github.com/HWRM/KarosGraveyard/wiki/UserFunction;-SobGroup_GetDistanceToSobGroup
-	-- @param group_a [string] A SobGroup in real space
-	-- @param group_b [string] A SobGroup in real space
-	-- @return [number] The distance between `group_a` and `group_b`
+	---@param group_a string A SobGroup in real space
+	---@param group_b string A SobGroup in real space
+	---@return number
 	function SobGroup_GetDistanceToSobGroup(group_a, group_b)
 		if SobGroup_Empty(group_a) == 0 and SobGroup_Empty(group_b) == 0 then
 			local t_position1 = SobGroup_GetPosition(group_a)
@@ -175,8 +182,8 @@ if (H_SOBGROUP ~= 1) then
 	end
 
 	--- Gets the current HP of the group (as a fraction, ala SobGroup_SetHealth).
-	-- @param group [string] The SobGroup who's health to check
-	-- @return [number] The current health as a fraction of the total
+	---@param group string The SobGroup who's health to check
+	---@return number
 	function SobGroup_GetHealth(group)
 		local max_health = SobGroup_MaxHealthTotal(group);
 		local current_health = SobGroup_CurrentHealthTotal(group);

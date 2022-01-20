@@ -1,6 +1,6 @@
 -- load hooks, to match in .ship files
 -- the default load hook, 'load', does nothing
--- there is no other way for a load hook to know which ship type called it, since `addCustomCode` only provides this hook with a player index
+-- there is no other way for a load hook to know which ship type called it
 
 if (modkit.player == nil) then
 	dofilepath("data:scripts/driver.lua");
@@ -19,9 +19,24 @@ end
 
 -- define your own load hooks here:
 
--- in `kus_mothership.ship`: `addCustomCode(NewShipType, "data:scripts/driver.lua", "kus_mothership_load", "create", "update", "destroy", "kus_mothership", 1);`
+--- ===[ research ships ]===
 
--- function kus_mothership_load(player_index)
--- 	print("load from kus ms");
--- 	print("pidx: " .. player_index);
--- end
+-- global wrapper actual for hook in ship file
+function load_kus_res_ship(player_index)
+	if (res_ships_proto == nil) then
+		dofilepath("data:scripts/mpp/hw1/research-ships.lua");
+	end
+
+	res_ships_proto:load("kus_researchship", createPlayer(player_index));
+end
+
+-- "
+function load_tai_res_ship(player_index)
+	if (res_ships_proto == nil) then
+		dofilepath("data:scripts/mpp/hw1/research-ships.lua");
+	end
+
+	res_ships_proto:load("tai_researchship", createPlayer(player_index));
+end
+
+--- ===[ end research ships ]===
