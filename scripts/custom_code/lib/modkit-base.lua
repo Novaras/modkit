@@ -10,7 +10,8 @@ dofilepath("data:scripts/modkit/research.lua"); -- research...
 
 ---@class Attribs
 ---@field id integer
----@field type_group string,
+---@field type_group string
+---@field ship_type string
 ---@field own_group string
 ---@field player Player
 ---@field _tick integer
@@ -53,7 +54,7 @@ end
 ---
 ---@return integer
 function modkit_base:batchSize()
-	return SobGroup_GetStaticF(self.type_group, "buildBatch");
+	return SobGroup_GetStaticF(self.ship_type, "buildBatch");
 end
 
 function modkit_base:print(...)

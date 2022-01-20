@@ -46,6 +46,10 @@ function modkit_ship:age()
 	return (Universe_GameTime() - self.created_at);
 end
 
+--- Sets the HP of this ship to the given `hp` fraction (between 0 and 1)
+---
+---@param hp number
+---@return number
 function modkit_ship:HP(hp)
 	if (hp) then
 		SobGroup_SetHealth(self.own_group, hp);
@@ -168,11 +172,11 @@ function modkit_ship:squadSize()
 end
 
 function modkit_ship:buildCost()
-	return SobGroup_GetStaticF(self.type_group, "buildCost") / self:squadSize();
+	return SobGroup_GetStaticF(self.ship_type, "buildCost") / self:squadSize();
 end
 
 function modkit_ship:buildTime()
-	return SobGroup_GetStaticF(self.type_group, "buildTime");
+	return SobGroup_GetStaticF(self.ship_type, "buildTime");
 end
 
 -- === Commands ===
@@ -332,7 +336,7 @@ end
 ---
 ---@return string
 function modkit_ship:race()
-	return strsub(self.type_group, 0, 3);
+	return strsub(self.ship_type, 0, 3);
 end
 
 -- === Attack family queries ===
@@ -387,10 +391,11 @@ end
 
 -- === Ship type queries ===
 
+---@param ship_types string[]
 ---@return bool
 function modkit_ship:isAnyTypeOf(ship_types)
 	for k, v in ship_types do
-		if (self.type_group == v) then
+		if (self.ship_type == v) then
 			return v;
 		end
 	end
@@ -794,6 +799,25 @@ function modkit_ship:produceShip(type, spawn_group)
 	SobGroup_CreateShip(mixed, type);
 	SobGroup_FillSubstract(spawn_group, mixed, self.own_group);
 	return spawn_group;
+end
+
+-- ==== printing (debugging) ====
+
+function modkit_ship:print(verbose)
+	if (verbose) then
+		modkit.table.printTbl(self, "ship: " .. self.id);
+	else
+		modkit.table.printTbl(
+			{
+				id = self.id,
+				ship_type = self.ship_type,
+				group = self.type_group,
+				tick = self:age(),
+				health = self:HP()
+			},
+			"ship: " .. self.id
+		);
+	end
 end
 
 modkit.compose:addBaseProto(modkit_ship);
