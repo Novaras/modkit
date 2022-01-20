@@ -37,20 +37,38 @@ const linkCode = (type) => `addCustomCode(NewShipType, "data:scripts/driver.lua"
 			]
 		}
 	])).full;
-	
+
 	console.log(full_content);
 
 	if (full_content) {
-		const emitter = degit(`novaras/ships-vanilla`, {
+		const branch_name = (await prompts([
+			{
+				type: `select`,
+				name: `branch_name`,
+				message: `Vanilla?`,
+				choices: [
+					{
+						title: `Vanilla ship files only`,
+						value: ``,
+					},
+					{
+						title: `2.3 base (scripts, ships, weapons, etc...)`,
+						value: `#2.3`
+					}
+				]
+			}
+		])).branch_name;
+
+		const emitter = degit(`novaras/ships-vanilla${branch_name}`, {
 			cache: true,
 			force: true,
 			verbose: true,
 		});
-		
+
 		emitter.on('info', info => {
 			console.log(info.message);
 		});
-		
+
 		await emitter.clone(__dirname);
 
 		console.log('done');
