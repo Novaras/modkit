@@ -8,14 +8,26 @@ if (H_CAMPAIGN == nil) then
 	local campaign = {};
 
 	if (GLOBAL_RULES == nil) then
+
+		---@class RuleCoreState
+		---@field _rule_name string
+		---@field _interval integer
+		---@field _started_gametime number
+		---@field _tick integer
+
+		---@class RuleState : RuleCoreState, table
+
+		---@alias RuleFn fun(state: RuleState, rules: Rules)
+
 		---@class Rule
-		---@field fn function
+		---@field fn RuleFn
 		---@field id string
 		---@field interval integer
 		---@field status "init"|"running"|"returned"
 		---@field api_name string
 		---@field value any|nil
-		---@field fn_state table
+		---@field fn_state RuleState
+		---@field core_state RuleCoreState
 
 		---@class GLOBAL_RULES : MemGroup
 		---@field _entities Rule[]
@@ -37,21 +49,35 @@ if (H_CAMPAIGN == nil) then
 				status = "init",
 				api_name = "modkit_rule_fn__" .. id,
 				fn = rule_fn,
-				fn_state = modkit.table:merge(
-					{
-						_rule_name = id
-					},
-					state
-				)
+				core_state = {
+					_rule_name = id,
+					_interval = interval
+				}
 			};
 
+			rule.fn_state = modkit.table:merge(
+				rule.core_state,
+				{
+					_tick = 0,
+					_started_gametime = -1
+				},
+				state
+			);
+
 			function rule:finish()
+				-- print("kill rule " .. self.api_name);
 				Rule_Remove(self.api_name);
 				self.status = "returned";
 			end
 
 			function rule:run()
-				local result = self.fn(self.fn_state);
+				-- unset any modification to core state and update tick
+				self.fn_state = modkit.table:merge(
+					self.fn_state,
+					self.core_state
+				);
+				self.fn_state._tick = self.fn_state._tick + 1;
+				local result = self.fn(self.fn_state, modkit.campaign.rules);
 				if (result) then
 					self:finish();
 				end
@@ -63,12 +89,12 @@ if (H_CAMPAIGN == nil) then
 				if (self.status ~= "init") then
 					self:finish();
 				end
-				print("begin rule " .. self.api_name);
+				self.fn_state._started_gametime = Universe_GameTime();
+				-- print("begin rule " .. self.api_name);
 				GLOBAL_RULES.__runner = function ()
 					%self:run();
 				end;
 				dostring(self.api_name .. " = GLOBAL_RULES.__runner"); -- my word...
-				print(globals()[self.api_name]);
 				Rule_AddInterval(self.api_name, self.interval);
 				self.status = "running";
 			end
@@ -80,6 +106,7 @@ if (H_CAMPAIGN == nil) then
 
 	-- rule creation, management...
 
+	---@class Rules
 	local rules = {
 		min_poll_interval = 0.1,
 	};
@@ -91,7 +118,7 @@ if (H_CAMPAIGN == nil) then
 	end
 
 	---@param name string
-	---@param rule_fn function
+	---@param rule_fn RuleFn
 	---@param interval integer
 	---@return Rule
 	function rules:make(name, rule_fn, interval, state)
@@ -100,7 +127,7 @@ if (H_CAMPAIGN == nil) then
 			return rule.name == %name;
 		end);
 		if (already_exists) then
-			print("overrriding already existing rule: " .. name);
+			print("overriding already existing rule: " .. name);
 		end
 
 		return GLOBAL_RULES:add(name, rule_fn, interval, state);
@@ -112,16 +139,30 @@ if (H_CAMPAIGN == nil) then
 		rule:begin();
 	end
 
+	--- Takes a 'rule pattern', which is lua-style 'and' and 'or' with rule names, firing `callback` if the patten
+	-- is satisfied.
+	---
+	--- This pattern would trigger `callback` if rules `'A'` AND `'rule_b'` AND `'myC0OlRule'` were finished, OR if rule `'D'` finished:
+	--- ```lua
+	--- 	'(A and rule_b and myC0OlRule) or D'
+	--- ```
+	--- Returns a LUA string to execute (we just leverage LUA's inbuilt language parsing).
+	---
+	---@param pattern string
+	---@param callback fun(rules: Rules): any
+	---@return nil
 	function rules:on(pattern, callback)
 		-- 'A and (B or C)'
 		-- -> 'A&(B or C)'
 		-- -> 'A&(B|C)'
-
 		local exec = function ()
 			local rules = %self;
 			pattern_exec = "" .. %pattern;
 			pattern_exec = gsub(pattern_exec, " and ", " & ");
 			pattern_exec = gsub(pattern_exec, " or ", " | ");
+			-- here we are constructing a LUA logic expression which will tell us the truthiness of the supplied pattern
+			-- if a rule is running, we insert true (1), else false (nil)
+			-- (we construct something like: "return 1 and nil and nil or (1 and 1)")
 			pattern_exec = gsub(pattern_exec, "([%w_]+)", function(matches)
 				if(%rules:get(matches).status == "returned") then
 					return "1";
@@ -149,25 +190,29 @@ if (H_CAMPAIGN == nil) then
 	function rules:init(level_path)
 		GLOBAL_RULES.__level_path = level_path;
 
-		if (MISSION_SHIPS == nil) then
+		if (GLOBAL_MISSION_SHIPS == nil) then
+			-- dofilepath(level_path);
 			RegisterShips(level_path);
 			print("INIT MISSION SOBGROUPS");
 		end
 	end
 
+	-- == map getters
+
+	local map = {};
+
+	--- Returns a MemGroup of all the ships in the level file
+	---@return GLOBAL_MISSION_SHIPS
+	function map:ships()
+		return GLOBAL_MISSION_SHIPS; -- defined in sp_helpers.lua (called from the .level file)
+	end
+
+	-- automatic rule, which checks for listener completion
 	function modkit_campaign_driver()
 		for _, listener in GLOBAL_RULES.__listeners do
-			print("listening for " .. listener.pattern .. "(" .. listener.exec() .. ")...");
 			if (dostring(listener.exec())) then
-				print("\tpassed conditions!");
-				listener.callback(modkit.table.map(GLOBAL_RULES._entities, function (rule)
-					return {
-						id = rule.id,
-						status = rule.status,
-						value = rule.value,
-						state = rule.state
-					};
-				end));
+				-- print(listener.pattern .." passed conditions!");
+				listener.callback(%rules);
 				GLOBAL_RULES.__listeners[listener.pattern] = nil; -- unsubscribe
 			end
 		end
@@ -179,6 +224,7 @@ if (H_CAMPAIGN == nil) then
 		end;
 	end
 
+	campaign.map = map;
 	campaign.rules = rules;
 	modkit.campaign = campaign;
 

@@ -103,6 +103,6 @@ if (modkit.compose == nil) then
 	doscanpath("data:scripts/custom_code", "*.lua");
 	doscanpath("data:scripts/custom_code/lib", "*.lua");
 
-	doscanpath("data:scripts/custom_code/mpp", "*.lua");
-	doscanpath("data:scripts/custom_code/mpp/hw1", "*.lua");
+	doscanpath("data:scripts/custom_code/hw1", "*.lua");
+	doscanpath("data:scripts/custom_code/horde/ship_scripts", "*.lua");
 end

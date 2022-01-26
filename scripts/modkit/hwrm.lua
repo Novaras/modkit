@@ -1,6 +1,6 @@
 -- Custom definitions file to allow sumneko.lua to provide completion/hover/etc. for HWRM globals.
 
--- We can 'redefine' globals by first cloning the global table, then redefining actual globals as annotated wrappers around their originals.
+-- Notice we never run this code, these defines are just used for IDE assistance.
 
 if (nil) then
 
@@ -81,6 +81,42 @@ if (nil) then
 
 	---@alias AutoLaunchStatus 'ShipHoldLaunch'|'ShipHoldStayDockedUpToLimit'|'ShipHoldStayDockedAlways'
 
+	--- probably needs updating, see https://github.com/HWRM/KarosGraveyard/wiki/Modifiable-Values
+	---@alias ShipMultiplier
+	---| '"BuildSpeed"'
+	---| '"Capture"'
+	---| '"CloakDetection"'
+	---| '"CloakingStrength"'
+	---| '"CloakingTime"'
+	---| '"DefenseFieldTime"'
+	---| '"DustCloudSensitivity"'
+	---| '"HealthRegenerationRate"'
+	---| '"HyperSpaceAbortDamage"'
+	---| '"HyperSpaceCost"'
+	---| '"HyperSpaceTime"'
+	---| '"HyperSpaceRecoveryTime"'
+	---| '"MaxHealth"'
+	---| '"MaxShield"'
+	---| '"MaxSpeed"'
+	---| '"NebulaSensitivity"'
+	---| '"PrimarySensorsRange"'
+	---| '"ResourceCapacity"'
+	---| '"ResourceCollectionRate"'
+	---| '"ResourceCapacity"'
+	---| '"ResourceCollectionRate"'
+	---| '"SecondarySensorsRange"'
+	---| '"SensorDistortion"'
+	---| '"VisualRange"'
+	---| '"Speed"'
+	---| '"WeaponDamage"'
+	---| '"WeaponAccuracy"'
+
+	--- Just the values which can be modified via `SobGroup_` calls
+	---@alias RuntimeShipMultiplier
+	---| '"BuildSpeed"' # `SobGroup_SetBuildSpeedMultiplier`
+	---| '"WeaponDamage"' # `SobGroup_SetDamageMultiplier`
+	---| '"MaxSpeed"' # `SobGroup_SetMaxSpeedMultiplier`
+
 	---@param str string
 	---@param start number
 	---@param finish number
@@ -120,6 +156,94 @@ if (nil) then
 	---@return any
 	function doscanpath(directory, pattern)
 	end
+
+	--- Receives any number of arguments and prints their values to stdout, converting each argument to a string following the same rules of `tostring`.
+	---
+	--- **The location of `stdout` is `HomeworldRM\Bin\Release\HwRM.log`**.
+	---
+	---@vararg any
+	---@return nil
+	function print(...)
+	end
+
+
+	--- When called without arguments, returns a pseudo-random real number in the range [`0`,`1`].
+	---
+	--- When called with a number `a`, returns a pseudo-random integer in the range [`1`, `a`].
+	---
+	--- When called with _two_ arguments, `a` and `b`, returns a pseudo-random integer in the range [`a`, `b`].
+	---
+	---@overload fun(a: number): integer
+	---@overload fun(a: number, b: number): integer
+	---@return number
+	function random()
+	end
+
+	--- Rounds `num` rounded _up_ to the nearest integer.
+	---
+	---@param num number
+	---@return integer
+	function ceil(num)
+	end
+
+	--- Rounds `num` rounded _down_ to the nearest integer.
+	---
+	---@param num number
+	---@return integer
+	function floor(num)
+	end
+
+	---Returns the cosine of `num` (which is in degrees).
+	---
+	---@param num number
+	---@return number
+	function cos(num)
+	end
+
+	---Returns the arccosine of `num` (which is in degrees).
+	---
+	---@param num number
+	---@return number
+	function acos(num)
+	end
+
+	---Returns the sine of `num` (which is in degrees).
+	---
+	---@param num number
+	---@return number
+	function sin(num)
+	end
+
+	---Returns the arcsine of `num` (which is in degrees).
+	---
+	---@param num number
+	---@return number
+	function asin(num)
+	end
+
+	---Returns the tangent of `num` (which is in degrees).
+	---
+	---@param num number
+	---@return number
+	function tan(num)
+	end
+
+	---Returns the arctangent of `num` (which is in degrees).
+	---
+	---@param num number
+	---@return number
+	function atan(num)
+	end
+
+	---Returns the angle between the X axis of a graph and a line drawn to a point (`x`, `y`) on that graph.
+	---
+	---@param x number
+	---@param y number
+	---@return number
+	function atan2(x, y)
+	end
+
+	--- ==== SOBGROUP STUFF! ====
 
 	--- Activates the ability indicated by `ability_code` (see [the full list](https://github.com/HWRM/KarosGraveyard/wiki/Variable;-Abilities))
 	---
@@ -435,5 +559,14 @@ if (nil) then
 	---@param value_2 any
 	---@return integer
 	function Selection_FilterExclude(target_selection, source_selection, filter_type, value_1, value_2)
+	end
+
+	-- Subtitle stuff
+
+	--- Displays the given `message` in the top center of the screen for `duration` seconds.
+	---
+	---@param message string
+	---@param duration integer
+	function Subtitle_Message(message, duration)
 	end
 end

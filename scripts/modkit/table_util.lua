@@ -1,10 +1,14 @@
 --Table utility functions.
 
-function _printTbl(table, indent, output)
+--- Prints the given `table`, recursively if necessary. The output can be any function accepting varargs (i.e `print`, which is default).
+---
+---@param table table
+---@param indent integer
+---@param output fun(...: any): nil
+---@param no_recurse bool
+function _printTbl(table, indent, output, no_recurse)
 	output = output or print;
-	if (indent == nil) then
-		indent = 0;
-	end
+	index = indent or 0;
 	local indent_str = "";
 	if (indent > 0) then
 		local cur_indents = 0;
@@ -15,9 +19,13 @@ function _printTbl(table, indent, output)
 	end
 	for k, v in table do
 		if type(v) == "table" then
-			output(indent_str .. "\"" .. k .. "\": {");
-			_printTbl(v, indent + 1);
-			output(indent_str .. "},");
+			if (no_recurse) then
+				output(indent_str .. tostring(v)); -- just print address
+			else
+				output(indent_str .. "\"" .. k .. "\": {");
+				_printTbl(v, indent + 1, output, no_recurse);
+				output(indent_str .. "},");
+			end
 		else
 			if (type(v) ~= "number") then
 				v = "\"" .. tostring(v) .. "\"";
@@ -173,13 +181,26 @@ if (modkit.table == nil) then
 		return tbl[%table.firstKey(tbl)];
 	end
 
-	function table.printTbl(table, label)
+	function table.clone(tbl)
+		local out = {};
+		for k, v in tbl do
+			out[k] = v;
+		end
+		return out;
+	end
+
+	--- Prints the given `table`, recursively if necessary.
+	---
+	---@param table table
+	---@param label string
+	---@param no_recurse any If non-nil, sub-tables are not printed and their addresses are printed instead
+	function table.printTbl(table, label, no_recurse)
 		if (label == nil) then
 			label = tostring(table);
 		end
 		local temp_table = {};
 		temp_table[label] = table;
-		_printTbl(temp_table);
+		_printTbl(temp_table, 0, print, no_recurse);
 	end
 
 	function table:merge(tbl_a, tbl_b, merger)

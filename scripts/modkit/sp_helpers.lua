@@ -3,29 +3,53 @@
 if (H_SP_HELPERS == nil) then
 	SHIP_NEXT_ID = 0;
 
+	--- In the context of a .level script, creates squads & groups for the ships and positions them on the map etc.
+	--- In the context of a .lua script, creates `Ship` definitions from this information instead, stored in `GLOBAL_MISSION_SHIPS`
+	---@param type string
+	---@param player integer
+	---@param position Vec3
+	---@param rotation Vec3
+	---@param in_hyperspace '0'|'1'
+	---@param id_override string
 	function RegisterShip(type, player, position, rotation, in_hyperspace, id_override)
 		local group_name = "_registergroup_" .. SHIP_NEXT_ID;
+
+		player = player or 0;
+		position = position or { 0, 0, 0 };
+		rotation = rotation or { 0, 0, 0 };
+		in_hyperspace = in_hyperspace or 0;
 
 		if (id_override == nil) then
 			id_override = SHIP_NEXT_ID;
 			SHIP_NEXT_ID = SHIP_NEXT_ID + 1;
 		end
 
-		if (addSquadron ~= nil or createSobGroup ~= nil) then -- defined only during .level load by engine
+		if (addSquadron ~= nil and createSOBGroup ~= nil) then -- defined only during .level load by engine
+			-- print("LEVEL CONTEXT");
 			local squad_name = "_registergroup_" .. SHIP_NEXT_ID;
-			addSquadron(squad_name, type,	position,	player, rotation, 1, in_hyperspace);
+			addSquadron(squad_name, type, position,	player, rotation, 1, in_hyperspace);
 			createSOBGroup(group_name); -- group is accessible in the script
 			addToSOBGroup(squad_name, group_name); -- this fn assigns the squad to the sob
 		else
-			if (GLOBAL_SHIPS == nil) then
+			-- print("GAMETIME CONTEXT");
+			if (GLOBAL_MISSION_SHIPS == nil) then
 				dofilepath("data:scripts/modkit.lua");
+
+				---@class GLOBAL_MISSION_SHIPS : MemGroup
+				---@field _entities Ship[]
+				---@field all fun(): Ship[]
+				---@field get fun(): Ship
+				GLOBAL_MISSION_SHIPS = modkit.MemGroup.Create("mg-global-mission-ships");
 			end
-			GLOBAL_SHIPS:set(id_override, modkit.compose:instantiate(group_name, player, id_override, type));
+			GLOBAL_MISSION_SHIPS:set(id_override, modkit.compose:instantiate(group_name, player, id_override, type));
 		end
 	end
 
+	--- Called in the .level to place squads and assign them to groups
+	--- Called in the .lua gametime to register Ship objects for these defined ships
+	---@param level_path string The full path to the .level of the mission
 	function RegisterShips(level_path)
-		if (level_path) then
+		if (MODKIT_MISSION_SHIPS == nil) then
 			dofilepath(level_path);
 		end
 		for id, ship in MODKIT_MISSION_SHIPS do

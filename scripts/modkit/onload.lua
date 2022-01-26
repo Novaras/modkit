@@ -24,7 +24,7 @@ end
 -- global wrapper actual for hook in ship file
 function load_kus_res_ship(player_index)
 	if (res_ships_proto == nil) then
-		dofilepath("data:scripts/mpp/hw1/research-ships.lua");
+		dofilepath("data:scripts/hw1/research-ships.lua");
 	end
 
 	res_ships_proto:load("kus_researchship", createPlayer(player_index));
@@ -33,7 +33,7 @@ end
 -- "
 function load_tai_res_ship(player_index)
 	if (res_ships_proto == nil) then
-		dofilepath("data:scripts/mpp/hw1/research-ships.lua");
+		dofilepath("data:scripts/hw1/research-ships.lua");
 	end
 
 	res_ships_proto:load("tai_researchship", createPlayer(player_index));
