@@ -122,14 +122,36 @@ function modkit_ship:tumble(tumble)
 	return self._current_tumble;
 end
 
-function modkit_ship:damageMult(mult)
+--- Sets the damage multiplier for this ship.
+---
+--- The multiplier is always relative to 1 (its reset every time you call this fn), unless `relative` is non-nil.
+---
+---@param mult number
+---@param relative bool
+---@return number # the current dmg mult after being set
+function modkit_ship:damageMult(mult, relative)
 	if (mult) then
-		local restore_mult = (-1 * self._current_dmg_mult) + 2;
-		SobGroup_SetDamageMultiplier(self.own_group, restore_mult); -- clear previous
+		if (relative == nil) then
+			local restore_mult = (-1 * self._current_dmg_mult) + 2;
+			SobGroup_SetDamageMultiplier(self.own_group, restore_mult); -- clear previous
+		end
 		self._current_dmg_mult = mult;
 		SobGroup_SetDamageMultiplier(self.own_group, self._current_dmg_mult);
 	end
 	return self._current_dmg_mult;
+end
+
+---
+---@param mult_type RuntimeShipMultiplier
+---@param mult number
+function modkit_ship:setMult(mult_type, mult)
+	if (mult_type == "BuildSpeed") then
+		return SobGroup_SetBuildSpeedMultiplier(self.own_group, mult);
+	elseif (mult_type == "MaxSpeed") then
+		return SobGroup_SetMaxSpeedMultiplier(self.own_group, mult);
+	elseif (mult_type == "WeaponDamage") then
+		return self:damageMult(mult);
+	end
 end
 
 function modkit_ship:maxActualHP()
