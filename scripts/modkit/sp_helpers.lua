@@ -21,24 +21,24 @@ if (H_SP_HELPERS == nil) then
 
 		if (id_override == nil) then
 			id_override = SHIP_NEXT_ID;
-			SHIP_NEXT_ID = SHIP_NEXT_ID + 1;
 		end
+		SHIP_NEXT_ID = SHIP_NEXT_ID + 1;
 
 		if (addSquadron ~= nil and createSOBGroup ~= nil) then -- defined only during .level load by engine
-			-- print("LEVEL CONTEXT");
-			local squad_name = "_registergroup_" .. SHIP_NEXT_ID;
+			print("LEVEL CONTEXT");
+			local squad_name = group_name .. "_squad";
 			addSquadron(squad_name, type, position,	player, rotation, 1, in_hyperspace);
 			createSOBGroup(group_name); -- group is accessible in the script
 			addToSOBGroup(squad_name, group_name); -- this fn assigns the squad to the sob
 		else
-			-- print("GAMETIME CONTEXT");
+			print("GAMETIME CONTEXT");
 			if (GLOBAL_MISSION_SHIPS == nil) then
 				dofilepath("data:scripts/modkit.lua");
 
 				---@class GLOBAL_MISSION_SHIPS : MemGroup
 				---@field _entities Ship[]
 				---@field all fun(): Ship[]
-				---@field get fun(): Ship
+				---@field get fun(id: string): Ship
 				GLOBAL_MISSION_SHIPS = modkit.MemGroup.Create("mg-global-mission-ships");
 			end
 			GLOBAL_MISSION_SHIPS:set(id_override, modkit.compose:instantiate(group_name, player, id_override, type));
