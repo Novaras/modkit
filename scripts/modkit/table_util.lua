@@ -152,6 +152,22 @@ if (modkit.table == nil) then
 			end
 			return 1;
 		end,
+		randomEntry = function(tbl)
+			local arr = {};
+			for k, v in tbl do
+				arr[modkit.table.length(arr) + 1] = {
+					[1] = k,
+					[2] = v
+				};
+			end
+			local index;
+			if (modkit.table.length(arr) < 2) then
+				index = 1;
+			else
+				index = random(1, modkit.table.length(arr)); -- they made it so if you call `random(1, 1)`, it counts as an error...
+			end
+			return arr[index];
+		end,
 		--- Difference: Any elements in `tbl_a`, which are not found in `tbl_b`.
 		---
 		---@param tbl_a table
