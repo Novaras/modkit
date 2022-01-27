@@ -450,6 +450,17 @@ if (nil) then
 	function SobGroup_SalvageSobGroup(group_name, target_group)
 	end
 
+	--- Returns either the build cost or build time of `ship_type`.
+	---
+	--- **Ships in squads with a squadsize > 1 will report the cost of their whole squad.** Divide this value by
+	--- `SobGroup_Count` to get the value of just ONE of this ship type.
+	---
+	---@param ship_type string
+	---@param attribute "\"buildCost\"" | "\"buildTime\""
+	---@return integer
+	function SobGroup_GetStaticF(ship_type, attribute)
+	end
+
 	---comment
 	---@param group_name any
 	function SobGroup_GetTechHarvestedAmount(group_name)
@@ -490,6 +501,7 @@ if (nil) then
 	--- Spawn stuff
 
 	--- Spawns a `ship_type` squadron named `new_squad_name`, and adds it to `target_group`. The squad is spawned at `volume_name`.
+	---
 	--- Note: A 'squad' can contain one ship; this function is not limited to HW2 strikecraft squadrons.
 	---
 	---@param player_index integer
@@ -517,6 +529,14 @@ if (nil) then
 	---@param visibility Visibility
 	---@return nil
 	function SobGroup_SetInherentVisibility(target_group, target_player, visibility)
+	end
+
+	--- Adds all the ships in source_group to target_group. Both groups must exist before being passed to this function.
+	---
+	---@param source_group string
+	---@param target_group string
+	---@return nil
+	function SobGroup_SobGroupAdd(source_group, target_group)
 	end
 
 	--- Selection stuff (NEEDS TESTING, USED ONLY BY DEFENSE FIGHTER CUSTOM CODE):
