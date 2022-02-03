@@ -57,6 +57,12 @@ if (nil) then
 	COMMAND_Retire = 16;
 	-- ...todo
 
+	-- used by UI_ShowScreen
+	ePopup = 0;
+	eTransition = 1;
+
+	---@alias ScreenTransition '0' | '1' | 'ePopup' | 'eTransition'
+
 	VisNone = 0;
 	VisSecondary = 1;
 	VisFull = 2;
@@ -241,6 +247,20 @@ if (nil) then
 	---@param y number
 	---@return number
 	function atan2(x, y)
+	end
+
+	--- ==== PLAYER STUFF! ====
+
+	--- Returns the current RU amount owned by the given player.
+	---@param player_index integer
+	function Player_GetRU(player_index)
+	end
+
+	--- Sets the RU _total_ for the given player.
+	---
+	---@param player_index integer
+	---@param amount integer
+	function Player_SetRU(player_index, amount)
 	end
 
 	--- ==== SOBGROUP STUFF! ====
@@ -450,6 +470,21 @@ if (nil) then
 	function SobGroup_SalvageSobGroup(group_name, target_group)
 	end
 
+	--- Fills `target_group` with the remainder after subtracting ships in `subtract_group` from `source_group`.
+	---
+	---@param target_group string
+	---@param source_group string
+	---@param subtract_group string
+	function SobGroup_Substract(target_group, source_group, subtract_group)
+	end
+
+	--- Returns the average health of all ships in `target_group` (as a fraction between 0 and 1).
+	---
+	---@param target_group string
+	---@return number
+	function SobGroup_GetHealth(target_group)
+	end
+
 	--- Returns either the build cost or build time of `ship_type`.
 	---
 	--- **Ships in squads with a squadsize > 1 will report the cost of their whole squad.** Divide this value by
@@ -520,6 +555,13 @@ if (nil) then
 	function SobGroup_SetGhost(target_group, enable)
 	end
 
+	--- Sets the health of all ships in `target_group` to the `fraction` (between 0 and 1).
+	---
+	---@param target_group string
+	---@param fraction number
+	function SobGroup_SetHealth(target_group, fraction)
+	end
+
 	--- Sets the _inherent_ visibility of the `target_group` for player `target_player`.
 	---
 	--- Note: there is no corresponding getter for this value, so you should store it yourself if you need to get it later.
@@ -588,5 +630,70 @@ if (nil) then
 	---@param message string
 	---@param duration integer
 	function Subtitle_Message(message, duration)
+	end
+
+	-- UI stuff
+
+	--- Shows the named screen, with the given transition type.
+	---
+	---@param screen_name string
+	---@param transition_type ScreenTransition
+	function UI_ShowScreen(screen_name, transition_type)
+	end
+
+	--- Enables or disables the named UI element belonging to the named stylesheet.
+	---
+	--- Note: A 'screen' is just an entity which hosts UI elements (not necessarily a 'screen' as such).
+	---
+	--- The named screen should be defined in `ui/newui/` (see newmainmenu as an example).
+	---
+	---@param screen_name string
+	---@param element_name string
+	---@param enabled '0' | '1'
+	function UI_SetElementEnabled(screen_name, element_name, enabled)
+	end
+
+	--- Sets the visibility of the named UI element for the named screen.
+	---
+	--- Note: A 'screen' is just an entity which hosts UI elements (not necessarily a 'screen' as such).
+	---
+	--- The named screen should be defined in `ui/newui/` (see newmainmenu as an example).
+	---
+	---@param screen_name string
+	---@param element_name string
+	---@param visible '0' | '1'
+	function UI_SetElementVisible(screen_name, element_name, visible)
+	end
+
+	--- Enables or disables the given screen.
+	---
+	--- Note: A 'screen' is just an entity which hosts UI elements (not necessarily a 'screen' as such).
+	---
+	---@param screen_name string
+	---@param enabled '0' | '1'
+	function UI_SetScreenEnabled(screen_name, enabled)
+	end
+
+	--- Sets the visibility of the given screen.
+	---
+	--- Note: A 'screen' is just an entity which hosts UI elements (not necessarily a 'screen' as such).
+	---
+	---@param screen_name string
+	---@param visible '0' | '1'
+	function UI_SetScreenVisible(screen_name, visible)
+	end
+
+	--- Returns whether or not the given screen is 'active' (enabled and visible?)
+	---
+	---@param screen_name string
+	---@return '0' | '1'
+	function UI_IsScreenActive(screen_name)
+	end
+
+	--- ==== UNIVERSE STUFF ====
+
+	--- Returns the current gametime.
+	---@return number
+	function Universe_GameTime()
 	end
 end

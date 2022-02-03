@@ -6,6 +6,7 @@ if (modkit.MemGroup == nil) then dofilepath("data:scripts/modkit/memgroup.lua");
 
 if (H_CAMPAIGN == nil) then
 	local campaign = {};
+	modkit.campaign = {};
 
 	if (GLOBAL_RULES == nil) then
 
@@ -65,7 +66,7 @@ if (H_CAMPAIGN == nil) then
 			);
 
 			function rule:finish()
-				-- print("kill rule " .. self.api_name);
+				print("kill rule " .. self.api_name);
 				Rule_Remove(self.api_name);
 				self.status = "returned";
 			end
@@ -90,11 +91,12 @@ if (H_CAMPAIGN == nil) then
 					self:finish();
 				end
 				self.fn_state._started_gametime = Universe_GameTime();
-				-- print("begin rule " .. self.api_name);
+				print("begin rule " .. self.api_name);
 				GLOBAL_RULES.__runner = function ()
 					%self:run();
 				end;
 				dostring(self.api_name .. " = GLOBAL_RULES.__runner"); -- my word...
+				print(globals()[self.api_name]);
 				Rule_AddInterval(self.api_name, self.interval);
 				self.status = "running";
 			end
@@ -211,11 +213,23 @@ if (H_CAMPAIGN == nil) then
 	function modkit_campaign_driver()
 		for _, listener in GLOBAL_RULES.__listeners do
 			if (dostring(listener.exec())) then
-				-- print(listener.pattern .." passed conditions!");
+				print(listener.pattern .." passed conditions!");
 				listener.callback(%rules);
 				GLOBAL_RULES.__listeners[listener.pattern] = nil; -- unsubscribe
 			end
 		end
+
+		
+		-- local new_universe_ships_group = Universe_GetAllActiveShips(SobGroup_Fresh("__mk_univese_ships"));
+		-- if (modkit.campaign.universe_ships_group) then
+		-- 	local diff_group = SobGroup_Fresh("__mk_universe_ships_diff");
+		-- 	-- sub the old run ships from the current run ships to find newbies
+		-- 	SobGroup_Substract(diff_group, new_universe_ships_group, modkit.campaign.universe_ships_group);
+			
+		-- 	-- now we make the assumption that new ships are probably spaced apart
+		-- else
+		-- 	modkit.campaign.universe_ships_group = new_universe_ships_group;
+		-- end
 	end
 
 	if (OnInit == nil) then

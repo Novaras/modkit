@@ -11,8 +11,8 @@ if (H_SP_HELPERS == nil) then
 	---@param rotation Vec3
 	---@param in_hyperspace '0'|'1'
 	---@param id_override string
-	function RegisterShip(type, player, position, rotation, in_hyperspace, id_override)
-		local group_name = "_registergroup_" .. SHIP_NEXT_ID;
+	function RegisterShip(type, player, position, rotation, in_hyperspace, id_override, group_name_override)
+		local group_name = group_name_override or ("_registergroup_" .. SHIP_NEXT_ID);
 
 		player = player or 0;
 		position = position or { 0, 0, 0 };
@@ -59,7 +59,8 @@ if (H_SP_HELPERS == nil) then
 				ship.position,
 				ship.rotation,
 				ship.in_hyperspace,
-				id
+				id,
+				ship.group_name_override
 			);
 		end
 	end

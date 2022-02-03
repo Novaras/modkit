@@ -13,6 +13,7 @@ if (modkit_player_proto == nil) then
 		if (GLOBAL_PLAYERS == nil) then
 			---@class GLOBAL_PLAYERS : MemGroup
 			---@field _entities Player[]
+			---@field get fun(self: GLOBAL_PLAYERS, id: integer): Player
 			GLOBAL_PLAYERS = modkit.MemGroup.Create("mg-players-global");
 		
 			for i = 0, Universe_PlayerCount() - 1 do
@@ -58,7 +59,7 @@ if (modkit_player_proto == nil) then
 
 	--- Gets the player's ships (alive ships)
 	function modkit_player_proto:ships()
-		return GLOBAL_SHIPS:allied(function (ship)
+		return GLOBAL_SHIPS:allied(self, function (ship)
 			return ship.player.id == %self.id;
 		end);
 	end
