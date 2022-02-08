@@ -297,11 +297,19 @@ if (nil) then
 	function SobGroup_FilterExclude(group_to_fill, source_group, filter_key, filter_val)
 	end
 
-	--- Returns the number of squadrons (usuall 1-1 with number of ships) within group `source_group`.
+	--- Returns the number of squadrons (usually 1-1 with number of ships) within group `source_group`.
 	---
 	---@param source_group string
 	---@return integer
 	function SobGroup_Count(source_group)
+	end
+
+	--- Returns the number of squadrons (usually 1-1 with the number of ships) within group `source_group` belonging to `player_index`.
+	---
+	---@param source_group string
+	---@param player_index integer
+	---@return integer
+	function SobGroup_CountByPlayer(source_group, player_index)
 	end
 
 	--- Useful as a shortcut for `SobGroup_FilterExclude`, where we don't want to create a new group and count it, but just want the count directly.
@@ -494,6 +502,13 @@ if (nil) then
 	---@param attribute "\"buildCost\"" | "\"buildTime\""
 	---@return integer
 	function SobGroup_GetStaticF(ship_type, attribute)
+	end
+
+	--- Causes ships in `group` to hyperspace to the given position.
+	---
+	---@param group string
+	---@param position Position
+	function SobGroup_HyperSpaceTo(group, position)
 	end
 
 	---comment

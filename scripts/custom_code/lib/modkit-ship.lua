@@ -144,11 +144,11 @@ end
 ---
 ---@param mult_type RuntimeShipMultiplier
 ---@param mult number
-function modkit_ship:setMult(mult_type, mult)
+function modkit_ship:multiplier(mult_type, mult)
 	if (mult_type == "BuildSpeed") then
 		return SobGroup_SetBuildSpeedMultiplier(self.own_group, mult);
 	elseif (mult_type == "MaxSpeed") then
-		return SobGroup_SetMaxSpeedMultiplier(self.own_group, mult);
+		return self:speed(mult);
 	elseif (mult_type == "WeaponDamage") then
 		return self:damageMult(mult);
 	end
@@ -162,6 +162,11 @@ function modkit_ship:currentActualHP()
 	return SobGroup_CurrentHealthTotal(self.own_group);
 end
 
+--- Gets and optionally sets the HP of the named subsystem on this ship.
+---
+---@param subs_name string
+---@param HP number
+---@return number
 function modkit_ship:subsHP(subs_name, HP)
 	if (HP) then
 		SobGroup_SetHardPointHealth(self.own_group, subs_name, HP);
@@ -169,15 +174,24 @@ function modkit_ship:subsHP(subs_name, HP)
 	return SobGroup_GetHardPointHealth(self.own_group, subs_name);
 end
 
+--- Returns whether or not this ship host's the named subsystem.
+---
+---@param subs_name string
+---@return '0'|'1'
+function modkit_ship:hasSubsystem(subs_name)
+	return SobGroup_HasSubsystem(self.own_group, subs_name);
+end
+
+--- Returns the distance between this ship and the given other ship, or the average position if given multiple others.
+---
+---@param other Ship | Ship[]
+---@return number
 function modkit_ship:distanceTo(other)
-	if (nil or type(other.own_group) == "string") then -- assume ship
+	if (type(other.own_group) == "string") then -- assume ship
 		return SobGroup_GetDistanceToSobGroup(self.own_group, other.own_group);
-	else -- a position
+	else -- ship group
 		local a = self:position();
-		local b = other;
-		if (other.position) then
-			b = other:position();
-		end
+		local b = SobGroup_GetPosition(SobGroup_FromShips(SobGroup_Fresh("__"), other));
 		return sqrt(
 			(b[1] - a[1]) ^ 2 +
 			(b[2] - a[2]) ^ 2 +
@@ -266,8 +280,16 @@ function modkit_ship:move(where)
 	end
 end
 
-function modkit_ship:guard(other)
-	return SobGroup_GuardSobGroup(self.own_group, other.own_group);
+--- Makes this ship guard `target`, which may be one or multiple other ships.
+---
+---@param target Ship | Ship[]
+function modkit_ship:guard(target)
+	if (target.own_group) then
+		self._guard_group = target.own_group;
+	else -- collection of ships
+		self._guard_group = SobGroup_FromShips(self.own_group .. "_guard_group", target);
+	end
+	return SobGroup_GuardSobGroup(self.own_group, self._guard_group);
 end
 
 function modkit_ship:parade(other, mode)
@@ -293,8 +315,11 @@ function modkit_ship:dock(target, stay_docked)
 	end
 end
 
+--- Causes this ship to hyperspace to the given point.
+---
+---@param to Position
 function modkit_ship:hyperspace(to)
-	Sobroup_HyperspaceTo(to);
+	SobGroup_HyperspaceTo(to);
 end
 
 --- Gets or optionally sets the ship's auto-launch behavior. `1` for auto-launch, `0` for stay-docked manual launching.
@@ -453,7 +478,19 @@ function modkit_ship:isCarrier()
 		"hgn_carrier",
 		"vgr_carrier",
 		"kus_carrier",
-		"tai_carrier"
+		"tai_carrier",
+		"tur_p1mothership"
+	});
+end
+
+function modkit_ship:isCapturer()
+	return self:isCaptureFrigate() or self:isSalvager();
+end
+
+function modkit_ship:isCaptureFrigate()
+	return self:isAnyTypeOf({
+		"hgn_marinefrigate",
+		"vgr_infiltratorfrigate"
 	});
 end
 
@@ -596,10 +633,14 @@ end
 
 --- Returns whether the players owning this ship and the `other` ship are allied.
 ---
----@param other Ship
+---@param other Ship | Player
 ---@return bool
 function modkit_ship:alliedWith(other)
-	return self.player:alliedWith(other.player);
+	if (other.HP) then -- caller is a ship
+		return self.player:alliedWith(other.player);
+	else
+		return self.player:alliedWith(other);
+	end
 end
 
 --- Returns `1` if this ship is under attack from any source, else `nil`. If `attacker` is provided, check instead if
@@ -617,7 +658,7 @@ end
 --- Returns the command targets of the
 ---@param command integer
 ---@param source table
----@return table
+---@return Ship[]
 function modkit_ship:commandTargets(command, source)
 	local targets_group = SobGroup_Fresh("targets-group-" .. self.id .. "-" .. command);
 	SobGroup_GetCommandTargets(targets_group, self.own_group, command);
@@ -660,12 +701,19 @@ end
 
 -- === Ability stuff ===
 
+--- Returns whether or not this ship can perform the given ability (an `AB_` value).
+---
+---@param ability integer
+---@param enable '0'|'1'|'nil'
+---@return '0'|'1'
 function modkit_ship:canDoAbility(ability, enable)
 	enable = enable or SobGroup_CanDoAbility(self.own_group, ability);
 	SobGroup_AbilityActivate(self.own_group, ability, enable);
 	return SobGroup_CanDoAbility(self.own_group, ability);
 end
 
+---comment
+---@param enable '0'|'1'|'nil'
 function modkit_ship:canHyperspace(enable)
 	return self:canDoAbility(AB_Hyperspace, enable);
 end
@@ -702,6 +750,14 @@ end
 
 function modkit_ship:isBuilding(ship_type)
 	return SobGroup_IsBuilding(self.own_group, ship_type);
+end
+
+--- Returns `1` if this ship is being captured.
+---
+---@return bool
+function modkit_ship:isBeingCaptured()
+	local temp = SobGroup_GetSobGroupBeingCapturedGroup(self.own_group, DEFAULT_SOBGROUP);
+	return SobGroup_Count(temp) > 0;
 end
 
 -- === Command stuff ===
