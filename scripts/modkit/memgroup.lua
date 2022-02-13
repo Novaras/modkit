@@ -18,6 +18,7 @@ if (modkit.table == nil) then
 end
 
 if (modkit.MemGroup == nil) then
+	---@class MemGroup
 	modkit.MemGroup = {
 		_groups = {},
 		-- _new
@@ -36,7 +37,7 @@ if (modkit.MemGroup == nil) then
 		-- In addition, the entities will also host the attributes defined
 		-- in custom_attributes.
 		_new = function(group_name, custom_attribs)
-			---@class MemGroup
+			---@type MemGroup
 			local new_group = {
 				_entities = {},
 				group_name = group_name,

@@ -471,6 +471,15 @@ if (nil) then
 	function SobGroup_CaptureSobGroup(group_name, target_group)
 	end
 
+	--- Causes the first valid ship in `group_name` to instantly build the given subsystem.
+	---
+	--- The second param can also be the _type_ of subs, i.e `FighterProduction`, `AdvancedResearch`, etc.
+	---
+	---@param group_name string
+	---@param subs_name_or_type string
+	function SobGroup_CreateSubSystem(group_name, subs_name_or_type)
+	end
+
 	--- Makes ships with salvage ability in `group_name` begin salvaging viabel ships in `target_group`.
 	---
 	---@param group_name string
@@ -502,6 +511,14 @@ if (nil) then
 	---@param attribute "\"buildCost\"" | "\"buildTime\""
 	---@return integer
 	function SobGroup_GetStaticF(ship_type, attribute)
+	end
+
+	--- Returns `1` if any member of `group` hosts the given subsystem, else `0`.
+	---
+	---@param group string
+	---@param subs_name string
+	---@return '0' | '1'
+	function SobGroup_HasSubsystem(group, subs_name)
 	end
 
 	--- Causes ships in `group` to hyperspace to the given position.

@@ -319,7 +319,7 @@ end
 ---
 ---@param to Position
 function modkit_ship:hyperspace(to)
-	SobGroup_HyperspaceTo(to);
+	SobGroup_HyperspaceTo(self.own_group, to);
 end
 
 --- Gets or optionally sets the ship's auto-launch behavior. `1` for auto-launch, `0` for stay-docked manual launching.

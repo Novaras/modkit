@@ -58,6 +58,8 @@ if (modkit_player_proto == nil) then
 	modkit_player_proto = {};
 
 	--- Gets the player's ships (alive ships)
+	---
+	---@return Ship[]
 	function modkit_player_proto:ships()
 		return GLOBAL_SHIPS:allied(self, function (ship)
 			return ship.player.id == %self.id;
@@ -243,7 +245,9 @@ if (modkit_player_proto == nil) then
 		local after = {};
 		for _, opt in option do
 			if (restrict) then
+				print("- restrict: " .. restrict);
 				if (restrict == 0) then
+					print("freedom for " .. self.id .. ", " .. opt);
 					Player_UnrestrictBuildOption(self.id, opt);
 					after[opt] = 0;
 				else
