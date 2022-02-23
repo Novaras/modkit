@@ -36,8 +36,21 @@ if (modkit.MemGroup == nil) then
 		--   NextTick: function() => number
 		-- In addition, the entities will also host the attributes defined
 		-- in custom_attributes.
+		---@class MemGroupInst
+		---@field group_name string
+		---@field _entities table
+		---@field get fun(entity_name: string): any
+		---@field set fun(id, entity): any
+		---@field delete fun(id): nil
+		---@field all fun(): table
+		---@field find fun(): any
+		---@field filter fun(): table
+		---@field shallowCopy fun(): table
+		---@field length fun(): integer
+
+		---@return MemGroupInst
 		_new = function(group_name, custom_attribs)
-			---@type MemGroup
+			---@type MemGroupInst
 			local new_group = {
 				_entities = {},
 				group_name = group_name,
@@ -72,6 +85,11 @@ if (modkit.MemGroup == nil) then
 			---@return table
 			function new_group:filter(predicate)
 				return modkit.table.filter(self._entities, predicate);
+			end
+			function new_group:shallowCopy(new_entities)
+				new_entities = new_entities or self._entities;
+				-- local new_group = modkit.table.clone(self, { override = { _entities = new_entities }});
+				return modkit.table.clone(self, { override = { _entities = new_entities }});
 			end
 			---@return integer
 			function new_group:length()

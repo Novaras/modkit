@@ -46,7 +46,9 @@ if (H_SCHEDULER == nil) then
 
 	--- Calls the supplied function `fn` every `interval` scheduler ticks. Useful to bypass a ships update rate.
 	--- Anything passed into the optional third table parameter `data` will be added to the first and only argument of the callback `fn`.
+	---
 	--- **Note: You can convert seconds to scheduler ticks by dividing the number of seconds by `modkit.scheduler.seconds_per_tick`.**
+	---
 	--- Returns the new event's id (so it can be cleared using `modkit.scheduler.clear`)
 	---
 	---@param interval integer

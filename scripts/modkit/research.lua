@@ -38,6 +38,10 @@ if (modkit.research == nil) then
 		);
 	end
 
+	--- Gets the name of the given `item`, or just returns if given a string.
+	---
+	---@param item table
+	---@return string
 	function research_proto:resolveName(item)
 		if (type(item) == "string") then
 			return item;
