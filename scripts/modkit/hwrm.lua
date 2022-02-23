@@ -249,6 +249,16 @@ if (nil) then
 	function atan2(x, y)
 	end
 
+	--- Returns the remainder after dividing `a` by `b`.
+	---
+	--- i.e: `mod(10, 3) == 1`, since `10 / 3 = 3 remainder 1`
+	---
+	---@param n number
+	---@param m number
+	---@return number
+	function mod(n, m)
+	end
+
 	--- ==== PLAYER STUFF! ====
 
 	--- Returns the current RU amount owned by the given player.
@@ -261,6 +271,22 @@ if (nil) then
 	---@param player_index integer
 	---@param amount integer
 	function Player_SetRU(player_index, amount)
+	end
+
+	--- Returns whether or not this player can research the named research item.
+	---
+	---@param player_index integer
+	---@param item_name string
+	---@return '0'|'1'
+	function Player_CanResearch(player_index, item_name)
+	end
+
+	--- Returns whether or not this player has researched the named research item.
+	---
+	---@param player_index integer
+	---@param item_name string
+	---@return '0'|'1'
+	function Player_HasResearch(player_index, item_name)
 	end
 
 	--- ==== SOBGROUP STUFF! ====
@@ -319,6 +345,19 @@ if (nil) then
 	---@param filter_val string
 	---@return integer
 	function SobGroup_CountByFilterExclude(source_group, filter_key, filter_val)
+	end
+
+	--- Toggles the cloak for all ships in `group`.
+	---
+	---@param group string
+	function SobGroup_CloakToggle(group)
+	end
+
+	--- Returns `1` if all ships in `group` are cloaked, else `0`.
+	---
+	---@param group string
+	---@return '1' | '0'
+	function SobGroup_IsCloaked(group)
 	end
 
 	--- Fills `group_to_fill` with all the ships from `source_group` where the ship's `filter_key` property matches `filter_val`.
@@ -492,7 +531,7 @@ if (nil) then
 	---@param target_group string
 	---@param source_group string
 	---@param subtract_group string
-	function SobGroup_Substract(target_group, source_group, subtract_group)
+	function SobGroup_FillSubstract(target_group, source_group, subtract_group)
 	end
 
 	--- Returns the average health of all ships in `target_group` (as a fraction between 0 and 1).
@@ -636,10 +675,8 @@ if (nil) then
 	---@param target_selection string
 	---@param source_selection string
 	---@param filter_type string
-	---@param value_1 any
-	---@param value_2 any
 	---@return integer
-	function Selection_FilterInclude(target_selection, source_selection, filter_type, value_1, value_2)
+	function Selection_FilterInclude(target_selection, source_selection, filter_type, ...)
 	end
 
 	--- Fills `target_selection` with all values in `source_selection` which do NOT satisfy `filter_type` for `value_1`, and optionally `value_2`
