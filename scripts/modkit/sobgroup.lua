@@ -2,13 +2,47 @@
 -- By: Fear (Novaras)
 
 if (H_SOBGROUP ~= 1) then
+	if (makeStateHandle == nil) then
+		dofilepath("data:scripts/modkit/scope_state.lua");
+	end
+	local state = makeStateHandle();
+	local freshGroupIndex = function ()
+		local current = %state().__group_fresh_index or 1;
+		%state({
+			__group_fresh_index = current + 1
+		});
+
+		return current;
+	end
+
 	--- Creates a new sobgroup if one doesn't exist, then clears the group to ensure the group referenced by the return string is clear.
-	---@param name string The name of the SobGroup to create/clear.
+	---@param name string | nil The name of the SobGroup to create/clear. If `nil`, a unique name is generated
 	---@return string
 	function SobGroup_Fresh(name)
+		if (name == nil) then
+			name = ("_SobGroup_Fresh_" .. %freshGroupIndex());
+		end
 		SobGroup_CreateIfNotExist(name);
 		SobGroup_Clear(name);
 		return name;
+	end
+
+	--- Returns `1` if the given groups are _identical_ (same ships exactly), else `nil`.
+	---
+	---@param group_a string
+	---@param group_b string
+	---@return bool
+	function SobGroup_AreEqual(group_a, group_b)
+		-- print("count: " .. SobGroup_Count(group_a) .. " vs " .. SobGroup_Count(group_b));
+		-- print("ainb: " .. (SobGroup_GroupInGroup(group_a, group_b) or "nil"));
+		-- print("bina: " .. (SobGroup_GroupInGroup(group_b, group_a) or "nil"));
+		if (
+			SobGroup_Count(group_a) == SobGroup_Count(group_b) and
+			SobGroup_GroupInGroup(group_a, group_b) == 1 and
+			SobGroup_GroupInGroup(group_b, group_a) == 1
+		) then
+			return 1;
+		end
 	end
 
 	--- Overwrites `target_group` with the content of `incoming_group`.
