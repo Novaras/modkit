@@ -36,21 +36,8 @@ if (modkit.MemGroup == nil) then
 		--   NextTick: function() => number
 		-- In addition, the entities will also host the attributes defined
 		-- in custom_attributes.
-		---@class MemGroupInst
-		---@field group_name string
-		---@field _entities table
-		---@field get fun(entity_name: string): any
-		---@field set fun(id, entity): any
-		---@field delete fun(id): nil
-		---@field all fun(): table
-		---@field find fun(): any
-		---@field filter fun(): table
-		---@field shallowCopy fun(): table
-		---@field length fun(): integer
-
-		---@return MemGroupInst
 		_new = function(group_name, custom_attribs)
-			---@type MemGroupInst
+			---@class MemGroupInst
 			local new_group = {
 				_entities = {},
 				group_name = group_name,
@@ -58,9 +45,18 @@ if (modkit.MemGroup == nil) then
 			for i, v in custom_attribs do
 				new_group[i] = v;
 			end
+
+			--- Returns the specified entity if it exists.
+			---@param entityID number
+			---@return any
 			function new_group:get(entityID)
 				return self._entities[entityID];
 			end
+			--- Sets the entity with the given id, overriding if already set.
+			---@generic EntityType
+			---@param entityID number
+			---@param entity EntityType
+			---@return EntityType
 			function new_group:set(entityID, entity)
 				if (entity == nil) then
 					entity = {};
@@ -72,20 +68,36 @@ if (modkit.MemGroup == nil) then
 				end
 				return e;
 			end
+			--- Removes the specified entity by the given id.
+			---@param entityID number
 			function new_group:delete(entityID)
 				self._entities[entityID] = nil;
 			end
-			--- Returns all ships in this MemGroup.
+
+			--- Returns all entities in this MemGroup.
+			---@return table
 			function new_group:all()
 				return self._entities;
 			end
+
+			--- Finds the first entity matching the given predicate, or `nil` if not existing.
+			---@param predicate function
+			---@return 'any'|'nil'
 			function new_group:find(predicate)
 				return modkit.table.find(self._entities, predicate);
 			end
+
+			--- Filters the entities by the given predicate, returning a new (potentially empty) table.
+			---@param predicate function
 			---@return table
 			function new_group:filter(predicate)
 				return modkit.table.filter(self._entities, predicate);
 			end
+
+			--- Returns a copy of this group with the existing entities replaced by new collection given. If no new entities are given,
+			--- returns a copy of this group unaltered.
+			---@param new_entities table
+			---@return table
 			function new_group:shallowCopy(new_entities)
 				new_entities = new_entities or self._entities;
 				-- local new_group = modkit.table.clone(self, { override = { _entities = new_entities }});
@@ -97,14 +109,10 @@ if (modkit.MemGroup == nil) then
 			end
 			return new_group;
 		end,
-		-- Create
-		-- 1: group_name: string
-		-- 2: custom_attribs: table<any: any>
-		--
-		-- return: MemGroup
-		--
-		-- 'Soft' creation of group. If the group already exists, the already
-		-- present group is returned instead.
+		--- Creates a new MemGroup, unless it already exists.
+		---@param group_name string
+		---@param custom_attribs? table
+		---@return MemGroupInst
 		Create = function (group_name, custom_attribs)
 			if (modkit.MemGroup._groups[group_name] == nil) then
 				return modkit.MemGroup.ForceCreate(group_name, custom_attribs);
