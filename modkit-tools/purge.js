@@ -26,8 +26,6 @@ const rmReadmes = () => {
 };
 
 (async () => {
-	await rmReadmes();
-
 	const also_tools = (await prompts([
 		{
 			name: `answer`,
@@ -36,8 +34,9 @@ const rmReadmes = () => {
 			initial: true
 		}
 	])).answer;
-	
+
 	if (also_tools) {
+		await rmReadmes();
 		rimraf(`${root}/modkit-tools`, err => console.error(err));
 	}
 })();
