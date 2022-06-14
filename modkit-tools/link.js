@@ -67,7 +67,7 @@ const linkCode = (type) => `addCustomCode(NewShipType, "data:scripts/driver.lua"
 
 	try {
 		if (full_content) {
-			const paths = await globby([path.resolve(__dirname, `ship/**/*.ship`)]);
+			const paths = await globby([`ship/**/*.ship`]);
 			for (const file_path of paths) {
 				const parts = file_path.split(`/`);
 				const target_file = path.resolve(__dirname, `../ship/${parts.slice(-2).join(`/`)}`);
