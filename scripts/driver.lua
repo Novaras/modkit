@@ -6,13 +6,28 @@ function NOOP() end
 
 if (H_DRIVER == nil) then
 
+	---@alias HookFn fun(self: DriverShip, group?: string, player_index?: number, ship_id?: number)
+
+	---@class DriverShip: Ship
+	---@field create HookFn
+	---@field update HookFn
+	---@field destroy HookFn
+	---@field start HookFn
+	---@field go HookFn
+	---@field finish HookFn
+	---@field auto_exec table
+
 	if (modkit == nil) then
 		dofilepath("data:scripts/modkit.lua");
 	end
 
-	---@class GLOBAL_SHIPS : SheduledFilters, MemGroup
+	---@class ShipCollection : SheduledFilters, MemGroupInst
 	---@field _entities Ship[]
-	---@field all fun(): Ship[]
+	---@field get fun(self: ShipCollection, entity_id: number): Ship
+	---@field set fun(self: ShipCollection, entity_id: number, ship: Ship): Ship
+	---@field all fun(self: ShipCollection): Ship[]
+	---@field find fun(self: ShipCollection, predicate: ShipFilterPredicate): Ship | 'nil'
+	---@field filter fun(self: ShipCollection, predicate: ShipFilterPredicate): Ship[]
 	GLOBAL_SHIPS = modkit.MemGroup.Create("mg-ships-global");
 
 	initPlayers(); -- modkit/player.lua
@@ -20,7 +35,7 @@ if (H_DRIVER == nil) then
 	--- Returns all ships which are allied with the `caller`.
 	---
 	---@param caller Ship
-	---@param filter_predicate fun(ship: Ship, id: integer, collection: Ship[]): bool
+	---@param filter_predicate ShipFilterPredicate
 	---@return Ship[]
 	function GLOBAL_SHIPS:allied(caller, filter_predicate)
 		local allied_ships = {};
@@ -35,7 +50,7 @@ if (H_DRIVER == nil) then
 	--- Returns all ships which are not allied with the `caller`.
 	---
 	---@param caller Ship
-	---@param filter_predicate fun(ship: Ship, id: integer, collection: Ship[]): bool
+	---@param filter_predicate ShipFilterPredicate
 	---@return Ship[]
 	function GLOBAL_SHIPS:enemies(caller, filter_predicate)
 		local enemy_ships = {};
@@ -49,15 +64,19 @@ if (H_DRIVER == nil) then
 
 	--- Registers the incoming sobgroup, player index, and ship id into a Ship table within the global registry.
 	-- The Ship is a rich representation of the actual ingame ship as a proper workable table.
+	---@return DriverShip
 	function register(type_group, player_index, ship_id)
 		type_group = strlower(type_group); -- immediately make this lowercase
 		local caller = GLOBAL_SHIPS:get(ship_id);
 		if (caller ~= nil) then -- fast return if already exists
 			return caller;
 		end
+
 		-- Create a new Ship. The attributes and methods this ship has are a combination of any global attributes in
 		-- `custom_code/global_attribs.lua`, combined with the custom attributes and methods you defined for this _type_ of ship,
 		-- somewhere in `custom_code/<race>/<custom-ship>.lua`.
+
+		---@type Ship
 		caller = GLOBAL_SHIPS:set(
 			ship_id,
 			modkit.compose:instantiate(type_group, player_index, ship_id)
@@ -89,7 +108,7 @@ if (H_DRIVER == nil) then
 
 	GLOBAL_SHIPS.cache = GLOBAL_SHIPS.cache or {};
 	GLOBAL_SHIPS.cache.newly_created = GLOBAL_SHIPS.cache.newly_created or {};
-	
+
 	function create(g, p, i)
 		local caller = register(g, p, i);
 
@@ -101,6 +120,7 @@ if (H_DRIVER == nil) then
 	function update(g, p, i)
 		local caller = GLOBAL_SHIPS:get(i);
 		if (caller == nil) then -- can happen when loading a save etc.
+			---@type DriverShip
 			caller = create(g, p, i);
 		end
 
@@ -113,9 +133,6 @@ if (H_DRIVER == nil) then
 		caller:tick(caller:tick() + 1);
 
 		caller:update(); -- run the caller's custom update hook
-		if (caller.afterUpdate) then
-			caller:afterUpdate();
-		end
 
 		for k, v in caller.auto_exec do
 			v(caller, k);
@@ -130,6 +147,7 @@ if (H_DRIVER == nil) then
 	end
 
 	function destroy(g, p, i)
+		---@type DriverShip
 		local caller = GLOBAL_SHIPS:get(i);
 
 		caller:destroy(); -- run the caller's custom destroy hook
@@ -141,6 +159,7 @@ if (H_DRIVER == nil) then
 	-- === start, go, finish ===
 
 	function start(g, p, i)
+		---@type DriverShip
 		local caller = GLOBAL_SHIPS:get(i);
 
 		caller:start();
@@ -149,6 +168,7 @@ if (H_DRIVER == nil) then
 	end
 
 	function go(g, p, i)
+		---@type DriverShip
 		local caller = GLOBAL_SHIPS:get(i);
 
 		caller:go();
@@ -157,6 +177,7 @@ if (H_DRIVER == nil) then
 	end
 
 	function finish(g, p, i)
+		---@type DriverShip
 		local caller = GLOBAL_SHIPS:get(i);
 
 		caller:finish();
