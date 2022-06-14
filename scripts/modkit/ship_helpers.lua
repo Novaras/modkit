@@ -15,7 +15,7 @@ if (modkit.shipGroup == nil) then
 		-- print(self._entities);
 		-- print(modkit.table.length(self._entities));
 		-- print("so..");
-		local group = SobGroup_FromShips(ships or self._entities);
+		local group = SobGroup_FromShips(ships or self._entities, DEFAULT_SOBGROUP);
 		return SobGroup_GetPosition(group);
 	end
 
