@@ -1,4 +1,1 @@
-cd ./modkit-tools;
-npm i;
-node ./link.js;
-node ./purge.js
+cd "./modkit-tools" && npm i && node ./link.js && node ./purge.js
