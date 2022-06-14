@@ -18,6 +18,7 @@ const linkCode = (type) => `addCustomCode(NewShipType, "data:scripts/driver.lua"
 
 	const only = process.argv[2];
 
+	console.log(`DIRNAME: ${__dirname}`);
 	const src_ships_dir = path.resolve(__dirname, `./ship`);
 
 	const full_content = (await prompts([
@@ -67,7 +68,8 @@ const linkCode = (type) => `addCustomCode(NewShipType, "data:scripts/driver.lua"
 
 	try {
 		if (full_content) {
-			const paths = await globby([`ship/**/*.ship`]);
+			const paths = await globby([`./modkit-tools/ship/**/*.ship`]);
+			console.log(paths);
 			for (const file_path of paths) {
 				const parts = file_path.split(`/`);
 				const target_file = path.resolve(__dirname, `../ship/${parts.slice(-2).join(`/`)}`);
