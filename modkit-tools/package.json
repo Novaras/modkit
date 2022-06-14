@@ -9,6 +9,7 @@
   },
   "license": "ISC",
   "dependencies": {
+    "cli-progress": "^3.11.1",
     "degit": "^2.8.4",
     "globby": "^11.0.3",
     "prompts": "^2.4.1",
