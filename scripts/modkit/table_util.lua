@@ -214,8 +214,8 @@ if (modkit.table == nil) then
 	--- Returns a new table which is otherwise a clone of the original.
 	---
 	---@param tbl table
-	---@param custom_key_behaviors { omit: string[], override: table }
-	---@param recurse_stop_depth any
+	---@param custom_key_behaviors? { omit: string[], override: table }
+	---@param recurse_stop_depth? number
 	---@return table
 	function table.clone(tbl, custom_key_behaviors, recurse_stop_depth)
 		recurse_stop_depth = recurse_stop_depth or -1;
