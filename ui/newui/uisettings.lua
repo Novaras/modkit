@@ -1,17 +1,3 @@
---Load expanded options
-dofilepath("data:ui/PlayersPatch_UI_Util.lua")
-
-function GetStanceOrderPath()
-
-	if GetStanceOrderSetting() == 1 then --HWR stance order
-		StanceOrderPath = "DATA:\\UI\\NewUI\\NewTaskbar.lua"
-	else --HW1C stance order
-		StanceOrderPath = "DATA:\\UI\\NewUI\\NewTaskbarHW1C.lua"
-	end
-
-	return StanceOrderPath
-end
-
 -- This file contains all the UIScreens that will be loaded on
 --  startup of the app and on startup of the game.
 
@@ -323,13 +309,13 @@ GameScreens = {
 	
 	{
 		name = "NewTaskbar",
-		filename = GetStanceOrderPath(),
+		filename = "DATA:\\UI\\NewUI\\NewTaskbar.lua",
 		activated = 0,
 		type = "NewTaskbar",
 	},
 	{
 		name = "NewTaskbarRecover",
-		filename = GetStanceOrderPath(),
+		filename = "DATA:\\UI\\NewUI\\NewTaskbar.lua",
 		activated = 0,		
 	},
 	{
