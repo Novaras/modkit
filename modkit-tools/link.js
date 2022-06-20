@@ -69,7 +69,7 @@ const linkCode = (type) => `addCustomCode(NewShipType, "data:scripts/driver.lua"
 
 	try {
 		if (full_content) {
-			const paths = await globby([`./modkit-tools/ship/**/*.ship`]);
+			const paths = await globby([`./modkit-tools/ship/**/*.ship`, `./modkit-tools/resources/**/*.*`]);
 			const progress_bar = new cli_prog.SingleBar({
 				format: `Writing .ship files: [{bar}] {percentage}% | {value}/{total} (ETA: {eta}s)`,
 				clearOnComplete: false,
