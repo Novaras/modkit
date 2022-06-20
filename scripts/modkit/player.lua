@@ -57,6 +57,10 @@ if (modkit_player_proto == nil) then
 	---@field id integer
 	modkit_player_proto = {};
 
+	function modkit_player_proto:shipsGroup()
+		return "Player_Ships" .. self.id;
+	end
+
 	--- Gets the player's ships (alive ships)
 	---
 	---@return Ship[]
