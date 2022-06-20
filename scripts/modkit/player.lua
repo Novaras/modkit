@@ -241,10 +241,12 @@ if (modkit_player_proto == nil) then
 		return Player_IsAlive(self.id) == 1;
 	end
 
-	--- Returns whether or not the player has this subsystem.
-	-- Kinda weird that this exists
-	function modkit_player_proto:hasSubsystem(subsystem)
-		return Player_HasSubsystem(self.id, subsystem);
+	--- Returns whether or not the player has this subsystem on any ship.
+	---
+	---@param subsystem_type string
+	---@return bool
+	function modkit_player_proto:hasSubsystem(subsystem_type)
+		return Player_HasSubsystem(self.id, subsystem_type) == 1;
 	end
 
 	-- === build stuff ===
