@@ -2,7 +2,7 @@ if (modkit == nil) then
 	dofilepath("data:scripts/modkit/table_util.lua");
 end
 
----@type fun(screen_name: string, dropdown_host_el: string)
+---@type fun(screen_name?: string, dropdown_host_el?: string)
 makeStateHandle = makeStateHandle or function (screen_name, dropdown_host_el)
 	screen_name = screen_name or "DefaultStateScreen";
 	dropdown_host_el = dropdown_host_el or "host_dropdown";
