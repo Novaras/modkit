@@ -34,7 +34,7 @@ Then initialise:
 
 ```bash
 cd my-mod
-./init.bat
+init.bat
 ```
 
 When given the multiple choice question, I recommend the first option if starting a new mod:
