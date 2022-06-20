@@ -84,7 +84,7 @@ if (modkit.table == nil) then
 				end
 			end
 		end,
-		---@return 'nil'|'any'
+		---@return any
 		find = function (table, predicate)
 			for i, v in table do
 				if (type(predicate) == "function") then
@@ -242,15 +242,16 @@ if (modkit.table == nil) then
 
 	--- Prints the given `table`, recursively if necessary.
 	---
-	---@param table table
-	---@param label string
-	---@param no_recurse any If non-nil, sub-tables are not printed and their addresses are printed instead
-	function table.printTbl(table, label, no_recurse)
+	---@param tbl table
+	---@param label? string
+	---@param no_recurse? any If non-nil, sub-tables are not printed and their addresses are printed instead
+	function table.printTbl(tbl, label, no_recurse)
 		if (label == nil) then
-			label = tostring(table);
+			---@type string
+			label = tostring(tbl);
 		end
 		local temp_table = {};
-		temp_table[label] = table;
+		temp_table[label] = tbl;
 		_printTbl(temp_table, 0, print, no_recurse);
 	end
 
