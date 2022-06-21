@@ -64,6 +64,9 @@ if (H_DRIVER == nil) then
 
 	--- Registers the incoming sobgroup, player index, and ship id into a Ship table within the global registry.
 	-- The Ship is a rich representation of the actual ingame ship as a proper workable table.
+	---@param type_group string
+	---@param player_index integer
+	---@param ship_id integer
 	---@return DriverShip
 	function register(type_group, player_index, ship_id)
 		type_group = strlower(type_group); -- immediately make this lowercase
@@ -71,10 +74,6 @@ if (H_DRIVER == nil) then
 		if (caller ~= nil) then -- fast return if already exists
 			return caller;
 		end
-
-		-- Create a new Ship. The attributes and methods this ship has are a combination of any global attributes in
-		-- `custom_code/global_attribs.lua`, combined with the custom attributes and methods you defined for this _type_ of ship,
-		-- somewhere in `custom_code/<race>/<custom-ship>.lua`.
 
 		---@type Ship
 		caller = GLOBAL_SHIPS:set(
@@ -109,14 +108,26 @@ if (H_DRIVER == nil) then
 	GLOBAL_SHIPS.cache = GLOBAL_SHIPS.cache or {};
 	GLOBAL_SHIPS.cache.newly_created = GLOBAL_SHIPS.cache.newly_created or {};
 
+	--- The global `create` hook called by all ships correctly linked to modkit.
+	---
+	--- Called **once**, on spawn (construction, spawned by script, etc.)
+	---@param g string The sobgroup containing the callee's squad
+	---@param p integer The player index (id)
+	---@param i integer The ship's unique id
+	---@return nil
 	function create(g, p, i)
 		local caller = register(g, p, i);
 
 		caller:create(); -- run the caller's custom create hook
-
-		return caller;
 	end
 
+	--- The global `update` hook called by all ships correctly linked to modkit.
+	---
+	--- Called **periodically**, with an interval defined in the `addCustomCode` call.
+	---@param g string The sobgroup containing the callee's squad
+	---@param p integer The player index (id)
+	---@param i integer The ship's unique id
+	---@return nil
 	function update(g, p, i)
 		local caller = GLOBAL_SHIPS:get(i);
 		if (caller == nil) then -- can happen when loading a save etc.
@@ -142,10 +153,15 @@ if (H_DRIVER == nil) then
 			-- now the ship is definitely ready
 			GLOBAL_SHIPS.cache.newly_created[i] = caller;
 		end
-
-		return caller;
 	end
 
+	--- The global `destroy` hook called by all ships correctly linked to modkit.
+	---
+	--- Called **once**, on despawn (death, retirement, etc.)
+	---@param g string The sobgroup containing the callee's squad
+	---@param p integer The player index (id)
+	---@param i integer The ship's unique id
+	---@return nil
 	function destroy(g, p, i)
 		---@type DriverShip
 		local caller = GLOBAL_SHIPS:get(i);
@@ -158,31 +174,46 @@ if (H_DRIVER == nil) then
 
 	-- === start, go, finish ===
 
+	--- The global `start` function, called by all custom ability ships correctly linked to modkit.
+	---
+	--- Called **once per ability activation**, at the start of the ability.
+	---@param g string The sobgroup containing the callee's squad
+	---@param p integer The player index (id)
+	---@param i integer The ship's unique id
+	---@return nil
 	function start(g, p, i)
 		---@type DriverShip
 		local caller = GLOBAL_SHIPS:get(i);
 
 		caller:start();
-
-		return caller;
 	end
 
+	--- The global `go` function, called by all custom ability ships correctly linked to modkit.
+	---
+	--- Called **periodically** while the custom ability remains active, with an interval set in the `customCommand` call.
+	---@param g string The sobgroup containing the callee's squad
+	---@param p integer The player index (id)
+	---@param i integer The ship's unique id
+	---@return nil
 	function go(g, p, i)
 		---@type DriverShip
 		local caller = GLOBAL_SHIPS:get(i);
 
 		caller:go();
-
-		return caller;
 	end
 
+	--- The global `finish` function, called by all custom ability ships correctly linked with modkit.
+	---
+	--- Called **once per ability activation**, at the end of the ability.
+	---@param g string The sobgroup containing the callee's squad
+	---@param p integer The player index (id)
+	---@param i integer The ship's unique id
+	---@return nil
 	function finish(g, p, i)
 		---@type DriverShip
 		local caller = GLOBAL_SHIPS:get(i);
 
 		caller:finish();
-
-		return caller;
 	end
 
 	H_DRIVER = 1;
