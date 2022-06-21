@@ -259,7 +259,7 @@ if (modkit.table == nil) then
 		if (self.merge == nil) then
 			print("\n[modkit] Error: table:merge must be called as a method (table:merge vs table.merge)");
 		end
-		merger = merger or function (a, b)
+		merger = merger or function (a, b, k, t)
 			if (type(a) == "table" and type(b) == "table") then
 				return %self:merge(a, b);
 			else
@@ -282,7 +282,7 @@ if (modkit.table == nil) then
 			if (out[k] == nil) then
 				out[k] = v;
 			else
-				out[k] = merger(out[k], v);
+				out[k] = merger(out[k], v, k, out);
 			end
 		end
 		return out;
