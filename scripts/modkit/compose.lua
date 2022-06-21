@@ -72,7 +72,6 @@ if (modkit.compose == nil) then
 				local attribs = proto.attribs;
 				local result = {};
 				if (attribs) then
-					result = attribs;
 					if (type(attribs) == "function") then
 						result = attribs(%type_group, %player_index, %id);
 					end
@@ -82,33 +81,34 @@ if (modkit.compose == nil) then
 			end,
 			{}
 		);
-		
+
 		local static = self._cache[ship_type] or modkit.table.reduce(
 			source,
 			function (acc, proto)
 				local hooks = %self._lifetime_hooks;
-				proto.attribs = nil;
 
 				return modkit.table:merge(
 					acc,
 					proto,
 					function (a, b, k)
-						if (type(a) == "table" and type(b) == "table") then
-							return modkit.table:merge(a, b);
-						else
-							if (modkit.table.includesValue(%hooks, k)) then
-								if (a == nil) then
-									return b;
-								else
-									-- we want lifetime hooks to stack instead of being overwritten:
-									local old_fn = a;
-									return function (self)
-										%old_fn(self); -- current stack
-										%b(self); -- new guy
-									end
-								end
+						if (k ~= "attribs") then
+							if (type(a) == "table" and type(b) == "table") then
+								return modkit.table:merge(a, b);
 							else
-								return (b or a);
+								if (modkit.table.includesValue(%hooks, k)) then
+									if (a == nil) then
+										return b;
+									else
+										-- we want lifetime hooks to stack instead of being overwritten:
+										local old_fn = a;
+										return function (self)
+											%old_fn(self); -- current stack
+											%b(self); -- new guy
+										end
+									end
+								else
+									return (b or a);
+								end
 							end
 						end
 					end

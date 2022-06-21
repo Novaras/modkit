@@ -68,7 +68,7 @@ if (H_DRIVER == nil) then
 	---@param player_index integer
 	---@param ship_id integer
 	---@return DriverShip
-	function register(type_group, player_index, ship_id)
+	register = register or function (type_group, player_index, ship_id)
 		type_group = strlower(type_group); -- immediately make this lowercase
 		local caller = GLOBAL_SHIPS:get(ship_id);
 		if (caller ~= nil) then -- fast return if already exists
@@ -101,7 +101,7 @@ if (H_DRIVER == nil) then
 
 	-- === load, create, update, destroy ===
 
-	function load()
+	load = load or function()
 		return NOOP;
 	end
 
@@ -114,11 +114,13 @@ if (H_DRIVER == nil) then
 	---@param g string The sobgroup containing the callee's squad
 	---@param p integer The player index (id)
 	---@param i integer The ship's unique id
-	---@return nil
-	function create(g, p, i)
+	---@return DriverShip
+	create = create or function(g, p, i)
 		local caller = register(g, p, i);
 
 		caller:create(); -- run the caller's custom create hook
+
+		return caller;
 	end
 
 	--- The global `update` hook called by all ships correctly linked to modkit.
@@ -127,13 +129,18 @@ if (H_DRIVER == nil) then
 	---@param g string The sobgroup containing the callee's squad
 	---@param p integer The player index (id)
 	---@param i integer The ship's unique id
-	---@return nil
-	function update(g, p, i)
+	---@return DriverShip
+	update = update or function(g, p, i)
 		local caller = GLOBAL_SHIPS:get(i);
-		if (caller == nil) then -- can happen when loading a save etc.
+		if (caller == nil or caller.own_group == nil) then -- can happen when loading a save etc.
 			---@type DriverShip
 			caller = create(g, p, i);
 		end
+
+		-- if (caller.own_group == nil) then
+		-- 	print("og: " .. (caller.own_group or "nil"));
+		-- 	modkit.table.printTbl(caller);
+		-- end
 
 		local engine_player_index = SobGroup_GetPlayerOwner(caller.own_group);
 		if (caller.player.id ~= engine_player_index and engine_player_index >= 0 and engine_player_index < 8) then
@@ -153,6 +160,8 @@ if (H_DRIVER == nil) then
 			-- now the ship is definitely ready
 			GLOBAL_SHIPS.cache.newly_created[i] = caller;
 		end
+
+		return caller;
 	end
 
 	--- The global `destroy` hook called by all ships correctly linked to modkit.
@@ -161,15 +170,16 @@ if (H_DRIVER == nil) then
 	---@param g string The sobgroup containing the callee's squad
 	---@param p integer The player index (id)
 	---@param i integer The ship's unique id
-	---@return nil
-	function destroy(g, p, i)
+	---@return DriverShip
+	destroy = destroy or function(g, p, i)
 		---@type DriverShip
 		local caller = GLOBAL_SHIPS:get(i);
 
 		caller:destroy(); -- run the caller's custom destroy hook
 
 		GLOBAL_SHIPS:delete(i);
-		-- nil return
+		
+		return caller;
 	end
 
 	-- === start, go, finish ===
@@ -180,12 +190,14 @@ if (H_DRIVER == nil) then
 	---@param g string The sobgroup containing the callee's squad
 	---@param p integer The player index (id)
 	---@param i integer The ship's unique id
-	---@return nil
-	function start(g, p, i)
+	---@return DriverShip
+	start = start or function(g, p, i)
 		---@type DriverShip
 		local caller = GLOBAL_SHIPS:get(i);
 
 		caller:start();
+
+		return caller;
 	end
 
 	--- The global `go` function, called by all custom ability ships correctly linked to modkit.
@@ -194,12 +206,14 @@ if (H_DRIVER == nil) then
 	---@param g string The sobgroup containing the callee's squad
 	---@param p integer The player index (id)
 	---@param i integer The ship's unique id
-	---@return nil
-	function go(g, p, i)
+	---@return DriverShip
+	go = go or function(g, p, i)
 		---@type DriverShip
 		local caller = GLOBAL_SHIPS:get(i);
 
 		caller:go();
+
+		return caller;
 	end
 
 	--- The global `finish` function, called by all custom ability ships correctly linked with modkit.
@@ -208,12 +222,14 @@ if (H_DRIVER == nil) then
 	---@param g string The sobgroup containing the callee's squad
 	---@param p integer The player index (id)
 	---@param i integer The ship's unique id
-	---@return nil
-	function finish(g, p, i)
+	---@return DriverShip
+	finish = finish or function(g, p, i)
 		---@type DriverShip
 		local caller = GLOBAL_SHIPS:get(i);
 
 		caller:finish();
+
+		return caller;
 	end
 
 	H_DRIVER = 1;
