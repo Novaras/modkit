@@ -48,7 +48,7 @@ end
 
 --- Sets the HP of this ship to the given `hp` fraction (between 0 and 1)
 ---
----@param hp number
+---@param hp? number
 ---@return number
 function modkit_ship:HP(hp)
 	if (hp) then
@@ -90,7 +90,7 @@ end
 --- Returns the ship's current position (or the center position of the ship's batch squad).
 --- If `pos` is supplied, it will set the position of the ship instantly.
 ---
----@param pos Position
+---@param pos? Position
 ---@return Position
 function modkit_ship:position(pos)
 	if (pos) then
@@ -124,10 +124,11 @@ end
 
 --- Sets the damage multiplier for this ship.
 ---
---- The multiplier is always relative to 1 (its reset every time you call this fn), unless `relative` is non-nil.
+--- The multiplier is always relative to 1 (its reset every time you call this fn), unless `relative` is non-nil,
+--- meaning the function is being called _relative_ to its last value (instead of 1).
 ---
 ---@param mult number
----@param relative bool
+---@param relative? bool
 ---@return number # the current dmg mult after being set
 function modkit_ship:damageMult(mult, relative)
 	if (mult) then
@@ -375,7 +376,11 @@ end
 ---@param docked? Ship
 ---@return nil
 function modkit_ship:launch(docked)
-	return SobGroup_Launch(docked.own_group, self.own_group);
+	local group_to_launch = self.player:shipsGroup();
+	if (docked) then
+		group_to_launch = docked.own_group;
+	end
+	return SobGroup_Launch(group_to_launch, self.own_group);
 end
 
 --- Returns the 3-character race string of the ship.
