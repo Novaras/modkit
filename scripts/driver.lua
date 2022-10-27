@@ -67,7 +67,7 @@ if (H_DRIVER == nil) then
 	---@param type_group string
 	---@param player_index integer
 	---@param ship_id integer
-	---@return DriverShip
+	---@return Ship
 	register = register or function (type_group, player_index, ship_id)
 		type_group = strlower(type_group); -- immediately make this lowercase
 		local caller = GLOBAL_SHIPS:get(ship_id);
