@@ -21,6 +21,14 @@ if (modkit.compose == nil) then
 		}
 	};
 
+	--- Adds a 'base' prototype, which will affect all ship types not included in `type_filter`.
+	---
+	--- All the bases are availble in `_base`; when a ship's final definition is constructed all the recorded
+	--- bases will be overlayed to produce the final base. The specific prototypes for individual ship types
+	--- are overlayed on top of the final base.
+	---
+	---@param proto table
+	---@param type_filter string[]
 	function compose:addBaseProto(proto, type_filter)
 		self._base[modkit.table.length(self._base) + 1] = {
 			proto = proto,
@@ -28,20 +36,31 @@ if (modkit.compose == nil) then
 		};
 	end
 
+	--- Defines a specific ship type's properties & methods.
+	---@param type string
+	---@param proto table
 	function compose:addShipProto(type, proto)
 		self._ship[type] = proto;
 	end
 
-	-- this function is the one which constructs ships out of prototypes
-	-- it runs every time a new ship is created!
-	---@param type_group string
-	---@param player_index? integer
-	---@param id? integer
-	---@param type_override? string
+	--- **Returns a new `Ship` of the given type. This `Ship` object is a rich representation of the actual ship ingame.**
+	--- 
+	--- ---
+	---
+	--- The definition of a specific type of `Ship` object is a composition of any base prototypes supplied via `addBaseProto`,
+	--- which is finally overlayed with any specific ship type definition for the given `ship_type` via `addShipProto`.
+	---
+	--- Normal usage of modkit produces `Ship` entities where `sobgroup` and `ship_type` are the same (the group name and the ship type are the same string).
+	--- This is because the lifetime hooks `CustomGroup` value is always the ship's type string.
+	---
+	---@param sobgroup string A SobGroup containing the ship(/squad) to link
+	---@param player_index? integer The index of the player this ship belongs to
+	---@param id? integer The ID of the ship (availble in the `create`/`update`/`destroy` hooks as linked via `addCustomCode` in the `.ship` file)
+	---@param ship_type? string The ship's type (e.g `'kus_scout'`)
 	---@return Ship
-	function compose:instantiate(type_group, player_index, id, type_override)
+	function compose:instantiate(sobgroup, player_index, id, ship_type)
 		-- print("instantiate run for " .. type_group .. "(pid: " .. player_index .. ")");
-		local ship_type = type_override or type_group;
+		local ship_type = ship_type or sobgroup;
 
 		local base_protos = modkit.table.map(
 			modkit.table.filter(
@@ -73,7 +92,7 @@ if (modkit.compose == nil) then
 				local result = {};
 				if (attribs) then
 					if (type(attribs) == "function") then
-						result = attribs(%type_group, %player_index, %id);
+						result = attribs(sobgroup, %player_index, %id);
 					end
 				end
 
