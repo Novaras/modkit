@@ -56,56 +56,25 @@ You can name these files however you like.
 An example script, which heals Taiidan Field Frigates by 1/20 of their HP every `update` call (1s by default):
 
 ```lua
--- scripts/custom_code/my_script.lua:
-
--- here, we define what properties a field frigate has in-memory
--- the 'prototype' is basically our own custom definition of a field frigate
-
-tai_fields_prototype = {
-	foo = 10 -- we can assign a custom property 'foo' that all field frigates will have
-};
-
--- we can hook up methods to our field frigates:
-function tai_fields_prototype:doSomething()
-	-- do something...
-end
-
--- Most importantly, we can provide custom behavior for the four hooks as we please:
--- load, create, update, and destroy
-
--- akin to the classic 'Update_Tai_FieldFrigate()
-function tai_fields_prototype:update() 
-	-- 'self' refers to the ship which called its 'update' hook
-
-	-- new_hp = the smaller of (current health + 0.05) or 1
-	local new_hp = min(self:HP() + (1/20), 1);
-	self:HP(new_hp); -- set the hp to new_hp
-
-	print(self.foo); -- we can access the 'foo' property we defined
-end
-
--- hook our definition up to the ship type
-modkit.compose:addShipProto("tai_fieldfrigate", tai_fields_prototype);
-```
-
-If we boil it down and remove the comments, we can see modkit code is extremely concise and expressive:
-
-```lua
--- scripts/custom_code/my_script.lua:
+-- scripts/custom_code/field_frig_code.lua:
 
 tai_fields_prototype = {};
 
+-- define the update method (akin to classic `Update_Tai_FieldFrigate`)
 function tai_fields_prototype:update()
-	local new_hp = min(self:HP() + (1/20), 1);
-	self:HP(new_hp);
+	local new_hp = min(self:HP() + (1/20), 1); -- new_hp = smaller of (current hp + 1/20) or 1 [so we don't exceed 1]
+	self:HP(new_hp); -- set this ship's hp to new_hp
 end
 
+-- link this definition for ships of type "tai_fieldfrigate"
 modkit.compose:addShipProto("tai_fieldfrigate", tai_fields_prototype);
 ```
 
 **This is now a fully working mod!**
 
 This setup process is much faster than extracting big files etc., and the amount of tooling in addition to the large library make modkit a great option for any new mod author!
+
+We don't need to worry about editing the `.ship` file or anything - the setup process earlier should already have linked field frigates to modkit for you.
 
 ## Contributing to modkit
 
