@@ -53,9 +53,9 @@ if (H_SCHEDULER == nil) then
 	---
 	---@param interval integer
 	---@param fn function
-	---@param offset integer
-	---@param data table
-	---@return integer
+	---@param offset integer?
+	---@param data table?
+	---@return integer|nil
 	function scheduler:every(interval, fn, offset, data)
 		if (interval == nil or fn == nil) then
 			return nil;
@@ -116,10 +116,10 @@ if (H_SCHEDULER == nil) then
 	end
 
 	---WIP
-	---@param delay integer
 	---@param fn fun()
-	---@param data any
-	function scheduler:once(delay, fn, data)
+	---@param delay integer
+	---@param data any?
+	function scheduler:once(fn, delay,  data)
 		local fire_at = self.tick + delay;
 
 		local wrapper = function (event)
