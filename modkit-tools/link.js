@@ -82,7 +82,7 @@ const linkCode = (type) => `addCustomCode(NewShipType, "data:scripts/driver.lua"
 				progress_bar.update(index);
 
 				/**
-				 * parts: `['.', '<ship|resources>', '<ship_name>', '<ship_name'>.<ext>]`
+				 * parts: `['.', 'modkit-tools', '<ship|resources>', '<ship_name>', '<ship_name'>.<ext>]`
 				 * @type string[]
 				 */
 				const parts = file_path.split(`/`);
@@ -112,7 +112,7 @@ const linkCode = (type) => `addCustomCode(NewShipType, "data:scripts/driver.lua"
 					}
 				}
 				
-				if (parts[1] === 'ship') {
+				if (parts[2] === 'ship') {
 					await fs.appendFile(target_file, `\n\n${linkCode(parts.slice(-1)[0].split(`.`)[0])}`);
 				}
 			}
