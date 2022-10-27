@@ -81,6 +81,10 @@ const linkCode = (type) => `addCustomCode(NewShipType, "data:scripts/driver.lua"
 			for (const [index, file_path] of paths.entries()) {
 				progress_bar.update(index);
 
+				/**
+				 * parts: `['.', '<ship|resources>', '<ship_name>', '<ship_name'>.<ext>]`
+				 * @type string[]
+				 */
 				const parts = file_path.split(`/`);
 				const target_file = path.resolve(__dirname, `../ship/${parts.slice(-2).join(`/`)}`);
 				const target_dir = path.resolve(__dirname, `../ship/${parts.slice(-2, -1).join(`/`)}`);
@@ -107,7 +111,10 @@ const linkCode = (type) => `addCustomCode(NewShipType, "data:scripts/driver.lua"
 						console.error(err);
 					}
 				}
-				await fs.appendFile(target_file, `\n\n${linkCode(parts.slice(-1)[0].split(`.`)[0])}`);
+				
+				if (parts[1] === 'ship') {
+					await fs.appendFile(target_file, `\n\n${linkCode(parts.slice(-1)[0].split(`.`)[0])}`);
+				}
 			}
 			rimraf.sync(path.resolve(__dirname, `/ship`));
 			progress_bar.stop();
