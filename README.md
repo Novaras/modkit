@@ -82,4 +82,4 @@ Firstly, feel free to create issues: https://github.com/Novaras/modkit/issues
 
 You can also fork the repo and make pull requests.
 
-Talk to me on [Discord](https://discord.gg/homeworld) if you want to contribute directly to modkit (or just ask me anything :+1:). 
+Talk to me on [Discord](https://discord.gg/homeworld) if you want to contribute directly to modkit (or just ask me (Fear) anything :+1:). 
