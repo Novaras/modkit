@@ -51,6 +51,8 @@ scripts/
 
 You can name these files however you like.
 
+## Example
+
 An example script, which heals Taiidan Field Frigates by 1/20 of their HP every `update` call (1s by default):
 
 ```lua
