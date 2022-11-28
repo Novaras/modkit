@@ -31,3 +31,14 @@ function Universe_GetPlayerShips(player)
 	end);
 	return ships;
 end
+
+--- Unbinds any previously bound functions, then binds to the supplied function.
+---
+---@param key number
+---@param fn_name? string
+function UI_ForceBindKeyEvent(key, fn_name)
+	UI_UnBindKeyEvent(key);
+	if (fn_name) then
+		UI_BindKeyEvent(key, fn_name);
+	end
+end

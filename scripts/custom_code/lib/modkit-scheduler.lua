@@ -1,3 +1,4 @@
+dofilepath("data:scripts/modkit/console.lua");
 
 ---@class SchedulerAttribs
 ---@field init 'nil'|'1'
@@ -114,6 +115,10 @@ end
 function modkit_scheduler_proto:update()
 	self:init();
 	modkit.scheduler:update();
+
+	if (mod(self:tick(), 11) == 0) then
+		--consoleLog("tick is " .. tostring(self:tick()));
+	end
 end
 
 modkit.compose:addShipProto("modkit_scheduler", modkit_scheduler_proto);

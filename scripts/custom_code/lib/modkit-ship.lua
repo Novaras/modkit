@@ -394,14 +394,7 @@ end
 -- === Attack family queries ===
 
 function modkit_ship:attackFamily()
-	if (attackFamily == nil) then
-		dofilepath("data:scripts/familylist.lua");
-	end
-	for i, family in attackFamily do
-		if (SobGroup_AreAnyFromTheseAttackFamilies(self.own_group, family.name) == 1) then
-			return strlower(family.name);
-		end
-	end
+	return SobGroup_GetFirstAttackFamily(self.own_group);
 end
 
 ---@return bool

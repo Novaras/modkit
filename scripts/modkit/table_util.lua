@@ -127,6 +127,30 @@ if (modkit.table == nil) then
 			table[modkit.table.length(table) + 1] = value;
 			return table;
 		end,
+		pop = function (table)
+			local original = table[modkit.table.length(table)];
+			local out = {};
+			for k, v in table do
+				if (k ~= modkit.table.firstKey(table)) then
+					out[k] = v;
+				end
+			end
+			table = out;
+			return v;
+		end,
+		shift = function (tbl)
+			local v = tbl[modkit.table.firstKey(tbl)];
+			tbl[modkit.table.firstKey(tbl)] = nil;
+			return v;
+		end,
+		unshift = function (tbl, value)
+			local out = {};
+			modkit.table.push(out, value);
+			for k, v in tbl do
+				out[k + 1] = v;
+			end
+			return out;
+		end,
 		firstKey = function (tbl)
 			local lowest_k = modkit.table.length(tbl); -- highest k
 			for k, v in tbl do
@@ -179,9 +203,19 @@ if (modkit.table == nil) then
 		end,
 
 		slice = function (tbl, i, j)
+			j = j or modkit.table.length(tbl);
 			local out = {};
 			for index = i, j do
 				out[index] = tbl[index];
+			end
+			return out;
+		end,
+
+		reverse = function (tbl)
+			local out = {};
+			local l = modkit.table.length(tbl);
+			for i = l, 0, -1 do
+				out[i] = tbl[l - i];
 			end
 			return out;
 		end
