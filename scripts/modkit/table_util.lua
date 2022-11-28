@@ -279,14 +279,23 @@ if (modkit.table == nil) then
 	---@param tbl table
 	---@param label? string
 	---@param no_recurse? any If non-nil, sub-tables are not printed and their addresses are printed instead
-	function table.printTbl(tbl, label, no_recurse)
-		if (label == nil) then
-			---@type string
-			label = tostring(tbl);
-		end
+	---@param output_fn? fun(...: any[]): nil
+	---@param no_label? nil|1
+	function table.printTbl(tbl, label, no_recurse, output_fn, no_label)
 		local temp_table = {};
-		temp_table[label] = tbl;
-		_printTbl(temp_table, 0, print, no_recurse);
+
+		if (no_label == nil) then
+			if (label == nil) then
+				---@type string
+				label = tostring(tbl);
+			end
+	
+			temp_table[label] = tbl;
+		else
+			temp_table = tbl;
+		end
+		
+		_printTbl(temp_table, 0, output_fn or print, no_recurse);
 	end
 
 	function table:merge(tbl_a, tbl_b, merger)
