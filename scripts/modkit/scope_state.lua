@@ -14,10 +14,9 @@ makeStateHandle = makeStateHandle or function (screen_name, dropdown_host_el)
 
 	return function(new_state, custom_key_behaviors, overwrite)
 		UI_SelectDropDownListboxItemIndex(%screen_name, %dropdown_host_el, 0);
-		-- print("CURRENT UI_STR STATE:");
-		-- print(UI_GetDropdownListBoxSelectedCustomDataString(%screen_name, %dropdown_host_el) or "{}");
+		local ui_str = UI_GetDropdownListBoxSelectedCustomDataString(%screen_name, %dropdown_host_el);
 
-		local current_state = dostring("return " .. (UI_GetDropdownListBoxSelectedCustomDataString(%screen_name, %dropdown_host_el) or "{}"));
+		local current_state = dostring("return " .. (ui_str or "{}"));
 
 		if (new_state) then
 			UI_ClearDropDownListbox(%screen_name, %dropdown_host_el);
@@ -50,7 +49,7 @@ makeStateHandle = makeStateHandle or function (screen_name, dropdown_host_el)
 				end
 			end
 
-			local state_str = asStr(current_state, asStr);
+			local state_str = gsub(asStr(current_state, asStr), ':', "=");
 			UI_AddDropDownListboxItem(%screen_name, %dropdown_host_el, "_", "", 0, state_str);
 		end
 
