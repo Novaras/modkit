@@ -19,6 +19,7 @@ dofilepath("data:leveldata/multiplayer/lib/strikecraftgamemode.lua")
 dofilepath("data:leveldata/multiplayer/lib/modkit-scheduler.lua")
 dofilepath("data:leveldata/multiplayer/lib/modkit-bindkeys.lua")
 dofilepath("data:leveldata/multiplayer/lib/modkit-textcapture.lua")
+dofilepath("data:leveldata/multiplayer/lib/modkit-hoist-memgroups.lua")
 
 dofilepath("data:scripts/modkit/util.lua");
 
@@ -81,6 +82,7 @@ function timer_updating()
 				Rule_AddInterval("modkit_scheduler_spawn", 0.1);
 				Rule_AddInterval("modkit_bindkeys", 0.1);
 				Rule_AddInterval("modkit_poll_text_capture", 0.5);
+				Rule_AddInterval("modkit_hoist_memgroups", 2);
 
 
 				if nocruisers == 1 then
