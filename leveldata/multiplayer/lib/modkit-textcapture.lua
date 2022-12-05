@@ -47,19 +47,8 @@ screens_to_disable = {
 ---@class CommandFn
 ---@field params? ParamConfig[]
 ---@field flags? string[]
+---@field description? string
 ---@field fn fun(params: any[], words: string[], flags: any[], line: string): any
-
-function intToPlayer()
-	return function (value)
-		return GLOBAL_PLAYERS:get(value);
-	end
-end
-
-TRANSFORMS = {
-	intToPlayer = function (value)
-		return GLOBAL_PLAYERS:get(value);
-	end
-};
 
 ---@alias ParamConfigGenerator fun(names: string[], default: any): ParamConfig
 
@@ -139,6 +128,7 @@ PARAMS = {
 ---@type CommandFn[]
 COMMANDS = {
 	spawn = {
+		description = "Spawns ships for a player",
 		params = {
 			player = PARAMS.intToPlayer({ 'p', 'player' }, 0),
 			count = PARAMS.int({ 'c', 'count', 'n' }, 1),
@@ -172,6 +162,7 @@ COMMANDS = {
 		end,
 	},
 	attack = {
+		description = "Causes all of one player's ships to attack all of another player's ships.",
 		params = {
 			attacker = PARAMS.intToPlayer({ 'a', 'atk', 'attacker' }, 0),
 			target = PARAMS.int({ 't', 'trg', 'target' }),
@@ -191,6 +182,7 @@ COMMANDS = {
 		end
 	},
 	fight = {
+		description = "Causes the given players to attack eachother.",
 		fn = function (_, words)
 			local player_a = words[2];
 			local player_b = words[3];
@@ -202,6 +194,7 @@ COMMANDS = {
 		end,
 	},
 	research = {
+		description = "Grants, starts, or cancels research for a player.",
 		params = {
 			player = PARAMS.intToPlayer({ 'p', 'player' }, 0),
 			research_name = PARAMS.str({ 'r', 'research', 't', 'type', 'name' })
@@ -234,6 +227,7 @@ COMMANDS = {
 		end
 	},
 	ru = {
+		description = "Grants (adds) or sets RU for a player.",
 		params = {
 			player = PARAMS.intToPlayer({ 'p', 'player' }, 0),
 			amount = PARAMS.int({ 'n', 'v', 'val', 'value', 'amount' })
@@ -246,17 +240,18 @@ COMMANDS = {
 			if (amount == nil) then
 				consoleLog("ru: missing require param 'val={amount}' i.e 'value=1000'");
 			else
-				if (verb == 'give') then
+				if (verb == 'grant') then
 					Player_SetRU(player.id, Player_GetRU(player.id) + amount);
 				elseif (verb == 'set') then
 					Player_SetRU(player.id, amount);
 				else
-					consoleLog("ru: invalid argument 1 'verb': 'ru {give|set}', i.e 'ru give val=1000 p=0'");
+					consoleLog("ru: invalid argument 1 'verb': 'ru {grant|set}', i.e 'ru grant val=1000 p=0'");
 				end
 			end
 		end,
 	},
 	kill = {
+		description = "Kills a player.",
 		fn = function (_, words)
 			local player_index = tonumber(words[2]);
 			if (player_index) then
@@ -267,6 +262,7 @@ COMMANDS = {
 		end,
 	},
 	destroy = {
+		description = "Destroys ships.",
 		params = {
 			type = PARAMS.str({ 't', 'type' }),
 			family = PARAMS.str({ 'f', 'family' }),
@@ -282,16 +278,19 @@ COMMANDS = {
 		end,
 	},
 	gametime = {
+		description = "Prints the current gametime.",
 		fn = function ()
 			consoleLog("gametime is " .. Universe_GameTime());
 		end,
 	},
 	log = {
+		description = "Logs (echos) the supplied string.",
 		fn = function (line)
 			consoleLog(strsub(line, 4, strlen(line)));
 		end,
 	},
 	gamespeed = {
+		description = "Sets the game speed to a multiplier of the default speed.",
 		fn = function (_, words)
 			local stateHnd = makeStateHandle();
 			local speed = words[2];
@@ -307,6 +306,7 @@ COMMANDS = {
 		end,
 	},
 	move = {
+		description = "Causes ships to move (or teleport) to a position.",
 		params = {
 			type = PARAMS.str({ 't', 'type' }),
 			family = PARAMS.str({ 'f', 'family '}),
@@ -338,6 +338,7 @@ COMMANDS = {
 		end,
 	},
 	foreach = {
+		description = "Runs a command or Lua string for a ship selection.",
 		params = {
 			lua = {
 				names = { "lua" },
@@ -402,15 +403,17 @@ COMMANDS = {
 		end,
 	},
 	hp = {
+		description = "Sets the HP (as a fraction [0..1]) for ships.",
 		fn = function (_, words, _, line)
 			local str = "foreach " .. strsub(line, 3, strlen(line)) .. " lua=SobGroup_SetHealth($g, " .. words[2] .. ");";
-			consoleLog("parsed to: " .. str);
+			-- consoleLog("parsed to: " .. str);
 			parseCommand(str);
 		end,
 	},
 	swap = {
+		description = "Swaps all the ships of two given players.",
 		fn = function (_, words)
-			consoleLog("swap?");
+			-- consoleLog("swap?");
 
 			if (words[2] == nil or words[3] == nil) then
 				consoleLog("swap: missing one or both required arguments 'swap {player-1} {player-2}' i.e 'swap 0 1'");
@@ -443,6 +446,25 @@ COMMANDS = {
 
 			SobGroup_Despawn(temp_group);
 			SobGroup_SetHealth(temp_group, 0);
+		end
+	},
+	help = {
+		description = "Prints help for a given command.",
+		fn = function (_, words)
+			local cmd = COMMANDS[words[2]];
+
+			if (cmd) then
+				consoleLog("command " .. words[2]);
+				consoleLog(cmd.description);
+				consoleLog("params");
+				for param, conf in (cmd.params or {}) do
+					consoleLog("\t" .. param .. ": [ " .. strimplode(conf.names, ", ") .. " ]");
+				end
+				consoleLog("flags");
+				for _, flag in (cmd.flags or {}) do
+					consoleLog("\t" .. flag);
+				end
+			end
 		end
 	},
 };
@@ -497,10 +519,10 @@ function parseParams(line, params)
 			if (s) then
 				print("OK GOT CAPTURE FROM " .. s .. " TO " .. e .. " (label is " .. label .. ")");
 				local capture = strsub(line, s, e);
-				consoleLog("\tcapture: " .. capture);
+				-- consoleLog("\tcapture: " .. capture);
 				local parts = strsplit(capture, "=", 1);
 				value = parts[2];
-				consoleLog("\t\tval = " .. tostring(value));
+				-- consoleLog("\t\tval = " .. tostring(value));
 				print("parsed val for name " .. name .. " as " .. tostring(value));
 			end
 		end
@@ -514,8 +536,8 @@ function parseParams(line, params)
 		res[label] = value;
 	end
 
-	consoleLog("parseParams:");
-	consoleLog("\tline: " .. line);
+	-- consoleLog("parseParams:");
+	-- consoleLog("\tline: " .. line);
 	modkit.table.printTbl(res, "res");
 
 	return res;
