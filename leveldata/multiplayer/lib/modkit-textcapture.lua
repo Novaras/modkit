@@ -298,7 +298,7 @@ COMMANDS = {
 			if (speed) then
 				local existing_stack = stateHnd().ui_scope_exec;
 				stateHnd({
-					ui_scope_exec = modkit.table.push(existing_stack or {}, 'SetTurboSpeed(' .. speed .. ")");
+					ui_scope_exec = modkit.table.push(existing_stack or {}, 'SetTurboSpeed(1); SetTurboSpeed(' .. speed .. ")");
 				});
 			else
 				consoleLog("gamespeed: missing required argument 1 'speed': gamespeed {speed} i.e: 'gamespeed 8'");
