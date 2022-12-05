@@ -239,6 +239,15 @@ if (modkit_player_proto == nil) then
 		return Player_Kill(self.id);
 	end
 
+	--- Causes all ships of this player to attack all ships of another player.
+	---
+	---@param other Player
+	function modkit_player_proto:attack(other)
+		for _, ship in self:ships() do
+			ship:attack(other:ships());
+		end
+	end
+
 	--- Whether or not the player is alive.
 	---@return bool
 	function modkit_player_proto:isAlive()
