@@ -61,3 +61,10 @@ function strcharset(str, index, replacement)
 
 	return pre .. replacement .. post;
 end
+
+function strimplode(arr, delimeter)
+	delimeter = delimeter or "";
+	return modkit.table.reduce(arr, function (acc, word)
+		return acc .. word .. %delimeter;
+	end, "");
+end
