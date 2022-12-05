@@ -234,6 +234,7 @@ if (H_SOBGROUP ~= 1) then
 	---@param vol_type? string
 	---@return string
 	function Volume_Fresh(name, position, radius, vol_type)
+		name = name or ("_Volume_Fresh_" .. %freshGroupIndex());
 		position = position or { 0, 0, 0 };
 		radius = radius or 10;
 		vol_type = vol_type or "sphere";
