@@ -49,7 +49,7 @@ makeStateHandle = makeStateHandle or function (screen_name, dropdown_host_el)
 				end
 			end
 
-			local state_str = gsub(asStr(current_state, asStr), ':', "=");
+			local state_str = asStr(current_state, asStr);
 			UI_AddDropDownListboxItem(%screen_name, %dropdown_host_el, "_", "", 0, state_str);
 		end
 

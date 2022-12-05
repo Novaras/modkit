@@ -17,4 +17,14 @@ end
 
 function onHide()
 	print("HIDE CONSOLE SCREEN");
+
+	local hnd = makeStateHandle();
+
+	local ui_exec = hnd().ui_scope_exec;
+	if (ui_exec) then
+		for i, v in ui_exec do
+			print(i .. ": " .. tostring(v));
+			dostring(v);
+		end
+	end
 end
