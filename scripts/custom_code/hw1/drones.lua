@@ -191,9 +191,11 @@ function drones_proto:positionLaunchedDrones()
 	local position_index = 1;
 	for _, drone in self.live_drones do
 		if (drone:docked(self) == nil) then
+			drone:speed(1);
 			local pos = self:droneParadePos(drone);
 			if (drone:attacking()) then
-				if (drone:distanceTo(pos) > 100) then
+				if (drone:distanceTo(pos) > 200) then
+					drone:speed(5);
 					drone:move(pos);
 				end
 			else
@@ -210,13 +212,13 @@ end
 
 function drones_proto:update()
 	if (self:tick() > 1 and self:autoLaunch() == 0) then
-		-- self:print("autolaunching");
+		-- print("autolaunch");
 		self:autoLaunch(ShipHoldStayDockedAlways);
 	end
 	if (self:tick() >= 3) then -- some time to undock
 		-- self:print("update tick, ready?: " .. (self:frigateReady() or "nil"));
 		if (self:frigateReady()) then
-			-- self:print("main run");
+			-- print("main run");
 			self:pruneDeadDrones();
 			self:addProducedDronesToList();
 			self:launchDrones();
