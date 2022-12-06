@@ -118,6 +118,7 @@ const linkAbilityCode = (type) => {
 				const parts = file_path.split(`/`);
 				const target_file = path.resolve(__dirname, `../ship/${parts.slice(-2).join(`/`)}`);
 				const target_dir = path.resolve(__dirname, `../ship/${parts.slice(-2, -1).join(`/`)}`);
+				const type = parts.slice(-1)[0].split(`.`)[0];
 
 				try {
 					await fs.mkdir(target_dir, { recursive: true });
@@ -126,9 +127,17 @@ const linkAbilityCode = (type) => {
 				}
 
 				try {
+					let content = await fs.readFile(file_path);
+					
+					if (type !== "modkit_scheduler") {
+						content = content.toString();
+						content = content.replace(/addCustomCode.+/gmi, '');
+						content = content.replace(/addAbility\(NewShipType,\s*"CustomCommand".+/gmi, '');
+					}
+
 					await fs.writeFile(
 						target_file,
-						await fs.readFile(file_path),
+						content,
 						{
 							flag: `ax`
 						}
@@ -143,7 +152,6 @@ const linkAbilityCode = (type) => {
 				}
 				
 				if (parts[2] === 'ship') {
-					const type = parts.slice(-1)[0].split(`.`)[0];
 					await fs.appendFile(target_file, `\n\n${linkCode(type)}`);
 					const ab_code = linkAbilityCode(type);
 					if (ab_code) {
