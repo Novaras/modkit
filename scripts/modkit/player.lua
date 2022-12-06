@@ -275,9 +275,7 @@ if (modkit_player_proto == nil) then
 		local after = {};
 		for _, opt in option do
 			if (restrict) then
-				print("- restrict: " .. restrict);
 				if (restrict == 0) then
-					print("freedom for " .. self.id .. ", " .. opt);
 					Player_UnrestrictBuildOption(self.id, opt);
 					after[opt] = 0;
 				else
