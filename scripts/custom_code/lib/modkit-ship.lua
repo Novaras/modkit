@@ -188,17 +188,24 @@ end
 ---@param other Ship | Ship[]
 ---@return number
 function modkit_ship:distanceTo(other)
-	if (type(other.own_group) == "string") then -- assume ship
+	local a = self:position();
+
+	if (other.own_group) then -- ship
 		return SobGroup_GetDistanceToSobGroup(self.own_group, other.own_group);
-	else -- ship group
-		local a = self:position();
-		local b = SobGroup_GetPosition(SobGroup_FromShips(SobGroup_Fresh("__"), other));
-		return sqrt(
-			(b[1] - a[1]) ^ 2 +
-			(b[2] - a[2]) ^ 2 +
-			(b[3] - a[3]) ^ 2
-		);
 	end
+
+	local b = a;
+	if (other[1] and type(other[1]) == "number") then
+		b = other;
+	else
+		b = SobGroup_GetPosition(SobGroup_FromShips(other));
+	end
+
+	return sqrt(
+		(b[1] - a[1]) ^ 2 +
+		(b[2] - a[2]) ^ 2 +
+		(b[3] - a[3]) ^ 2
+	);
 end
 
 --- Returns the squad (batch) size of the ship, which may be a squadron.
@@ -248,7 +255,7 @@ function modkit_ship:capture(targets)
 	if (targets.own_group) then
 		SobGroup_CaptureSobGroup(self.own_group, targets.own_group);
 	else
-		local temp_group = SobGroup_FromShips(self.own_group .. "-temp-capture-group", targets);
+		local temp_group = SobGroup_FromShips(targets, self.own_group .. "-temp-capture-group");
 		SobGroup_CaptureSobGroup(self.own_group, temp_group);
 	end
 end
@@ -260,7 +267,7 @@ function modkit_ship:salvage(targets)
 	if (targets.own_group) then
 		SobGroup_SalvageSobGroup(self.own_group, targets.own_group);
 	else
-		local temp_group = SobGroup_FromShips(self.own_group .. "-temp-salvage-group", targets);
+		local temp_group = SobGroup_FromShips(targets, self.own_group .. "-temp-salvage-group");
 		SobGroup_SalvageSobGroup(self.own_group, temp_group);
 	end
 end
@@ -288,7 +295,7 @@ function modkit_ship:guard(target)
 	if (target.own_group) then
 		self._guard_group = target.own_group;
 	else -- collection of ships
-		self._guard_group = SobGroup_FromShips(self.own_group .. "_guard_group", target);
+		self._guard_group = SobGroup_FromShips({ target }, self.own_group .. "_guard_group");
 	end
 	return SobGroup_GuardSobGroup(self.own_group, self._guard_group);
 end
