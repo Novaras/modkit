@@ -165,7 +165,7 @@ COMMANDS = {
 		description = "Causes all of one player's ships to attack all of another player's ships.",
 		params = {
 			attacker = PARAMS.intToPlayer({ 'a', 'atk', 'attacker' }, 0),
-			target = PARAMS.int({ 't', 'trg', 'target' }),
+			target = PARAMS.intToPlayer({ 't', 'trg', 'target' }),
 		},
 		fn = function (param_vals)
 			---@type Player
@@ -187,10 +187,8 @@ COMMANDS = {
 			local player_a = words[2];
 			local player_b = words[3];
 
-			local fn = COMMANDS.attack.fn;
-
-			fn(parseCommand('attack attacker=' .. player_a .. " target=" .. player_b));
-			fn(parseCommand('attack attacker=' .. player_b .. " target=" .. player_a));
+			parseCommand('attack attacker=' .. player_a .. " target=" .. player_b);
+			parseCommand('attack attacker=' .. player_b .. " target=" .. player_a);
 		end,
 	},
 	research = {
