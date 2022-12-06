@@ -232,7 +232,7 @@ function modkit_ship:attack(targets)
 	elseif (targets.own_group) then
 		return SobGroup_Attack(self.player.id, self.own_group, targets.own_group);
 	else
-		local temp_group = SobGroup_FromShips(self.own_group .. "-temp-attack-group", targets);
+		local temp_group = SobGroup_FromShips(targets, self.own_group .. "-temp-attack-group");
 		SobGroup_Attack(self.player.id, self.own_group, temp_group);
 	end
 end
