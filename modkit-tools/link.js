@@ -12,7 +12,37 @@ const rimraf = require("rimraf");
 const degit = require("degit");
 const cli_prog = require("cli-progress");
 
-const linkCode = (type) => `addCustomCode(NewShipType, "data:scripts/driver.lua", "load", "create", "update", "destroy", "${type}", 1);`;
+/**
+ * 
+ * @param { string } type 
+ */
+const linkCode = (type) => {
+	const load = type.substring(4) === `researchship` ? `load_${type.substring(0, 3)}_res_ship` : `load`;
+	return `addCustomCode(NewShipType, "data:scripts/driver.lua", "${load}", "create", "update", "destroy", "${type}", 1);`;
+};
+
+const linkAbilityCode = (type) => {
+	if (![`kus`, `tai`].includes(type.substring(0, 3))) {
+		return null;
+	}
+	const generic = type.substring(4);
+	const confs = {
+		'scout': {
+			label: `"Speed Burst"`,
+			energy_params: `1, 0, 1200, 1200, 12, 3, 200`,
+			extra: `1, 3, 1`,
+		},
+		'gravwellgenerator': {
+			label: `"Gravity Well"`,
+			energy_params: `1,0,166,1,0.65,0.0,300`,
+			extra: `1.0,1,1,1,1`,
+		}
+	};
+	const conf = confs[generic];
+	if (!conf) return null;
+
+	return `\naddAbility(NewShipType, "CustomCommand", 1, ${conf.label}, ${conf.energy_params}, "data:scripts/driver.lua", "start", "go", "finish", "${type}", ${conf.extra});`;
+};
 
 (async () => {
 	console.log("[modkit] link.js: start! 🔗");
@@ -113,7 +143,12 @@ const linkCode = (type) => `addCustomCode(NewShipType, "data:scripts/driver.lua"
 				}
 				
 				if (parts[2] === 'ship') {
-					await fs.appendFile(target_file, `\n\n${linkCode(parts.slice(-1)[0].split(`.`)[0])}`);
+					const type = parts.slice(-1)[0].split(`.`)[0];
+					await fs.appendFile(target_file, `\n\n${linkCode(type)}`);
+					const ab_code = linkAbilityCode(type);
+					if (ab_code) {
+						await fs.appendFile(target_file, ab_code);
+					}
 				}
 			}
 			rimraf.sync(path.resolve(__dirname, `/ship`));
