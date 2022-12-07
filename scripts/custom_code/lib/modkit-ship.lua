@@ -394,7 +394,7 @@ end
 --- **Note: This is the host race of the _ship type_, as opposed to the player's race.**
 ---
 ---@return string
-function modkit_ship:race()
+function modkit_ship:racePrefix()
 	return strsub(self.ship_type, 0, 3);
 end
 
