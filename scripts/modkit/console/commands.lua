@@ -1,5 +1,6 @@
 if (MODKIT_CONSOLE_COMMANDS == nil) then
 	if (modkit == nil or modkit.table == nil) then
+		dofilepath("data:scripts/modkit/string_util.lua");
 		dofilepath("data:scripts/modkit/table_util.lua");
 	end
 
@@ -174,29 +175,43 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 			description = "Grants, starts, or cancels research for a player.",
 			params = {
 				player = PARAMS.intToPlayer({ 'p', 'player' }, 0),
-				research_name = PARAMS.str({ 'r', 'research', 't', 'type', 'name' })
+				research_name = modkit.table:merge(
+					PARAMS.str({ 'r', 'research', 't', 'type', 'name' })
+				)
 			},
 			fn = function (param_vals, words, flags)
-				local verb = words[2];
+				local verb = words[2] or 'grant';
 
 				---@type Player
 				local player = param_vals.player;
-				---@type string?
+				---@type string
 				local res_name = param_vals.research_name;
 
-				if (res_name) then
+				---@type ResearchItem
+				-- local research_item = modkit.research:find(res_name, player:race;
+
+				if (research_item) then
 					if (verb == 'grant') then
-						local all = flags.all;
+						local all = research_name == 'all';
 
 						if (all) then
 							player:grantAllResearch();
 						else
-							player:grantResearchOption(res_name);
+							consoleLog("GRANT " .. research_item.name);
+							player:grantResearchOption(research_item);
 						end
 					elseif (verb == 'start') then
-						player:doResearch(res_name);
+						player:doResearch(research_item);
 					elseif (verb == 'cancel') then
-						player:cancelResearch(res_name);
+						player:cancelResearch(research_item);
+					elseif (verb == 'has') then
+						local phrase = "doesn't have";
+						if (player:hasResearch(research_item)) then
+							phrase = 'has';
+						end
+						consoleLog("Player " .. player.id .. " " .. phrase .. " tech " .. research_item.name);
+					else
+						consoleLog("research: missing required argument 1 'verb' {grant|start|cancel|has}, i.e 'research start t=corvettedrive");
 					end
 				else
 					consoleLog("research: missing required param 'research_name', i.e 'research type=CorvetteDrive'");
@@ -355,19 +370,20 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 					});
 
 					local parsed = gsub(lua_str, "$t", type or '');
-					parsed = gsub(lua_str, "$f", family or '');
-					parsed = gsub(lua_str, "$p", pid or '');
-					parsed = gsub(lua_str, "$g", "'" .. SobGroup_FromShips(src) .. "'");
-					parsed = gsub(lua_str, "$s", 'modkit.table.map(makeStateHandle()().foreach_src, function(ship_def) return register(ship_def.type, ship_def.player_id, ship_def.id); end)');
+					parsed = gsub(parsed, "$f", family or '');
+					parsed = gsub(parsed, "$p", pid or '');
+					parsed = gsub(parsed, "$g", "'" .. SobGroup_FromShips(src) .. "'");
+					parsed = gsub(parsed, "$s", 'modkit.table.map(makeStateHandle()().foreach_src, function(ship_def) return register(ship_def.type, ship_def.player_id, ship_def.id); end)');
 
 					-- consoleLog("EXEC: " .. parsed);
 
 					parsed = "dofilepath('data:scripts/modkit/scope_state.lua'); " ..
 						"dofilepath('data:scripts/modkit/driver.lua'); " ..
 						parsed;
-					print(">> " .. parsed);
 
+					print("foreach >> " .. parsed);
 					dostring(parsed);
+
 				elseif (param_vals.command) then
 					local cmd = param_vals.command;
 
@@ -382,9 +398,11 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 		hp = {
 			description = "Sets the HP (as a fraction [0..1]) for ships.",
 			fn = function (_, words, _, line)
-				local str = "foreach " .. strsub(line, 3, strlen(line)) .. " lua=SobGroup_SetHealth($g, " .. words[2] .. ");";
-				-- consoleLog("parsed to: " .. str);
-				parseCommand(str);
+				if (words[2]) then
+					local str = "foreach " .. strsub(line, 3, strlen(line)) .. " lua=SobGroup_SetHealth($g, " .. words[2] .. ");";
+					-- consoleLog("parsed to: " .. str);
+					parseCommand(str);
+				end
 			end,
 		},
 		swap = {
