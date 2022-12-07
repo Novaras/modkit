@@ -7,30 +7,6 @@ local base_prodship_proto = {
 	test = 0
 };
 
---- Causes innate production subsystems to appear (`subsystem/hw1_production_*`) on all the player's production ships
---- when the player researches key technologies.
---- New ships will also have these systems present.
-function base_prodship_proto:showProductionSubsystems()
-	local tech_subs = {
-		FighterChassis = "FighterProduction",
-		DefenderSubSystems = "FighterProduction",
-		CorvetteDrive = "CorvetteProduction",
-		CapitalShipDrive = "FrigateProduction",
-		SuperCapitalShipDrive = "CapShipProduction"
-	};
-	for tech, subsystem in tech_subs do
-		if (self.player:hasResearch(tech) == 1) then
-			if (tech == "SuperCapitalShipDrive") then -- only add capship to motherships
-				if (self:isMothership()) then
-					SobGroup_CreateSubSystem(self.own_group, subsystem);
-				end
-			else
-				SobGroup_CreateSubSystem(self.own_group, subsystem);
-			end
-		end
-	end
-end
-
 --- Ensures that only one production ship is building the next research ship.
 function base_prodship_proto:ensureSingleResShipQueued()
 	if (self.single_ship_queue_event_id == nil) then
@@ -78,7 +54,6 @@ end
 
 function motherships_proto:update()
 	self:ensureSingleResShipQueued();
-	self:showProductionSubsystems();
 
 	-- SP stock code
 	if Player_GetNumberOfSquadronsOfTypeAwakeOrSleeping(-1, "Special_Splitter" ) == 0 then		
@@ -117,7 +92,6 @@ end
 
 function carriers_proto:update()
 	self:ensureSingleResShipQueued();
-	self:showProductionSubsystems();
 
 	-- SP stock code (tai cc only)
 	if (self:isAnyTypeOf({"tai_carrier"})) then
