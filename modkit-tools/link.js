@@ -16,7 +16,7 @@ const cli_prog = require("cli-progress");
  * 
  * @param { string } type 
  */
-const linkCode = (type) => {
+const linkCustomCode = (type) => {
 	const load = type.substring(4) === `researchship` ? `load_${type.substring(0, 3)}_res_ship` : `load`;
 	return `addCustomCode(NewShipType, "data:scripts/driver.lua", "${load}", "create", "update", "destroy", "${type}", 1);`;
 };
@@ -42,6 +42,10 @@ const linkAbilityCode = (type) => {
 	if (!conf) return null;
 
 	return `\naddAbility(NewShipType, "CustomCommand", 1, ${conf.label}, ${conf.energy_params}, "data:scripts/driver.lua", "start", "go", "finish", "${type}", ${conf.extra});`;
+};
+
+const linkModkitRegister = (type) => {
+	return `dostring(dofilepath('data:scripts/modkit/races.lua'); modkit.table.push(modkit.ship_types, '${type}')`;
 };
 
 (async () => {
@@ -73,7 +77,7 @@ const linkAbilityCode = (type) => {
 	console.log(full_content);
 
 	if (full_content) {
-		const emitter = degit(`novaras/ships-vanilla`, {
+		const emitter = degit(`novaras/ships-vanilla#all-ships`, {
 			force: true,
 			verbose: true,
 		});
@@ -112,54 +116,81 @@ const linkAbilityCode = (type) => {
 				progress_bar.update(index);
 
 				/**
-				 * parts: `['.', 'modkit-tools', '<ship|resources>', '<ship_name>', '<ship_name'>.<ext>]`
 				 * @type string[]
 				 */
 				const parts = file_path.split(`/`);
-				const target_file = path.resolve(__dirname, `../ship/${parts.slice(-2).join(`/`)}`);
-				const target_dir = path.resolve(__dirname, `../ship/${parts.slice(-2, -1).join(`/`)}`);
-				const type = parts.slice(-1)[0].split(`.`)[0];
+				
+				const extension = parts[parts.length - 1].split('.')[1];
 
-				try {
-					await fs.mkdir(target_dir, { recursive: true });
-				} catch (err) {
-					console.error(err);
-				}
+				// clone any .lua scripts
+				if (extension == 'lua') {
+					const target_file = path.resolve(__dirname, `../${parts.slice(-3).join('/')}`);
+					const target_dir = path.resolve(__dirname, `${parts.slice(-3, -1).join(`/`)}`);
 
-				try {
-					let content = await fs.readFile(file_path);
-					
-					// cleanse original calls if present
-					if (type !== "modkit_scheduler") {
-						content = content.toString();
-						content = content.replace(/addCustomCode.+/gmi, '');
-						content = content.replace(/addAbility\(NewShipType,\s*"CustomCommand".+/gmi, '');
-					}
-
-					await fs.writeFile(
-						target_file,
-						content,
-						{
-							flag: `ax`
-						}
-					);
-					didnt_exist_count += 1;
-				} catch (err) {
-					if (err.code === `EEXIST`) {
-						already_existed_count += 1;
-					} else {
+					try {
+						await fs.mkdir(target_dir, { recursive: true });
+						await fs.copyFile(file_path, target_file);
+					} catch (err) {
 						console.error(err);
 					}
-				}
-				
-				// link custom code & custom ability calls
-				if (parts[2] === 'ship') {
-					await fs.appendFile(target_file, `\n\n${linkCode(type)}`);
-					const ab_code = linkAbilityCode(type);
-					if (ab_code) {
-						await fs.appendFile(target_file, ab_code);
+				} else {
+
+					// parts: `['.', 'modkit-tools', '<ship|resources>', '<ship_name>', '<ship_name'>.<ext>]`
+
+					const target_file = path.resolve(__dirname, `../ship/${parts.slice(-3).join(`/`)}`);
+					const target_dir = path.resolve(__dirname, `../ship/${parts.slice(-3, -1).join(`/`)}`);
+					const type = parts.slice(-1)[0].split(`.`)[0]; // i.e 'hgn_scout' from 'hgn_scout.ship'
+
+					try {
+						await fs.mkdir(target_dir, { recursive: true });
+					} catch (err) {
+						console.error(err);
+					}
+	
+					try {
+						let content = await fs.readFile(file_path);
+						
+						// cleanse original calls if present
+						if (type !== "modkit_scheduler") {
+							content = content.toString();
+							content = content.replace(/addCustomCode.+/gmi, '');
+							content = content.replace(/addAbility\(NewShipType,\s*"CustomCommand".+/gmi, '');
+						}
+	
+						// create the .ship file
+						await fs.writeFile(
+							target_file,
+							content,
+							{
+								flag: `ax`
+							}
+						);
+						didnt_exist_count += 1;
+					} catch (err) {
+						if (err.code === `EEXIST`) {
+							already_existed_count += 1;
+						} else {
+							console.error(err);
+						}
+					}
+					
+					// link custom code & custom ability calls
+					if (parts[2] === 'ship') {
+						// custom code hook
+						await fs.appendFile(target_file, `\n\n${linkCustomCode(type)}`);
+	
+						// custom ability hook
+						const ab_code = linkAbilityCode(type);
+						if (ab_code) {
+							await fs.appendFile(target_file, ab_code);
+						}
+	
+						// register the ship's filename in modkit.ship_types
+						await fs.appendFile(target_file, linkModkitRegister(type));
 					}
 				}
+
+				
 			}
 			rimraf.sync(path.resolve(__dirname, `/ship`));
 			progress_bar.stop();

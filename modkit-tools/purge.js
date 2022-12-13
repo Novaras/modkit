@@ -30,7 +30,7 @@ const rmReadmes = () => {
 		{
 			name: `answer`,
 			type: `confirm`,
-			message: `Also delete ./modkit-tools (including this script)?`,
+			message: `Delete ./modkit-tools (including this script)?`,
 			initial: true
 		}
 	])).answer;
