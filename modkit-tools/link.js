@@ -129,6 +129,7 @@ const linkAbilityCode = (type) => {
 				try {
 					let content = await fs.readFile(file_path);
 					
+					// cleanse original calls if present
 					if (type !== "modkit_scheduler") {
 						content = content.toString();
 						content = content.replace(/addCustomCode.+/gmi, '');
@@ -151,6 +152,7 @@ const linkAbilityCode = (type) => {
 					}
 				}
 				
+				// link custom code & custom ability calls
 				if (parts[2] === 'ship') {
 					await fs.appendFile(target_file, `\n\n${linkCode(type)}`);
 					const ab_code = linkAbilityCode(type);
