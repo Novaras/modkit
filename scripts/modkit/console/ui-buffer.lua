@@ -46,7 +46,7 @@ if (MK_CONSOLE == nil) then
 			end
 		end
 		raw = gsub(raw, "\t", "    ");
-		
+
 		local d = UI_GetElementCustomData("MK_ConsoleScreen", "mk_consolescreen_root");
 		if (d == 10) then
 			UI_SetElementCustomData("MK_ConsoleScreen", "mk_consolescreen_root", 50);
@@ -61,6 +61,31 @@ if (MK_CONSOLE == nil) then
 			});
 			if (modkit.table.length(lines) > MK_CONSOLE_MAX_LINES) then
 				modkit.table.pop(lines);
+			end
+		end
+
+		--- Logs a table's items in `row_length` rows, which are just the items casted to strings and seperated by `delimeter`.
+		---
+		---@param items table
+		---@param row_length integer? Default `3`
+		---@param delimeter string? Default `", "`
+		function consoleLogRows(items, row_length, delimeter)
+			delimeter = delimeter or ", ";
+			local items_count = modkit.table.length(items);
+			row_length = min(items_count, row_length or 3);
+			local word_count = 0;
+			local row_str = "";
+			for _, item in items do
+				word = tostring(item);
+				row_str = row_str .. word .. delimeter;
+
+				word_count = word_count + 1;
+
+				if (mod(word_count, row_length) == 0 or strlen(row_str) > 100) then
+					consoleLog(row_str);
+					word_count = 0;
+					row_str = "";
+				end
 			end
 		end
 
