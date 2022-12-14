@@ -191,8 +191,11 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 			end,
 		},
 		research = {
-			description = "Grants, starts, or cancels research for a player. If '--recurse' is set, also grants all the required research for this item.",
-			syntax = "research ?<grant|start|cancel|has> ?player=[player-id] name=[research-name] ?--recurse",
+			description = [[Grants, starts, or cancels research for a player. If '--recurse' is set with 'grant', also grants all the
+required research for this item.
+
+Valid<b><c=ffffff> verb</c></b> arguments are: grant, all, start, cancel, has, list. By default, the verb is<b> grant</b>.]],
+			syntax = "research ?[verb] ?player=[player-id] name=[research-name] ?--recurse",
 			example = "research grant name=ioncannons -r",
 			params = {
 				player = PARAMS.intToPlayer({ 'p', 'player' }, 0),
@@ -205,15 +208,50 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 				'recurse'
 			},
 			fn = function (param_vals, words, flags)
-
-				local recurse = flags.r or flags.recurse;
-
-				local verb = words[2] or 'grant';
-
 				---@type Player
 				local player = param_vals.player;
 				---@type string?
 				local res_name = param_vals.research_name;
+
+				modkit.table.printTbl(flags, "flags");
+				local recurse = flags.r or flags.recurse;
+
+				local verb = words[2] or 'grant';
+
+				if (verb == 'list') then
+					local src = modkit.research:getItems(1);
+
+					---@type Ship
+					local ship = modkit.table.first(player:ships());
+					print("prefix: " .. ship:racePrefix());
+					src = modkit.research:getRaceItems(ship:raceName());
+					modkit.table.printTbl(src, "SRC");
+
+					local names = modkit.table.map(src, function (item)
+						return item.name;
+					end);
+
+					local word_count = 0;
+					local str = "";
+					for _, name in names do
+						local part = name;
+						if (player:hasResearch(part)) then
+							part = "<c=11ff88>" .. part .. "</c>";
+						end
+						str = str .. part .. ", ";
+
+						if (mod(word_count, 3) == 0 or strlen(str) > 100) then
+							consoleLog(str);
+							word_count = 0;
+							str = "";
+						end
+
+						word_count = word_count + 1;
+					end
+					return nil;
+				end
+
+				
 
 				if (res_name) then
 					modkit.table.printTbl(modkit.table.firstValue(player:ships()):racePrefix(), "OH");
@@ -222,14 +260,9 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 
 					if (research_item) then
 						if (verb == 'grant') then
-							local all = research_name == 'all';
-
-							if (all) then
-								player:grantAllResearch();
-							else
-								consoleLog("GRANT " .. research_item.name);
-								player:grantResearchOption(research_item, recurse);
-							end
+							consoleLog("GRANT " .. research_item.name);
+							consoleLog("recurse?: " .. (recurse or 'no'));
+							player:grantResearchOption(research_item, recurse);
 						elseif (verb == 'start') then
 							player:doResearch(research_item);
 						elseif (verb == 'cancel') then
@@ -240,6 +273,8 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 								phrase = 'has';
 							end
 							consoleLog("Player " .. player.id .. " " .. phrase .. " tech " .. research_item.name);
+						elseif (verb == 'all') then
+							player:grantAllResearch();
 						else
 							consoleLog("research: missing required argument 1 'verb' {grant|start|cancel|has}, i.e 'research start t=corvettedrive");
 						end
@@ -529,7 +564,7 @@ If you pass a lua string with 'lua=', you can include replacement tokens in your
 					for _, ship_type in src do
 						str = str .. ship_type .. ", ";
 
-						if (mod(word_count, 4) == 0 or strlen(str) > 128) then
+						if (mod(word_count, 4) == 0 or strlen(str) > 100) then
 							consoleLog(str);
 							word_count = 0;
 							str = "";
@@ -706,8 +741,8 @@ Flags are off by default but are set when passed with '--[flag]' ex: 'research g
 	function parseFlags(line, flags)
 		local res = {};
 		for _, flag in flags do
-			print("look for " .. '--' .. flag);
-			if (strfind(line, '--' .. flag)) then
+			-- print("look for " .. '--' .. flag);
+			if (strfind(line, '--' .. flag, 1, 1)) then
 				res[flag] = 1;
 			end
 		end
