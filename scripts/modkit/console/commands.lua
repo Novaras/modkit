@@ -231,37 +231,24 @@ Valid<b><c=ffffff> verb</c></b> arguments are: grant, all, start, cancel, has, l
 						return item.name;
 					end);
 
-					local word_count = 0;
-					local str = "";
-					for _, name in names do
-						local part = name;
-						if (player:hasResearch(part)) then
-							part = "<c=11ff88>" .. part .. "</c>";
-						end
-						str = str .. part .. ", ";
-
-						if (mod(word_count, 3) == 0 or strlen(str) > 100) then
-							consoleLog(str);
-							word_count = 0;
-							str = "";
-						end
-
-						word_count = word_count + 1;
-					end
+					consoleLogRows(names, 3);
 					return nil;
 				end
 
-				
-
 				if (res_name) then
+					if (player:hasResearchCapableShip() == nil) then
+						consoleError("research: no research capable ship found");
+						return nil;
+					end
+
 					modkit.table.printTbl(modkit.table.firstValue(player:ships()):racePrefix(), "OH");
 					---@type ResearchItem
 					local research_item = modkit.research:find(res_name, modkit.table.firstValue(player:ships()):racePrefix());
 
 					if (research_item) then
 						if (verb == 'grant') then
-							consoleLog("GRANT " .. research_item.name);
-							consoleLog("recurse?: " .. (recurse or 'no'));
+							-- consoleLog("GRANT " .. research_item.name);
+							-- consoleLog("recurse?: " .. (recurse or 'no'));
 							player:grantResearchOption(research_item, recurse);
 						elseif (verb == 'start') then
 							player:doResearch(research_item);
@@ -276,13 +263,13 @@ Valid<b><c=ffffff> verb</c></b> arguments are: grant, all, start, cancel, has, l
 						elseif (verb == 'all') then
 							player:grantAllResearch();
 						else
-							consoleLog("research: missing required argument 1 'verb' {grant|start|cancel|has}, i.e 'research start t=corvettedrive");
+							consoleError("research: missing required argument 1 'verb' {grant|start|cancel|has}, i.e 'research start t=corvettedrive");
 						end
 					else
-						consoleLog("research: cant resolve research by the name '" .. res_name .. "'");
+						consoleError("research: cant resolve research by the name '" .. res_name .. "'");
 					end
 				else
-					consoleLog("research: missing required param 'type', i.e research grant t=corvettedrive (see 'help research')");
+					consoleError("research: missing required param 'type', i.e research grant t=corvettedrive (see 'help research')");
 				end
 			end
 		},
@@ -553,47 +540,26 @@ If you pass a lua string with 'lua=', you can include replacement tokens in your
 				local src = modkit.ship_types;
 				if (pattern) then
 					src = modkit.table.filter(src, function (ship_type)
-						local s, e = strfind(ship_type, %pattern);
-						return (s and e);
-					end)
+						-- print("type: " .. ship_type);
+						-- print("pattern: " .. %pattern);
+						-- local s, e = strfind(ship_type, %pattern);
+						-- print("s: " .. (s or 'nil') .. ", e: " .. (e or 'nil'));
+						return strfind(ship_type, %pattern);
+					end);
+
+					modkit.table.printTbl(src, "src");
 				end
 
 				if (src and modkit.table.length(src) > 0) then
-					local word_count = 0;
-					local str = "";
-					for _, ship_type in src do
-						str = str .. ship_type .. ", ";
-
-						if (mod(word_count, 4) == 0 or strlen(str) > 100) then
-							consoleLog(str);
-							word_count = 0;
-							str = "";
-						end
-
-						word_count = word_count + 1;
-					end
+					consoleLogRows(src, 4);
 				end
-
-				
 			end
 		},
 		commands = {
 			description = "Lists all commands.",
 			syntax = "commands",
 			fn = function ()
-				local word_count = 0;
-				local str = "";
-				for command_str, command in COMMANDS do
-					str = str .. command_str .. ", ";
-
-					if (mod(word_count, 4) == 0) then
-						consoleLog(str);
-						word_count = 0;
-						str = "";
-					end
-
-					word_count = word_count + 1;
-				end
+				consoleLogRows(modkit.table.keys(COMMANDS), 3);
 			end
 		},
 		help = {
