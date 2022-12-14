@@ -64,6 +64,14 @@ if (MK_CONSOLE == nil) then
 			end
 		end
 
+		function consoleError(...)
+			for k, val in arg do
+				if (k ~= "n") then
+					consoleLog("<c=ff4422>" .. tostring(val) .. "</c>");
+				end
+			end
+		end
+
 		--- Logs a table's items in `row_length` rows, which are just the items casted to strings and seperated by `delimeter`.
 		---
 		---@param items table
