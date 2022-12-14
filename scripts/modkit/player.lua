@@ -99,11 +99,14 @@ if (modkit_player_proto == nil) then
 	--- Returns whether or not this player is capable of researching `item`.
 	---
 	---@param item string | table
+	---@deprecated
 	---@return '0'|'1'
 	function modkit_player_proto:canResearch(item)
 		local name = modkit.research:resolveName(item); -- item or item.name if table
-		print("can " .. self.id  .. " res " .. name);
-		return Player_CanResearch(self.id, name);
+		if (name) then
+			print("can " .. self.id  .. " res " .. name);
+			return Player_CanResearch(self.id, name);
+		end
 	end
 
 	--- Grants all research items to this player.
