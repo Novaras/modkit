@@ -1,7 +1,9 @@
 if (MODKIT_CONSOLE_COMMANDS == nil) then
 	if (modkit == nil or modkit.table == nil) then
-		dofilepath("data:scripts/modkit/string_util.lua");
 		dofilepath("data:scripts/modkit/table_util.lua");
+	end
+	if (strsplit == nil) then
+		dofilepath("data:scripts/modkit/string_util.lua");
 	end
 
 	function makeSpawnVolGenerator(radius)
@@ -17,6 +19,15 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 		end
 	end
 
+	function consoleMultiple(lines)
+		print("ok");
+		print(tostring(line));
+
+		for _, line in lines do
+			consoleLog(strsub(line, 1, strlen(line) - 1));
+		end
+	end
+
 
 	---@class ParamConfig
 	---@field names string[] The param name(s), i.e 'p' in 'p=10'
@@ -28,6 +39,8 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 	---@field params? ParamConfig[]
 	---@field flags? string[]
 	---@field description? string
+	---@field syntax? string
+	---@field example? string
 	---@field fn fun(params: any[], words: string[], flags: any[], line: string): any
 
 	---@alias ParamConfigGenerator fun(names: string[], default: any): ParamConfig
@@ -108,7 +121,9 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 	---@type CommandFn[]
 	COMMANDS = {
 		spawn = {
-			description = "Spawns ships for a player",
+			description = "Spawns ships for a player. Also see the 'ship_types' command.",
+			syntax = "spawn [ship-type] ?player=[player-index] ?count=[number-to-spawn] ?position=[x y z]",
+			example = "spawn kpr_sajuuk p=0 c=5 pos=1000 -100 15000",
 			params = {
 				player = PARAMS.intToPlayer({ 'p', 'player' }, 0),
 				count = PARAMS.int({ 'c', 'count', 'n' }, 1),
@@ -143,6 +158,8 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 		},
 		attack = {
 			description = "Causes all of one player's ships to attack all of another player's ships.",
+			syntax = "attack ?attacker=[player-id] target=[player-id]",
+			example = "attack atk=0 target=1",
 			params = {
 				attacker = PARAMS.intToPlayer({ 'a', 'atk', 'attacker' }, 0),
 				target = PARAMS.intToPlayer({ 't', 'trg', 'target' }),
@@ -163,6 +180,8 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 		},
 		fight = {
 			description = "Causes the given players to attack eachother.",
+			syntax = "fight [player-id] [player-id]",
+			example = "fight 0 1",
 			fn = function (_, words)
 				local player_a = words[2];
 				local player_b = words[3];
@@ -172,60 +191,77 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 			end,
 		},
 		research = {
-			description = "Grants, starts, or cancels research for a player.",
+			description = "Grants, starts, or cancels research for a player. If '--recurse' is set, also grants all the required research for this item.",
+			syntax = "research ?<grant|start|cancel|has> ?player=[player-id] name=[research-name] ?--recurse",
+			example = "research grant name=ioncannons -r",
 			params = {
 				player = PARAMS.intToPlayer({ 'p', 'player' }, 0),
 				research_name = modkit.table:merge(
 					PARAMS.str({ 'r', 'research', 't', 'type', 'name' })
 				)
 			},
+			flags = {
+				'r',
+				'recurse'
+			},
 			fn = function (param_vals, words, flags)
+
+				local recurse = flags.r or flags.recurse;
+
 				local verb = words[2] or 'grant';
 
 				---@type Player
 				local player = param_vals.player;
-				---@type string
+				---@type string?
 				local res_name = param_vals.research_name;
 
-				---@type ResearchItem
-				-- local research_item = modkit.research:find(res_name, player:race;
+				if (res_name) then
+					modkit.table.printTbl(modkit.table.firstValue(player:ships()):racePrefix(), "OH");
+					---@type ResearchItem
+					local research_item = modkit.research:find(res_name, modkit.table.firstValue(player:ships()):racePrefix());
 
-				if (research_item) then
-					if (verb == 'grant') then
-						local all = research_name == 'all';
+					if (research_item) then
+						if (verb == 'grant') then
+							local all = research_name == 'all';
 
-						if (all) then
-							player:grantAllResearch();
+							if (all) then
+								player:grantAllResearch();
+							else
+								consoleLog("GRANT " .. research_item.name);
+								player:grantResearchOption(research_item, recurse);
+							end
+						elseif (verb == 'start') then
+							player:doResearch(research_item);
+						elseif (verb == 'cancel') then
+							player:cancelResearch(research_item);
+						elseif (verb == 'has') then
+							local phrase = "doesn't have";
+							if (player:hasResearch(research_item)) then
+								phrase = 'has';
+							end
+							consoleLog("Player " .. player.id .. " " .. phrase .. " tech " .. research_item.name);
 						else
-							consoleLog("GRANT " .. research_item.name);
-							player:grantResearchOption(research_item);
+							consoleLog("research: missing required argument 1 'verb' {grant|start|cancel|has}, i.e 'research start t=corvettedrive");
 						end
-					elseif (verb == 'start') then
-						player:doResearch(research_item);
-					elseif (verb == 'cancel') then
-						player:cancelResearch(research_item);
-					elseif (verb == 'has') then
-						local phrase = "doesn't have";
-						if (player:hasResearch(research_item)) then
-							phrase = 'has';
-						end
-						consoleLog("Player " .. player.id .. " " .. phrase .. " tech " .. research_item.name);
 					else
-						consoleLog("research: missing required argument 1 'verb' {grant|start|cancel|has}, i.e 'research start t=corvettedrive");
+						consoleLog("research: cant resolve research by the name '" .. res_name .. "'");
 					end
 				else
-					consoleLog("research: missing required param 'research_name', i.e 'research type=CorvetteDrive'");
+					consoleLog("research: missing required param 'type', i.e research grant t=corvettedrive (see 'help research')");
 				end
 			end
 		},
 		ru = {
 			description = "Grants (adds) or sets RU for a player.",
+			syntax = "ru ?<grant|reduce|set> ?player=[player-id] amount=[ru-amount]",
+			example = "ru set p=0 amount=12345678",
 			params = {
 				player = PARAMS.intToPlayer({ 'p', 'player' }, 0),
 				amount = PARAMS.int({ 'n', 'v', 'val', 'value', 'amount' })
 			},
 			fn = function (param_vals, words)
-				local verb = words[2];
+				local verb = words[2] or 'grant';
+				---@type Player
 				local player = param_vals.player;
 				local amount = param_vals.amount;
 
@@ -233,9 +269,11 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 					consoleLog("ru: missing require param 'val={amount}' i.e 'value=1000'");
 				else
 					if (verb == 'grant') then
-						Player_SetRU(player.id, Player_GetRU(player.id) + amount);
+						player:RU(player:RU() + amount);
 					elseif (verb == 'set') then
-						Player_SetRU(player.id, amount);
+						player:RU(amount);
+					elseif (verb == 'reduce') then
+						player:RU(max(0, player:RU() - amount));
 					else
 						consoleLog("ru: invalid argument 1 'verb': 'ru {grant|set}', i.e 'ru grant val=1000 p=0'");
 					end
@@ -244,6 +282,8 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 		},
 		kill = {
 			description = "Kills a player.",
+			syntax = "kill [player-id]",
+			example = "kill 1",
 			fn = function (_, words)
 				local player_index = tonumber(words[2]);
 				if (player_index) then
@@ -255,6 +295,8 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 		},
 		destroy = {
 			description = "Destroys ships.",
+			syntax = "destroy (type=[ship-type] or family=[attack-family]) player=[player-id]",
+			example = "destroy type=vgr_resourcecollector player=1",
 			params = {
 				type = PARAMS.str({ 't', 'type' }),
 				family = PARAMS.str({ 'f', 'family' }),
@@ -271,34 +313,45 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 		},
 		gametime = {
 			description = "Prints the current gametime.",
+			syntax = "gametime",
 			fn = function ()
 				consoleLog("gametime is " .. Universe_GameTime());
 			end,
 		},
 		log = {
 			description = "Logs (echos) the supplied string.",
+			syntax = "log <string...>",
+			example = "log hello world!",
 			fn = function (line)
 				consoleLog(strsub(line, 4, strlen(line)));
 			end,
 		},
 		gamespeed = {
-			description = "Sets the game speed to a multiplier of the default speed.",
+			description = "Sets the game speed to a multiplier of the default speed. Accepts any positive number.",
+			syntax = "gamespeed [speed-multiplier]",
+			example = "gamespeed 0.5",
 			fn = function (_, words)
 				local stateHnd = makeStateHandle();
 				local speed = words[2];
 
 				if (speed) then
-					local existing_stack = stateHnd().ui_scope_exec;
-					stateHnd({
-						ui_scope_exec = modkit.table.push(existing_stack or {}, 'SetTurboSpeed(1); SetTurboSpeed(' .. speed .. ")");
-					});
+					if (speed < 0) then
+						local existing_stack = stateHnd().ui_scope_exec;
+						stateHnd({
+							ui_scope_exec = modkit.table.push(existing_stack or {}, 'SetTurboSpeed(1); SetTurboSpeed(' .. speed .. ")");
+						});
+					else
+						consoleLog("gamespeed: must be a positive float i.e 'gamespeed 12'");
+					end
 				else
 					consoleLog("gamespeed: missing required argument 1 'speed': gamespeed {speed} i.e: 'gamespeed 8'");
 				end
 			end,
 		},
 		move = {
-			description = "Causes ships to move (or teleport) to a position.",
+			description = "Causes ships to move to a position. If '--force' is set, teleports the units to the positon.",
+			syntax = "move (type=[ship-type] or family=[attack-family]) player=[player-id] position=[x y z] ?--force",
+			example = "move type=tai_assaultfrigate p=0 pos=0 0 0 --force",
 			params = {
 				type = PARAMS.str({ 't', 'type' }),
 				family = PARAMS.str({ 'f', 'family '}),
@@ -312,7 +365,7 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 				---@type Position?
 				local pos = param_vals.position;
 
-				modkit.table.printTbl(flags, "ye");
+				-- modkit.table.printTbl(flags, "ye");
 
 				if (pos) then
 					---@type Ship[]
@@ -325,12 +378,19 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 						end
 					end
 				else
-					consoleLog("move: missing required param 'pos={x y z}', i.e: 'pos=10 1000 -500'");
+					consoleLog("move: missing required param 'pos=[x y z]', i.e: 'pos=10 1000 -500'");
 				end
 			end,
 		},
 		foreach = {
-			description = "Runs a command or Lua string for a ship selection.",
+			description = [[Runs a command or Lua string for a ship selection.
+If you pass a lua string with 'lua=', you can include replacement tokens in your code which will be replaced with certain values:
+- $f: the value of 'family='
+- $t: the value of 'type='
+- $g: a sobgroup name containing all the universe ships
+- $s: a modkit memgroup containing all the universe ships]],
+			syntax = "foreach (type=[ship-type] or family=[attack-family]) player=[player-id] (lua=[lua-str] or command=[console-command])",
+			example = "foreach type=kus_resourcecollector player=0 lua=SobGroup_SetHealth($g, 0.1)",
 			params = {
 				lua = {
 					names = { "lua" },
@@ -397,6 +457,8 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 		},
 		hp = {
 			description = "Sets the HP (as a fraction [0..1]) for ships.",
+			syntax = "hp [hp-fraction] (type=[ship-type] or family=[attack-family]) player=[player-id]",
+			example = "hp 0.9 type=kus_mothership p=1",
 			fn = function (_, words, _, line)
 				if (words[2]) then
 					local str = "foreach " .. strsub(line, 3, strlen(line)) .. " lua=SobGroup_SetHealth($g, " .. words[2] .. ");";
@@ -407,6 +469,8 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 		},
 		swap = {
 			description = "Swaps all the ships of two given players.",
+			syntax = "swap [player-id] [player-id]",
+			example = "swap 0 1",
 			fn = function (_, words)
 				-- consoleLog("swap?");
 
@@ -443,8 +507,80 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 				SobGroup_SetHealth(temp_group, 0);
 			end
 		},
+		shiptypes = {
+			description = "Lists all ship types, or just those matching a Lua pattern.",
+			syntax = "shiptypes ?[pattern]",
+			example = "shiptypes vgr_",
+			fn = function (_, words)
+				local pattern = words[2];
+
+				local src = modkit.ship_types;
+				if (pattern) then
+					src = modkit.table.filter(src, function (ship_type)
+						local s, e = strfind(ship_type, %pattern);
+						return (s and e);
+					end)
+				end
+
+				if (src and modkit.table.length(src) > 0) then
+					local word_count = 0;
+					local str = "";
+					for _, ship_type in src do
+						str = str .. ship_type .. ", ";
+
+						if (mod(word_count, 4) == 0 or strlen(str) > 128) then
+							consoleLog(str);
+							word_count = 0;
+							str = "";
+						end
+
+						word_count = word_count + 1;
+					end
+				end
+
+				
+			end
+		},
+		commands = {
+			description = "Lists all commands.",
+			syntax = "commands",
+			fn = function ()
+				local word_count = 0;
+				local str = "";
+				for command_str, command in COMMANDS do
+					str = str .. command_str .. ", ";
+
+					if (mod(word_count, 4) == 0) then
+						consoleLog(str);
+						word_count = 0;
+						str = "";
+					end
+
+					word_count = word_count + 1;
+				end
+			end
+		},
 		help = {
-			description = "Prints help for a given command.",
+			description = [[-------------------------------
+Prints help for a given command. See all commands with 'commands'.
+
+Help syntax has variables in <c=11aacc> [square-brackets]</c>.
+The command comes first, then any <c=ff1111> arguments</c>, then <c=11ff11> parameters</c> and <c=1111ff> flags</c>.
+
+If any of these types is prefixed by a <b>'?'</b>, it means it is <i>optional</i>.
+
+<b><c=ff1111>Arguments:</c></b>
+Just values, like in 'gamespeed [speed-multiplier]' ex: 'gamespeed 2.5'.
+
+<b><c=11ff11>Parameters:</c></b>
+<b>key=[value]</b> pairs, like in'attack ?attacker=[player-id] target=[player-id]' ex: 'attack attacker=0 target=1'.
+
+<b><c=1111ff>Flags:</c></b>
+Flags are off by default but are set when passed with '--[flag]' ex: 'research grant t=corvettedrive<b> --recurse</b>'.
+-------------------------------
+]],
+			syntax = "help ?[command]",
+			example = "help spawn",
 			fn = function (_, words)
 				local cmd = nil;
 				if (words[2]) then
@@ -452,18 +588,41 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 				end
 
 				if (cmd) then
-					consoleLog("command " .. words[2]);
-					consoleLog(cmd.description);
-					consoleLog("params");
-					for param, conf in (cmd.params or {}) do
-						consoleLog("\t" .. param .. ": [ " .. strimplode(conf.names, ", ") .. " ]");
+					consoleLog("-------------------------------");
+					consoleLog("<b><c=ffffff>Command: " .. words[2] .. "</c></b>");
+					consoleLog("-------------------------------");
+					if (cmd.description) then
+						local s, e = strfind(cmd.description, '\n');
+						if (s and e) then
+							consoleMultiple(strsplit(cmd.description, '\n', 1));
+						else
+							consoleLog(cmd.description);
+						end
 					end
-					consoleLog("flags");
-					for _, flag in (cmd.flags or {}) do
-						consoleLog("\t" .. flag);
+					if (cmd.syntax) then
+						consoleLog("<c=ffffff>SYNTAX</c>:  " .. cmd.syntax);
 					end
+					if (cmd.example) then
+						consoleLog("<c=ffffff>EXAMPLE</c>: " .. cmd.example);
+					end
+					if (cmd.params) then
+						consoleLog("Params:");
+						for param, conf in (cmd.params or {}) do
+							consoleLog("\t" .. param .. ": [ " .. strimplode(conf.names, ", ") .. " ]");
+						end
+					end
+					if (cmd.flags) then
+						consoleLog("Flags:");
+						for _, flag in (cmd.flags or {}) do
+							consoleLog("\t" .. flag);
+						end
+					end
+					consoleLog('-------------------------------');
 				else
-					consoleLog("HWRM Console made by Fear (Novaras). Please see the README linked in the Steam workshop!");
+					consoleLog("HWRM Ingame Console mod made by <c=11aaff> Fear (Novaras)</c>. Please see the README linked in the Steam workshop!");
+					consoleLog("Use <b>'help [command]'</b> for details on a command, i.e: 'help spawn'");
+					consoleLog("Use <b>'commands'</b> for a list of commands.");
+					consoleLog("Use <b>'help help'</b> for details on how to read help [command] info.");
 				end
 			end
 		},
@@ -538,7 +697,7 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 
 		-- consoleLog("parseParams:");
 		-- consoleLog("\tline: " .. line);
-		modkit.table.printTbl(res, "res");
+		-- modkit.table.printTbl(res, "res");
 
 		return res;
 	end
