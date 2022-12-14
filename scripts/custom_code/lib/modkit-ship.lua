@@ -175,12 +175,39 @@ function modkit_ship:subsHP(subs_name, HP)
 	return SobGroup_GetHardPointHealth(self.own_group, subs_name);
 end
 
---- Returns whether or not this ship host's the named subsystem.
+--- Returns whether or not this ship hosts the named subsystem.
 ---
 ---@param subs_name string
 ---@return '0'|'1'
 function modkit_ship:hasSubsystem(subs_name)
-	return SobGroup_HasSubsystem(self.own_group, subs_name);
+	return SobGroup_HasSubsystem(self.own_group, subs_name) == 1;
+end
+
+--- Returns whether or not this ship hosts a research module of any kind.
+---
+---@return boolean
+function modkit_ship:hasResearchModule()
+	for _, name in {
+		'hgn_c_module_research',
+		'hgn_c_module_researchadvanced',
+		'hgn_ms_module_research',
+		'hgn_ms_module_researchadvanced',
+		'vgr_c_module_research',
+		'vgr_ms_module_research',
+		'hw1_researchmodule'
+	} do
+		if (self:hasSubsystem(name)) then
+			return 1;
+		end
+
+		if (name == 'hw1_researchmodule') then
+			for i = 1, 5 do
+				if (self:hasSubsystem(name .. i)) then
+					return 1;
+				end
+			end
+		end
+	end
 end
 
 --- Returns the distance between this ship and the given other ship, or the average position if given multiple others.
