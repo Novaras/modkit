@@ -137,8 +137,8 @@ const linkModkitRegister = (type) => {
 
 					// parts: `['.', 'modkit-tools', '<ship|resources>', '<ship_name>', '<ship_name'>.<ext>]`
 
-					const target_file = path.resolve(__dirname, `../ship/${parts.slice(-3).join(`/`)}`);
-					const target_dir = path.resolve(__dirname, `../ship/${parts.slice(-3, -1).join(`/`)}`);
+					const target_file = path.resolve(__dirname, `../ship/${parts.slice(-2).join(`/`)}`);
+					const target_dir = path.resolve(__dirname, `../ship/${parts.slice(-2, -1).join(`/`)}`);
 					const type = parts.slice(-1)[0].split(`.`)[0]; // i.e 'hgn_scout' from 'hgn_scout.ship'
 
 					try {
@@ -186,7 +186,7 @@ const linkModkitRegister = (type) => {
 						}
 	
 						// register the ship's filename in modkit.ship_types
-						await fs.appendFile(target_file, linkModkitRegister(type));
+						// await fs.appendFile(target_file, linkModkitRegister(type));
 					}
 				}
 
