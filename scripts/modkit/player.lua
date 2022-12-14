@@ -131,16 +131,23 @@ if (modkit_player_proto == nil) then
 			-- SuperHeavyChassis & SuperCapitalShipDrive | IonCannons
 			-- f('SuperHeavyChassis')
 
-			local requirements_str = item.requiredresearch;
+			if (strlen(item.requiredresearch) > 0) then
+				local requirementStrToLuaCalls = function (str, fn_name, fn_args)
+					local args_str = strimplode(fn_args, ', ');
+					local exec = gsub(str, '(%w+)', fn_name .. '("' .. args_str .. '")');
+					exec = gsub(exec, '[&]', 'and')
+					exec = gsub(exec, '[|]', 'or');
+					exec = "dofilepath('data:scripts/modkit/player.lua'); player = GLOBAL_PLAYERS:get(" .. %self.id .. "); " .. exec;
+					-- print("REQS: " .. exec);
+					return exec;
+				end
 
-			local exec = gsub(requirements_str, '(%w+)', 'player:grantResearchOption("%1", 1)');
-			exec = gsub(exec, '[&]', 'and')
-			exec = gsub(exec, '[|]', 'or');
-			exec = "dofilepath('data:scripts/modkit/player.lua'); player = GLOBAL_PLAYERS:get(" .. self.id .. "); " .. exec;
+				local res_reqs_exec = requirementStrToLuaCalls(item.requiredresearch, 'player:grantResearchOption', { '%1', 1 });
+				print(res_reqs_exec);
+				dostring(res_reqs_exec);
+			end
 
-			print("DO " .. exec);
-			dostring(exec);
-			self:grantResearchOption(item, recursive);
+			self:grantResearchOption(item);
 		end
 	end
 
@@ -194,6 +201,28 @@ if (modkit_player_proto == nil) then
 
 	function modkit_player_proto:hasResearchFor(ship_type)
 		return Player_HasResearchPrequisitesToBuild(self.id, ship_type) == 1;
+	end
+
+	--- Checks if the player has any ship with a research module. Includes hw1 research ships.
+	---
+	---@return boolean
+	function modkit_player_proto:hasResearchCapableShip()
+		-- for _, name in {
+		-- 	'hgn_c_module_research',
+		-- 	'hgn_c_module_researchadvanced',
+		-- 	'hgn_ms_module_research',
+		-- 	'hgn_ms_module_researchadvanced',
+		-- 	'vgr_c_module_research',
+		-- 	'vgr_ms_module_research',
+		-- 	'hw1_researchmodule'
+		-- } do
+		-- 	if (self:hasSubsystem(name)) then
+		-- 		return 1;
+		-- 	end
+		-- end
+		return modkit.table.find(self:ships(), function (ship)
+			return ship:hasResearchModule();
+		end);
 	end
 
 	-- === end of research stuff ===

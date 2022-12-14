@@ -72,7 +72,7 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 			return {
 				names = names,
 				default = default,
-				pattern = "[%a_-]+"
+				pattern = "[%a%d_-]+"
 			};
 		end,
 		vec3 = function (names, default)
@@ -219,19 +219,23 @@ Valid<b><c=ffffff> verb</c></b> arguments are: grant, all, start, cancel, has, l
 				local verb = words[2] or 'grant';
 
 				if (verb == 'list') then
-					local src = modkit.research:getItems(1);
-
 					---@type Ship
 					local ship = modkit.table.first(player:ships());
 					print("prefix: " .. ship:racePrefix());
-					src = modkit.research:getRaceItems(ship:raceName());
+					local src = modkit.research:getRaceItems(ship:raceName());
 					modkit.table.printTbl(src, "SRC");
 
 					local names = modkit.table.map(src, function (item)
+						if (%player:hasResearch(item)) then
+							return '<c=11ff66>' .. item.name .. '</c>';
+						end
 						return item.name;
 					end);
 
 					consoleLogRows(names, 3);
+					return nil;
+				elseif (verb == 'all') then
+					player:grantAllResearch();
 					return nil;
 				end
 
@@ -260,8 +264,6 @@ Valid<b><c=ffffff> verb</c></b> arguments are: grant, all, start, cancel, has, l
 								phrase = 'has';
 							end
 							consoleLog("Player " .. player.id .. " " .. phrase .. " tech " .. research_item.name);
-						elseif (verb == 'all') then
-							player:grantAllResearch();
 						else
 							consoleError("research: missing required argument 1 'verb' {grant|start|cancel|has}, i.e 'research start t=corvettedrive");
 						end
