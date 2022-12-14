@@ -113,11 +113,31 @@ if (modkit_player_proto == nil) then
 
 	--- Grants the named research _option_ to this player (they still need to research it).
 	---
-	---@param item string | table
-	function modkit_player_proto:grantResearchOption(item)
-		local name = modkit.research:resolveName(item);
+	---@param item string | ResearchItem
+	---@param recursive boolean
+	function modkit_player_proto:grantResearchOption(item, recursive)
+		if (type(item) == "string") then
+			item = modkit.research:find(strlower(item));
+		end
+
 		if (self:canResearch(item) == 1) then
+			local name = modkit.research:resolveName(item);
+			print("granting " .. name);
 			return Player_GrantResearchOption(self.id, name);
+		elseif (recursive) then
+			-- SuperHeavyChassis & SuperCapitalShipDrive | IonCannons
+			-- f('SuperHeavyChassis')
+
+			local requirements_str = item.requiredresearch;
+
+			local exec = gsub(requirements_str, '(%w+)', 'player:grantResearchOption("%1", 1)');
+			exec = gsub(exec, '[&]', 'and')
+			exec = gsub(exec, '[|]', 'or');
+			exec = "dofilepath('data:scripts/modkit/player.lua'); player = GLOBAL_PLAYERS:get(" .. self.id .. "); " .. exec;
+
+			print("DO " .. exec);
+			dostring(exec);
+			self:grantResearchOption(item, recursive);
 		end
 	end
 
