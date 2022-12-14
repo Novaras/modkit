@@ -393,9 +393,16 @@ end
 --- Returns the 3-character race string of the ship.
 --- **Note: This is the host race of the _ship type_, as opposed to the player's race.**
 ---
----@return string
+---@return RacePrefix
 function modkit_ship:racePrefix()
 	return strsub(self.ship_type, 0, 3);
+end
+
+--- Returns the actual race name of the ship (see `races.lua`)
+---
+---@return RaceName
+function modkit_ship:raceName()
+	return modkit.races:find(self:racePrefix()).name;
 end
 
 -- === Attack family queries ===
