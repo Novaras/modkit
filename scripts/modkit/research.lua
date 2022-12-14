@@ -56,7 +56,7 @@ if (modkit.research == nil) then
 
 	--- Gets the research items for the given race.
 	---
-	---@param race RacePrefix
+	---@param race RaceName
 	---@return ResearchItem[]
 	function research_proto:getRaceItems(race)
 		return self.items[race];
@@ -80,18 +80,13 @@ if (modkit.research == nil) then
 
 	--- Gets the name of the given `item`, or just returns if given a string.
 	---
-	---@param item ResearchItem
-	---@return string
+	---@param item ResearchItem|string
+	---@return string?
 	function research_proto:resolveName(item)
 		if (type(item) == "string") then
 			return item;
 		else
-			return modkit.table.find(
-				self:getItems(1),
-				function (research_item) -- research item or a method like resolveName
-					return research_item.name == %item.name;
-				end
-			).name; -- we return the name
+			return item.name;
 		end
 	end
 
