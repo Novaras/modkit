@@ -335,7 +335,8 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 				local speed = words[2];
 
 				if (speed) then
-					if (speed < 0) then
+					speed = tonumber(speed);
+					if (speed > 0) then
 						local existing_stack = stateHnd().ui_scope_exec;
 						stateHnd({
 							ui_scope_exec = modkit.table.push(existing_stack or {}, 'SetTurboSpeed(1); SetTurboSpeed(' .. speed .. ")");

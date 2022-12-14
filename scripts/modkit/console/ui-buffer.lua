@@ -53,7 +53,7 @@ if (MK_CONSOLE == nil) then
 		end
 
 		local new_lines = strToConsoleLines(raw);
-		local lines = s().MK_CONSOLE_LINES; -- tbl ref
+		local lines = s().MK_CONSOLE_LINES or {}; -- tbl ref
 		for _, line in new_lines do
 			print(line);
 			s({
