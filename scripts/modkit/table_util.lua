@@ -152,13 +152,9 @@ if (modkit.table == nil) then
 			return out;
 		end,
 		firstKey = function (tbl)
-			local lowest_k = modkit.table.length(tbl); -- highest k
-			for k, v in tbl do
-				if (k < lowest_k) then
-					lowest_k = k;
-				end
+			for k, _ in tbl do
+				return k;
 			end
-			return lowest_k;
 		end,
 		any = function (tbl, predicate)
 			for k, v in tbl do
