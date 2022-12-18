@@ -64,7 +64,14 @@ end
 
 function strimplode(arr, delimeter)
 	delimeter = delimeter or "";
+	local i = 0;
 	return modkit.table.reduce(arr, function (acc, word)
-		return acc .. word .. %delimeter;
+		local _i = %i + 1;
+		%i = _i;
+		local delim = %delimeter;
+		if (i == modkit.table.length(%arr)) then -- dont append anything on last entry
+			delim = '';
+		end
+		return acc .. word .. delim;
 	end, "");
 end
