@@ -29,7 +29,7 @@ if (MK_CONSOLE == nil) then
 		end
 	end
 
-	function consoleLog(...)
+	consoleLog = consoleLog or function (...)
 		if (MK_CONSOLE_INIT == nil) then
 			s({
 				MK_CONSOLE_SCREEN_NAME = MK_CONSOLE_SCREEN_NAME,
@@ -63,44 +63,43 @@ if (MK_CONSOLE == nil) then
 				modkit.table.pop(lines);
 			end
 		end
-
-		function consoleError(...)
-			for k, val in arg do
-				if (k ~= "n") then
-					consoleLog("<c=ff4422>" .. tostring(val) .. "</c>");
-				end
-			end
-		end
-
-		--- Logs a table's items in `row_length` rows, which are just the items casted to strings and seperated by `delimeter`.
-		---
-		---@param items table
-		---@param row_length integer? Default `3`
-		---@param delimeter string? Default `", "`
-		function consoleLogRows(items, row_length, delimeter)
-			delimeter = delimeter or ", ";
-			local items_count = modkit.table.length(items);
-			row_length = min(items_count, row_length or 3);
-			local word_count = 0;
-			local row_str = "";
-			for _, item in items do
-				word = tostring(item);
-				row_str = row_str .. word .. delimeter;
-
-				word_count = word_count + 1;
-
-				if (mod(word_count, row_length) == 0 or strlen(row_str) > 100) then
-					consoleLog(row_str);
-					word_count = 0;
-					row_str = "";
-				end
-			end
-		end
-
 		-- MK_CONSOLE_LINES = modkit.table.slice(MK_CONSOLE_LINES, 1, MK_CONSOLE_MAX_LINES);
 
 		printConsoleLines(s().MK_CONSOLE_LINES);
 		-- modkit.table.printTbl(s().MK_CONSOLE_LINES, "lines");
+	end
+
+	consoleError = consoleError or function (...)
+		for k, val in arg do
+			if (k ~= "n") then
+				consoleLog("<c=ff4422>" .. tostring(val) .. "</c>");
+			end
+		end
+	end
+
+	--- Logs a table's items in `row_length` rows, which are just the items casted to strings and seperated by `delimeter`.
+	---
+	---@param items table
+	---@param row_length integer? Default `3`
+	---@param delimeter string? Default `", "`
+	consoleLogRows = consoleLogRows or function (items, row_length, delimeter)
+		delimeter = delimeter or ", ";
+		local items_count = modkit.table.length(items);
+		row_length = min(items_count, row_length or 3);
+		local word_count = 0;
+		local row_str = "";
+		for _, item in items do
+			word = tostring(item);
+			row_str = row_str .. word .. delimeter;
+
+			word_count = word_count + 1;
+
+			if (mod(word_count, row_length) == 0 or strlen(row_str) > 100) then
+				consoleLog(row_str);
+				word_count = 0;
+				row_str = "";
+			end
+		end
 	end
 
 	MK_CONSOLE = 1;
