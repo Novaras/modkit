@@ -346,7 +346,7 @@ Valid<b><c=ffffff> verb</c></b> arguments are: grant, all, start, cancel, has, l
 			description = "Logs (echos) the supplied string.",
 			syntax = "log <string...>",
 			example = "log hello world!",
-			fn = function (line)
+			fn = function (_, _, _, line)
 				consoleLog(strsub(line, 4, strlen(line)));
 			end,
 		},
