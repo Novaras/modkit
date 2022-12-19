@@ -44,10 +44,6 @@ const linkAbilityCode = (type) => {
 	return `\naddAbility(NewShipType, "CustomCommand", 1, ${conf.label}, ${conf.energy_params}, "data:scripts/driver.lua", "start", "go", "finish", "${type}", ${conf.extra});`;
 };
 
-const linkModkitRegister = (type) => {
-	return `dostring(dofilepath('data:scripts/modkit/races.lua'); modkit.table.push(modkit.ship_types, '${type}')`;
-};
-
 (async () => {
 	console.log("[modkit] link.js: start! 🔗");
 
@@ -155,6 +151,10 @@ const linkModkitRegister = (type) => {
 							content = content.toString();
 							content = content.replace(/addCustomCode.+/gmi, '');
 							content = content.replace(/addAbility\(NewShipType,\s*"CustomCommand".+/gmi, '');
+						}
+
+						if (type.substring(4) === 'defensefighter') {
+							content = content.replace(/Fighter_vs_Fighter/gmi, 'frontal_defensefighter');
 						}
 	
 						// create the .ship file

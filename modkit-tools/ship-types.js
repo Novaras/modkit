@@ -52,7 +52,7 @@ const objToLuaTable = (obj, indent = 0) => {
 
 	const ship_types = [];
 	for (const path of paths) {
-		console.log(path);
+		// console.log(path);
 		const ship_type = path.split(`/`).slice(-1)[0].split('.')[0];
 		ship_types.push(ship_type);
 	}
