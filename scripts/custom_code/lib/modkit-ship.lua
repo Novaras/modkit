@@ -70,7 +70,7 @@ end
 ---
 --- Values exceeding `1` may be passed.
 ---
----@param speed number
+---@param speed? number
 ---@return number
 function modkit_ship:speed(speed)
 	if (speed) then
@@ -221,6 +221,7 @@ function modkit_ship:distanceTo(other)
 		return SobGroup_GetDistanceToSobGroup(self.own_group, other.own_group);
 	end
 
+	---@type Position|Ship
 	local b = a;
 	if (other[1] and type(other[1]) == "number") then
 		b = other;
@@ -357,9 +358,9 @@ function modkit_ship:hyperspace(to)
 	SobGroup_HyperspaceTo(self.own_group, to);
 end
 
---- Gets or optionally sets the ship's auto-launch behavior. `1` for auto-launch, `0` for stay-docked manual launching.
+--- Gets or optionally sets the ship's auto-launch behavior.
 ---
----@param auto_launch AutoLaunchStatus
+---@param auto_launch? AutoLaunchStatus
 ---@return AutoLaunchStatus
 function modkit_ship:autoLaunch(auto_launch)
 	if (auto_launch) then
@@ -382,7 +383,7 @@ end
 
 --- Gets and optionally sets the ship's [Stance](https://github.com/HWRM/KarosGraveyard/wiki/Variable;-Stance).
 ---
----@param new_stance Stance
+---@param new_stance? Stance
 ---@return Stance
 function modkit_ship:stance(new_stance)
 	if (new_stance) then
@@ -607,7 +608,7 @@ function modkit_ship:invulnerable(invulnerable)
 		end
 		SobGroup_SetInvulnerability(self.own_group, self._invulnerable or 0);
 	end
-	return self._invulnerable;
+	return self._invulnerable == 1;
 end
 
 --- Get or set the stunned status of the ship.
@@ -622,7 +623,7 @@ end
 
 --- Returns whether or not this ship is docked with anything. Optionally, checks if this ship is docked with a specific ship.
 ---@param with Ship
----@return '1'|'nil'
+---@return bool
 function modkit_ship:docked(with)
 	if (with) then
 		return SobGroup_IsDockedSobGroup(self.own_group, with.own_group) == 1;
@@ -711,15 +712,17 @@ function modkit_ship:commandTargets(command, source)
 end
 
 function modkit_ship:beingCaptured()
-	return SobGroup_AnyBeingCaptured(self.own_group);
+	return SobGroup_AnyBeingCaptured(self.own_group) == 1;
 end
 
+---@return bool
 function modkit_ship:allInRealSpace()
-	return SobGroup_AreAllInRealSpace(self.own_group);
+	return SobGroup_AreAllInRealSpace(self.own_group) == 1;
 end
 
+---@return bool
 function modkit_ship:allInHyperSpace()
-	return SobGroup_AreAllInHyperspace(self.own_group);
+	return SobGroup_AreAllInHyperspace(self.own_group) == 1;
 end
 
 -- === Flags (need better name) ===
