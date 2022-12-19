@@ -32,7 +32,7 @@ function printKeyBuffer()
 	print("received buffer: " .. key_buffer);
 	if (strlen(key_buffer) > 0) then
 		local line = gsub(key_buffer, "\"", "\'");
-		consoleLog(line);
+		consoleLog('<c=2255ff><b>' .. line .. '</b></c>');
 
 		local words = strsplit(line, " ", 1);
 		if (words[1] == "do") then
