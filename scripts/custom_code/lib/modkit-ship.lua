@@ -178,14 +178,14 @@ end
 --- Returns whether or not this ship hosts the named subsystem.
 ---
 ---@param subs_name string
----@return '0'|'1'
+---@return bool
 function modkit_ship:hasSubsystem(subs_name)
 	return SobGroup_HasSubsystem(self.own_group, subs_name) == 1;
 end
 
 --- Returns whether or not this ship hosts a research module of any kind.
 ---
----@return boolean
+---@return bool
 function modkit_ship:hasResearchModule()
 	for _, name in {
 		'hgn_c_module_research',
@@ -212,7 +212,7 @@ end
 
 --- Returns the distance between this ship and the given other ship, or the average position if given multiple others.
 ---
----@param other Ship | Ship[]
+---@param other Ship | Ship[] | Position
 ---@return number
 function modkit_ship:distanceTo(other)
 	local a = self:position();
@@ -371,7 +371,7 @@ end
 
 --- Gets and optionally sets the ship's [Rules Of Engagement](https://github.com/HWRM/KarosGraveyard/wiki/Variable;-ROE).
 ---
----@param new_ROE ROE
+---@param new_ROE? ROE
 ---@return ROE
 function modkit_ship:ROE(new_ROE)
 	if (new_ROE) then
@@ -632,7 +632,7 @@ end
 
 --- Returns `1` if this ship is attacking anything, else `nil`. If `target` is provided, check instead if
 -- this ship is attacking that target (instead of anything).
----@param target Ship | 'nil'
+---@param target? Ship
 ---@return bool
 function modkit_ship:attacking(target)
 	if (target) then
@@ -645,7 +645,7 @@ function modkit_ship:attacking(target)
 end
 
 --- Returns whether or not this ship is currently capturing anything, or just the specified `target` if supplied.
----@param target Ship | 'nil'
+---@param target? Ship
 ---@return bool
 function modkit_ship:capturing(target)
 	if (target) then
@@ -768,19 +768,19 @@ end
 --- Returns `1` is this ship is performing `ability` (one of the `AB_` global ability codes).
 ---
 ---@param ability integer
----@return '0'|'1'
+---@return bool
 function modkit_ship:isDoingAbility(ability)
-	return SobGroup_IsDoingAbility(self.own_group, ability);
+	return SobGroup_IsDoingAbility(self.own_group, ability) == 1;
 end
 
 --- Returns `1` if this ship is performing any ability in `abilities`, else `0`.
 ---
 ---@param abilities table
----@return '0'|'1'
+---@return bool
 function modkit_ship:isDoingAnyAbilities(abilities)
 	return modkit.table.any(abilities, function (ability)
 		return %self:isDoingAbility(ability) == 1;
-	end) or 0;
+	end);
 end
 
 function modkit_ship:isDocking()

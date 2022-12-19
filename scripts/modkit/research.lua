@@ -64,7 +64,7 @@ if (modkit.research == nil) then
 
 	--- Gets all research items, optionally as one merged array.
 	---
-	---@param merge boolean
+	---@param merge bool
 	---@return table<RacePrefix, ResearchItem[]>|ResearchItem[]
 	function research_proto:getItems(merge)
 		if (merge) then

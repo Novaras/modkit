@@ -45,7 +45,7 @@ if (modkit.table == nil) then
 		--- Returns a new table comprised of elements in `table` which pass the given `predicate` function (any non-`nil` return is considered a 'pass').
 		---
 		---@param table table
-		---@param predicate fun(val: any, index: any, tbl: table)
+		---@param predicate fun(val: any, index: any, tbl: table): bool
 		---@return table
 		filter = function (table, predicate)
 			local out = {};
@@ -156,13 +156,13 @@ if (modkit.table == nil) then
 				return k;
 			end
 		end,
+		---@return bool
 		any = function (tbl, predicate)
 			for k, v in tbl do
 				if (predicate(v, k, tbl)) then
 					return 1;
 				end
 			end
-			return nil;
 		end,
 		all = function (tbl, predicate)
 			for k, v in tbl do
