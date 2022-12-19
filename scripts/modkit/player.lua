@@ -99,8 +99,7 @@ if (modkit_player_proto == nil) then
 	--- Returns whether or not this player is capable of researching `item`.
 	---
 	---@param item string | table
-	---@deprecated
-	---@return '0'|'1'
+	---@return bool
 	function modkit_player_proto:canResearch(item)
 		local name = modkit.research:resolveName(item); -- item or item.name if table
 		if (name) then
@@ -117,7 +116,7 @@ if (modkit_player_proto == nil) then
 	--- Grants the named research _option_ to this player (they still need to research it).
 	---
 	---@param item string | ResearchItem
-	---@param recursive boolean
+	---@param recursive? bool
 	function modkit_player_proto:grantResearchOption(item, recursive)
 		if (type(item) == "string") then
 			item = modkit.research:find(strlower(item));
@@ -125,27 +124,25 @@ if (modkit_player_proto == nil) then
 
 		if (self:canResearch(item) == 1) then
 			local name = modkit.research:resolveName(item);
-			print("granting " .. name);
+			consoleLog("granting " .. name);
 			return Player_GrantResearchOption(self.id, name);
-		elseif (recursive) then
+		elseif (recursive and strlen(item.requiredresearch) > 0) then
 			-- SuperHeavyChassis & SuperCapitalShipDrive | IonCannons
 			-- f('SuperHeavyChassis')
 
-			if (strlen(item.requiredresearch) > 0) then
-				local requirementStrToLuaCalls = function (str, fn_name, fn_args)
-					local args_str = strimplode(fn_args, ', ');
-					local exec = gsub(str, '(%w+)', fn_name .. '("' .. args_str .. '")');
-					exec = gsub(exec, '[&]', 'and')
-					exec = gsub(exec, '[|]', 'or');
-					exec = "dofilepath('data:scripts/modkit/player.lua'); player = GLOBAL_PLAYERS:get(" .. %self.id .. "); " .. exec;
-					-- print("REQS: " .. exec);
-					return exec;
-				end
-
-				local res_reqs_exec = requirementStrToLuaCalls(item.requiredresearch, 'player:grantResearchOption', { '%1', 1 });
-				print(res_reqs_exec);
-				dostring(res_reqs_exec);
+			local requirementStrToLuaCalls = function (str, fn_name, fn_args)
+				local args_str = strimplode(fn_args, ', ');
+				local exec = gsub(str, '(%w+)', fn_name .. '(' .. args_str .. ')');
+				exec = gsub(exec, '[&]', 'and')
+				exec = gsub(exec, '[|]', 'or');
+				exec = "dofilepath('data:scripts/modkit/player.lua'); player = GLOBAL_PLAYERS:get(" .. %self.id .. "); " .. exec;
+				-- print("REQS: " .. exec);
+				return exec;
 			end
+
+			local res_reqs_exec = requirementStrToLuaCalls(item.requiredresearch, 'player:grantResearchOption', { '"%1"', 1 });
+			print(res_reqs_exec);
+			dostring(res_reqs_exec);
 
 			self:grantResearchOption(item);
 		end
@@ -205,7 +202,7 @@ if (modkit_player_proto == nil) then
 
 	--- Checks if the player has any ship with a research module. Includes hw1 research ships.
 	---
-	---@return boolean
+	---@return bool
 	function modkit_player_proto:hasResearchCapableShip()
 		-- for _, name in {
 		-- 	'hgn_c_module_research',
