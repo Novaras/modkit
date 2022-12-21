@@ -32,6 +32,14 @@ function Universe_GetPlayerShips(player)
 	return ships;
 end
 
+--- Returns whether or not a 'Special_Splitter' has been spawned by the rule `sobgroups_init`, which is only called during
+--- skirmishes (not campaign). May return a flase positive on the very first few game ticks.
+---
+---@return bool
+function Universe_IsCampaign()
+	return Player_GetNumberOfSquadronsOfTypeAwakeOrSleeping(-1, "Special_Splitter") == 0;
+end
+
 --- Unbinds any previously bound functions, then binds to the supplied function.
 ---
 ---@param key number
