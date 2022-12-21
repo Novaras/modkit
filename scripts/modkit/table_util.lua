@@ -235,6 +235,37 @@ if (modkit.table == nil) then
 		return tbl[%table.firstKey(tbl)];
 	end
 
+	--- Returns a string representation of a table. Whitespace and newlines are removed.
+	---
+	---@param tbl table
+	---@return string
+	function table.stringify(tbl)
+		local result = "{";
+		for k, v in tbl do
+			-- convert the key to a string
+			if (type(k) == "number") then
+				k = "[" .. k .. "]";
+			elseif (type(k) == "string") then
+				k = '["' .. k .. '"]';
+			end
+
+			-- convert the value to a string
+			if (type(v) == "table") then
+				v = table.stringify(v);
+			elseif (type(v) == "string") then
+				v = '"' .. v .. '"';
+			else
+				v = tostring(v);
+			end
+
+			-- add the key-value pair to the result string
+			result = result .. k .. "=" .. v .. ",";
+		end
+		result = result .. "}";
+
+		return result;
+	end
+
 	--- _Clones_ a table, meaning the table is copied by value (a new table is created),
 	--- unlike normal copy of a table variable, which merely copies the _reference_ to that table.
 	---
