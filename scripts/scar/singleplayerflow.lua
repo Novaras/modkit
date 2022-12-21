@@ -371,15 +371,6 @@ function singlePlayerOnStartOrLoad(missionNumber)
 
     --reset the music to whatever it was when saved
     KAS_SavedMusicRestore()
-
-    if (modkit_poll_text_capture == nil or Rule_Exists("modkit-textcapture") == 0) then
-        dofilepath("data:scripts/modkit.lua");
-        dofilepath("data:leveldata/multiplayer/lib/modkit-bindkeys.lua");
-        dofilepath("data:leveldata/multiplayer/lib/modkit-textcapture.lua");
-
-        Rule_AddInterval("modkit_bindkeys", 0.1);
-        Rule_AddInterval("modkit_poll_text_capture", 0.5);
-    end
 end
 
 --
@@ -439,6 +430,16 @@ end
 function singlePlayerPostHyperspaceLetterboxWatch()
     KAS_EndStartingLetterbox()
     Rule_Remove("singlePlayerPostHyperspaceLetterboxWatch")
+
+    if (modkit_poll_text_capture == nil or Rule_Exists("modkit_bindkeys") == 0) then
+        print("CONSOLE BIND FOR SINGLEPLAYER");
+        dofilepath("data:scripts/modkit.lua");
+        dofilepath("data:leveldata/multiplayer/lib/modkit-bindkeys.lua");
+        dofilepath("data:leveldata/multiplayer/lib/modkit-textcapture.lua");
+
+        Rule_AddInterval("modkit_bindkeys", 0.1);
+        Rule_AddInterval("modkit_poll_text_capture", 0.5);
+    end
 end
 
 --
