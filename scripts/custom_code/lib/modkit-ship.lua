@@ -746,7 +746,7 @@ end
 --- Returns whether or not this ship can perform the given ability (an `AB_` value).
 ---
 ---@param ability integer
----@param enable '0'|'1'|'nil'
+---@param enable? 0|1
 ---@return '0'|'1'
 function modkit_ship:canDoAbility(ability, enable)
 	enable = enable or SobGroup_CanDoAbility(self.own_group, ability);
