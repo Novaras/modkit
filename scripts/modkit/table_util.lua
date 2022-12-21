@@ -251,7 +251,7 @@ if (modkit.table == nil) then
 
 			-- convert the value to a string
 			if (type(v) == "table") then
-				v = table.stringify(v);
+				v = %table.stringify(v);
 			elseif (type(v) == "string") then
 				v = '"' .. v .. '"';
 			else
