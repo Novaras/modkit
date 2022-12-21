@@ -57,6 +57,7 @@ function OnInit()
 		UI_TimerStop("NewTaskbar", "GameTimer")
 	end
 
+	Rule_AddInterval("sobgroups_init",1)
 	Rule_AddInterval("timer_updating",1.02)	--timed with doai
 end
 
@@ -72,7 +73,7 @@ function timer_updating()
 								end
 						end
 				end
-				Rule_AddInterval("sobgroups_init",1)
+				
 				--Rule_AddInterval("sobgroups_updating",1)
 				Rule_AddInterval("UI_init",0.1)
 				--Rule_AddInterval("UI_updating",0.5)
