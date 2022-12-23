@@ -2,7 +2,10 @@
 -- Ships hook here instead of their own nested scripts
 -- Do not edit unless you know what you're doing.
 
-function NOOP() end
+--- Does nothing: no-operation
+NOOP = NOOP or function()
+	--
+end
 
 if (H_DRIVER == nil) then
 	---@alias HookFn fun(self: DriverShip, group?: string, player_index?: number, ship_id?: number)
