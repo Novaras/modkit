@@ -8,9 +8,24 @@ if (MK_CONSOLE == nil) then
 
 	s = makeStateHandle();
 
+	--- Initialises state for the console code to interact with the UI window. If already initialised, does nothing unless `force` is set.
+	---
+	---@param force? bool
+	function consoleInit(force)
+		if (force or MK_CONSOLE_INIT == nil) then
+			s({
+				MK_CONSOLE_SCREEN_NAME = MK_CONSOLE_SCREEN_NAME,
+				MK_CONSOLE_LINES = {},
+				MK_CONSOLE_LINE_LENGTH = MK_CONSOLE_LINE_LENGTH,
+				MK_CONSOLE_MAX_LINES = MK_CONSOLE_MAX_LINES,
+			});
+			MK_CONSOLE_INIT = 1;
+		end
+	end
+
 	function strToConsoleLines(str)
 		local lines = {};
-		local timestamp = "[" .. strsub(tostring(Universe_GameTime()), 0, 3) .. "] ";
+		local timestamp = "<c=22dd44>[" .. strsub(tostring(Universe_GameTime()), 0, 3) .. "]</c>: ";
 		local max_length = MK_CONSOLE_LINE_LENGTH - strlen(timestamp);
 
 		for i = 1, strlen(str), max_length do
@@ -21,7 +36,11 @@ if (MK_CONSOLE == nil) then
 		return lines;
 	end
 
+	--- Prints the lines in `lines` to the console window, which hosts a textbox per line.
+	---
+	---@param lines string[]
 	function printConsoleLines(lines)
+		lines = lines or {};
 		local rev = modkit.table.reverse(lines);
 		for k, line in rev do
 			local ui_el = "line" .. (MK_CONSOLE_MAX_LINES - k);
@@ -29,16 +48,17 @@ if (MK_CONSOLE == nil) then
 		end
 	end
 
+
+	--- Similar to `print`, except instead sends output to the console window.
+	---
+	--- Internally converts all passed args to strings and concatenates them, then performs some cleanup.
+	---
+	--- Calls `consoleInit`.
+	---
+	---@param ... any[]
 	consoleLog = consoleLog or function (...)
-		if (MK_CONSOLE_INIT == nil) then
-			s({
-				MK_CONSOLE_SCREEN_NAME = MK_CONSOLE_SCREEN_NAME,
-				MK_CONSOLE_LINES = {},
-				MK_CONSOLE_LINE_LENGTH = MK_CONSOLE_LINE_LENGTH,
-				MK_CONSOLE_MAX_LINES = MK_CONSOLE_MAX_LINES,
-			});
-			MK_CONSOLE_INIT = 1;
-		end
+		consoleInit();
+
 		local raw = "";
 		for k, v in arg do
 			if k ~= "n" then
@@ -47,15 +67,11 @@ if (MK_CONSOLE == nil) then
 		end
 		raw = gsub(raw, "\t", "    ");
 
-		local d = UI_GetElementCustomData("MK_ConsoleScreen", "mk_consolescreen_root");
-		if (d == 10) then
-			UI_SetElementCustomData("MK_ConsoleScreen", "mk_consolescreen_root", 50);
-		end
-
 		local new_lines = strToConsoleLines(raw);
 		local lines = s().MK_CONSOLE_LINES or {}; -- tbl ref
 		for _, line in new_lines do
 			print(line);
+			-- a bit extraneous, should probably only write to the handle once
 			s({
 				MK_CONSOLE_LINES = modkit.table.push(lines, line)
 			});
@@ -63,10 +79,8 @@ if (MK_CONSOLE == nil) then
 				modkit.table.pop(lines);
 			end
 		end
-		-- MK_CONSOLE_LINES = modkit.table.slice(MK_CONSOLE_LINES, 1, MK_CONSOLE_MAX_LINES);
 
 		printConsoleLines(s().MK_CONSOLE_LINES);
-		-- modkit.table.printTbl(s().MK_CONSOLE_LINES, "lines");
 	end
 
 	consoleError = consoleError or function (...)
