@@ -16,15 +16,8 @@ dofilepath("data:leveldata/multiplayer/lib/main.lua")
 dofilepath("data:leveldata/multiplayer/lib/carriersonly.lua")
 dofilepath("data:leveldata/multiplayer/lib/nocruisers.lua")
 dofilepath("data:leveldata/multiplayer/lib/strikecraftgamemode.lua")
-dofilepath("data:leveldata/multiplayer/lib/modkit-scheduler.lua")
-dofilepath("data:leveldata/multiplayer/lib/modkit-bindkeys.lua")
-dofilepath("data:leveldata/multiplayer/lib/modkit-textcapture.lua")
-dofilepath("data:leveldata/multiplayer/lib/modkit-hoist-memgroups.lua")
-
-dofilepath("data:scripts/modkit/util.lua");
 
 function OnInit()
-	print("DEATHMATCH INIT 0");
     Volume_AddSphere("centre", {-11111, 11111, 11111,}, 10)
     MPRestrict()
     nocruisers = GetGameSettingAsNumber("nocruisers")
@@ -66,6 +59,12 @@ timer_interval = 5.1
 
 function timer_updating()
     if timer_timing == 1 then
+				-- here we do setup for one-time modkit things
+				dofilepath("data:scripts/modkit.lua");
+				dofilepath("data:leveldata/multiplayer/lib/modkit-scheduler.lua");
+				dofilepath("data:leveldata/multiplayer/lib/modkit-hoist-memgroups.lua");
+				modkitBindKeys();
+
 				for playerIndex = 0,Universe_PlayerCount()-1,1 do
 						if Player_IsAlive(playerIndex) == 1 then
 								if Player_HasShipWithBuildQueue(playerIndex) == 1 then
@@ -73,7 +72,7 @@ function timer_updating()
 								end
 						end
 				end
-				
+
 				--Rule_AddInterval("sobgroups_updating",1)
 				Rule_AddInterval("UI_init",0.1)
 				--Rule_AddInterval("UI_updating",0.5)
@@ -81,8 +80,6 @@ function timer_updating()
 				--Rule_AddInterval("balancing_updating",0.25) --dev. to remove
 
 				Rule_AddInterval("modkit_scheduler_spawn", 0.1);
-				Rule_AddInterval("modkit_bindkeys", 0.1);
-				Rule_AddInterval("modkit_poll_text_capture", 0.5);
 				Rule_AddInterval("modkit_hoist_memgroups", 2);
 
 

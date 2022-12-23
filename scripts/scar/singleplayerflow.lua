@@ -431,6 +431,8 @@ function singlePlayerPostHyperspaceLetterboxWatch()
     KAS_EndStartingLetterbox()
     Rule_Remove("singlePlayerPostHyperspaceLetterboxWatch")
 
+    dofilepath("data:scripts/modkit.lua");
+
     if (modkit_poll_text_capture == nil or Rule_Exists("modkit_bindkeys") == 0) then
         print("CONSOLE BIND FOR SINGLEPLAYER");
         dofilepath("data:scripts/modkit.lua");
