@@ -56,7 +56,6 @@ MK_ConsoleScreen = {
 			pos_XY = {	x = 0.2, y = 0.2, xr = "scr", yr = "scr", },
 		},
 		arrangetype = "vert",
-		customData = 10,
 		customDataString = "",
 		;
 
