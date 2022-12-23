@@ -446,7 +446,7 @@ Valid<b><c=ffffff> verb</c></b> arguments are: grant, all, start, cancel, has, l
 If you pass a lua string with 'lua=', you can include replacement tokens in your code which will be replaced with certain values:
 - $f: the value of 'family='
 - $t: the value of 'type='
-- $g: a sobgroup name containing all the universe ships
+- $g: a sobgroup name containing filtered ships
 - $s: a modkit memgroup containing all the universe ships]],
 			syntax = "foreach (type=[ship-type] or family=[attack-family]) player=[player-id] (lua=[lua-str] or command=[console-command])",
 			example = "foreach type=kus_resourcecollector player=0 lua=SobGroup_SetHealth($g, 0.1)",
