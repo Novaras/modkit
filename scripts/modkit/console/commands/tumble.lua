@@ -8,7 +8,7 @@ COMMANDS.tumble = COMMANDS.tumble or {
         type = PARAMS.str({ 't', 'type' }),
         family = PARAMS.str({ 'f', 'family' }),
         player = PARAMS.intToPlayer(),
-        amount = PARAMS.strToVec3({ 'v', 'val', 'amount', 'tumble' }, "0 0 0"),
+        amount = PARAMS.strToVec3({ 'v', 'val', 'tumble', 'vec' }, "0 0 0"),
     },
     fn = function (param_vals, _, _, line)
         if (not param_vals.amount) then
