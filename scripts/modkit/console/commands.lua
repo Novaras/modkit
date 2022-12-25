@@ -91,7 +91,7 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 				local s, e = strfind(line, name .. "=" .. conf.pattern);
 				e = e or strlen(line);
 				if (s) then
-					print("OK GOT CAPTURE FROM " .. s .. " TO " .. e .. " (label is " .. label .. ")");
+					-- print("OK GOT CAPTURE FROM " .. s .. " TO " .. e .. " (label is " .. label .. ")");
 					local capture = strsub(line, s, e);
 					-- consoleLog("\tcapture: " .. capture);
 					local parts = strsplit(capture, "=", 1);
