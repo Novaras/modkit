@@ -1,7 +1,7 @@
 if (MODKIT_TEXTCAPTURE == nil) then
     if ((modkit or modkit.table or modkitBindKeys) == nil) then
         dofilepath("data:scripts/modkit/table_util.lua");
-        dofilepath("data:scripts/modkit/console/ui-buffer");
+        dofilepath("data:scripts/modkit/console/main.lua");
         dofilepath("data:scripts/modkit/keybinds.lua");
     end
 
