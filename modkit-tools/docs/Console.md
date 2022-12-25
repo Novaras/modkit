@@ -96,8 +96,8 @@ The supplied table would look like this:
 ```lua
 {
     type = 'kus_scout',
-    -- A `Player` object
     position = { 0, 10, -3 },
+    -- A `Player` object
     player = { },
 }
 ```
