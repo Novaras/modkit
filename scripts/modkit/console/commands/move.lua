@@ -8,7 +8,7 @@ COMMANDS.move = COMMANDS.move or {
         type = PARAMS.str({ 't', 'type' }),
         family = PARAMS.str({ 'f', 'family '}),
         player = PARAMS.intToPlayer(),
-        position = PARAMS.strToVec3({ 'p', 'pos', 'position' })
+        position = PARAMS.strToVec3({ 'pos', 'position' })
     },
     flags = {
         'force'
