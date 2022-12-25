@@ -6,6 +6,8 @@ The console can run whole files, and also comes prepackaged with many commands.
 
 Post issues about bugs or feature requests [here](https://github.com/Novaras/modkit/issues).
 
+Code documentation for the console is [here](https://github.com/Novaras/modkit/tree/console-update/modkit-tools/docs/Console.md).
+
 ## Controls
 
 The console is brought up with the `P` key. Close it again with `ESC`.
