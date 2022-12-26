@@ -34,9 +34,9 @@ function strsplit(str, delimeter, return_words_only)
 	end
 	if (modkit.table.length(matches) == 0) then
 		if (return_words_only) then
-			matches[0] = str;
+			matches[1] = str;
 		else
-			matches[0] = {
+			matches[1] = {
 				start = 1,
 				finish = strlen(str),
 				str = str
