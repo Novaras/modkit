@@ -185,7 +185,7 @@ if (MODKIT_TEXTCAPTURE == nil) then
             'PLUS', 'MINUS', 'SLASH', 'APOSTROPHE', 'SPACE', 'F1', 'F2', 'F3', 'F4',
         };
         local nav = {
-            'PAGEUP', 'PAGEDOWN'
+            'PAGEUP', 'PAGEDOWN',
         };
 
         for group_type, group in { letters = letters, numbers = numbers, extras = extras, nav = nav } do
@@ -270,7 +270,7 @@ if (MODKIT_TEXTCAPTURE == nil) then
                 elseif (group_type == 'nav') then
                     rawset(globals(), callback_name, function ()
                         local keyname = %keyname;
-                        local line = nil;
+                        local line = key_buffer;
 
                         if (keyname == 'PAGEUP') then
                             line = input_recall:next();
