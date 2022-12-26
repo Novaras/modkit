@@ -11,29 +11,78 @@ if (MODKIT_TEXTCAPTURE == nil) then
     ---@type string The user's buffered input (input which has not been submitted with `flushKeyBuffer`)
     key_buffer = "";
 
+    -- ===
+
+    input_recall = {
+        ---@type integer
+        idx = 0,
+        ---@type string[]
+        lines = {},
+    };
+
+    function input_recall:set(lines)
+        self.lines = lines;
+        self:resetIdx();
+    end
+
+    function input_recall:clear()
+        self.lines = {};
+    end
+
+    function input_recall:resetIdx()
+        self.idx = modkit.table.length(self.lines) + 1;
+    end
+
+    function input_recall:push(line)
+        modkit.table.push(self.lines, line);
+    end
+
+    function input_recall:next()
+        if (self.lines[1] == nil) then
+            return nil;
+        end
+        self.idx = max(1, self.idx - 1);
+        return self.lines[self.idx];
+    end
+
+    function input_recall:previous()
+        self.idx = min(modkit.table.length(self.lines), self.idx + 1);
+        return self.lines[self.idx];
+    end
+
+    -- ===
+
     ---@type bool Whether or not the console's input is in capslock/shift
     shift_state = nil;
 
     -- ===
 
+    --- Sets the key buffer and displays it in the console input label
+    ---
+    ---@param val string
+    function setKeyBuffer(val)
+        key_buffer = val;
+        UI_SetTextLabelText("MK_ConsoleScreen", 'input_target', prefix .. key_buffer);
+    end
+
     --- Pushes a character to the end of the key buffer, implementing character input behavior.
     ---
     ---@param letter string
     function pushKeyBuffer(letter)
-        key_buffer = (key_buffer or "") .. letter;
-        UI_SetTextLabelText("MK_ConsoleScreen", 'input_target', prefix .. key_buffer);
+        input_recall:resetIdx();
+        setKeyBuffer((key_buffer or "") .. letter);
     end
 
     --- Pops a character from the end of the key buffer, implementing backspace/delete behavior.
     ---
     ---@return string popped The popped char
     function popKeyBuffer()
+        input_recall:resetIdx();
         local popped = "";
         if (strlen(key_buffer) > 0) then
             popped = strsub(key_buffer, strlen(key_buffer) - 1, strlen(key_buffer));
-            key_buffer = strsub(key_buffer, 0, strlen(key_buffer) - 1);
+            setKeyBuffer(strsub(key_buffer, 0, strlen(key_buffer) - 1));
         end
-        UI_SetTextLabelText("MK_ConsoleScreen", 'input_target', prefix .. key_buffer);
         return popped;
     end
 
@@ -76,6 +125,8 @@ if (MODKIT_TEXTCAPTURE == nil) then
     function flushKeyBuffer()
         print("received buffer: " .. key_buffer);
         if (strlen(key_buffer) > 0) then
+            input_recall:push(key_buffer);
+            input_recall:resetIdx();
             local line = gsub(key_buffer, "\"", "\'");
             consoleLog('<c=2255ff><b>' .. line .. '</b></c>');
 
@@ -107,8 +158,7 @@ if (MODKIT_TEXTCAPTURE == nil) then
             end
         end
 
-        key_buffer = "";
-        UI_SetTextLabelText("MK_ConsoleScreen", 'input_target', prefix .. key_buffer);
+        setKeyBuffer('');
     end
 
     --- Enables/disables 'text capture mode', which force binds most of the keys on the keyboard to custom events used by the console.
@@ -125,8 +175,6 @@ if (MODKIT_TEXTCAPTURE == nil) then
 
         -- !!TODO!! All of these definition tables should be moved into conf files or at least free tables
 
-        -- !!TODO!! Not sure why using `.includesValue` to check for a val instead of just using char group name (in {letters, numbers, extras} block)
-
         local letters = {
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
         };
@@ -136,20 +184,21 @@ if (MODKIT_TEXTCAPTURE == nil) then
         local extras = {
             'PLUS', 'MINUS', 'SLASH', 'APOSTROPHE', 'SPACE', 'F1', 'F2', 'F3', 'F4',
         };
+        local nav = {
+            'PAGEUP', 'PAGEDOWN'
+        };
 
-        for _, group in { letters, numbers, extras } do
+        for group_type, group in { letters = letters, numbers = numbers, extras = extras, nav = nav } do
             for i, keyname in group do
                 local char = keyname;
-                local is_letter = modkit.table.includesValue(letters, keyname) == 1;
-                local is_number = modkit.table.includesValue(numbers, keyname) == 1;
 
-                if (modkit.table.includesValue(numbers, keyname) == 1) then
+                if (group_type == 'numbers') then
                     if (keyname == 'ZERO') then
                         char = '0';
                     else
                         char = tostring(i);
                     end
-                elseif (modkit.table.includesValue(extras, keyname) == 1) then
+                elseif (group_type == 'extras') then
                     if (keyname == 'PLUS') then
                         char = '=';
                     elseif (keyname == 'MINUS') then
@@ -172,11 +221,12 @@ if (MODKIT_TEXTCAPTURE == nil) then
                         char = ']';
                     end
                 end
+
                 local keycode = globals()[keyname .. 'KEY'];
                 local callback_name = "pushKeyBuffer" .. keyname;
                 -- print('binding key ' .. keyname .. ' (' .. tostring(keycode) .. ')');
 
-                if (is_letter) then -- its a letter
+                if (group_type == 'letters') then -- its a letter
                     -- print("letter bind is " .. callback_name .. " char = " .. char);
                     rawset(globals(), callback_name, function ()
                         -- print("call for key " .. %char);
@@ -186,7 +236,7 @@ if (MODKIT_TEXTCAPTURE == nil) then
                             pushKeyBuffer(strlower(%char));
                         end
                     end);
-                elseif (is_number) then
+                elseif (group_type == 'numbers') then
                     rawset(globals(), callback_name, function ()
                         local keyname = %keyname;
                         local char = %char;
@@ -216,6 +266,22 @@ if (MODKIT_TEXTCAPTURE == nil) then
                             end
                         end
                         pushKeyBuffer(char);
+                    end);
+                elseif (group_type == 'nav') then
+                    rawset(globals(), callback_name, function ()
+                        local keyname = %keyname;
+                        local line = nil;
+
+                        if (keyname == 'PAGEUP') then
+                            line = input_recall:next();
+                        end
+
+                        if (keyname == 'PAGEDOWN') then
+                            line = input_recall:previous();
+                        end
+
+                        modkit.table.printTbl(input_recall.lines, "rec lines");
+                        setKeyBuffer(line);
                     end);
                 else
                     rawset(globals(), callback_name, function ()
