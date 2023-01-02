@@ -208,6 +208,7 @@ function modkit_ship:hasResearchModule()
 			end
 		end
 	end
+	return nil;
 end
 
 --- Returns the distance between this ship and the given other ship, or the average position if given multiple others.
@@ -923,6 +924,11 @@ end
 
 -- ==== printing (debugging) ====
 
+--- Calls `modkit.table.printTbl` for this 'Ship' (which is just a table).
+---
+--- By default, only outputs certain key details; for a full printing of this Ship table, `verbose` should be set.
+---
+---@param verbose? bool
 function modkit_ship:print(verbose)
 	if (verbose) then
 		modkit.table.printTbl(self, "ship: " .. self.id);
