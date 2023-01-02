@@ -29,7 +29,7 @@ if (modkit.research == nil) then
 	---@field targetname string
 
 	research_proto = {
-		---@type table<RacePrefix, ResearchItem[]>
+		---@type table<RaceName, ResearchItem[]>
 		items = {},
 	};
 
@@ -56,16 +56,29 @@ if (modkit.research == nil) then
 
 	--- Gets the research items for the given race.
 	---
-	---@param race RaceName
+	---@param race RaceName|RaceConfig
 	---@return ResearchItem[]
 	function research_proto:getRaceItems(race)
-		return self.items[race];
+		---@type string
+		local name = race;
+		if (type(race) == "table") then
+			name = race.name;
+		end
+		name = strlower(name);
+		-- print("finding race " .. name);
+		local cfg = modkit.races:find(name);
+		if (cfg) then
+			modkit.table.printTbl(cfg, "cfg");
+			return self.items[cfg.name] or {};
+		end
+
+		return {};
 	end
 
 	--- Gets all research items, optionally as one merged array.
 	---
 	---@param merge bool
-	---@return table<RacePrefix, ResearchItem[]>|ResearchItem[]
+	---@return table<RaceName, ResearchItem[]>|ResearchItem[]
 	function research_proto:getItems(merge)
 		if (merge) then
 			local all = {};
@@ -85,7 +98,7 @@ if (modkit.research == nil) then
 	function research_proto:resolveName(item)
 		if (type(item) == "string") then
 			return item;
-		else
+		elseif (type(item) == "table") then
 			return item.name;
 		end
 	end
@@ -99,20 +112,27 @@ if (modkit.research == nil) then
 	---@return any
 	function research_proto:find(name_or_pred, race)
 		local src = {};
-		race = modkit.races:find(race);
-		if (race) then
-			print("race: " .. race.name);
-			src = self:getRaceItems(race.name);
-		else
-			src = self:getItems(1);
-		end
+		race_cfg = modkit.races:find(race);
+		if (race_cfg) then
+			-- print("race: " .. race_cfg.name);
+			src = self:getRaceItems(race_cfg.name);
 
-		if (type(name_or_pred) == "string") then
-			return modkit.table.find(src, function (item)
-				return strlower(item.name) == %name_or_pred;
-			end);
+			if (type(name_or_pred) == "string") then
+				return modkit.table.find(src, function (item)
+					-- print("is " .. strlower(item.name) .. " == " .. strlower(%name_or_pred) .. "?");
+					return strlower(item.name) == strlower(%name_or_pred);
+				end);
+			else
+				return modkit.table.find(src, name_or_pred);
+			end
 		else
-			return modkit.table.find(src, name_or_pred);
+			local item = nil;
+			for _, race_name in modkit.races:names() do
+				item = self:find(name_or_pred, race_name);
+				if (item) then
+					return item;
+				end
+			end
 		end
 	end
 
