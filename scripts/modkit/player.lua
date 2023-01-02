@@ -16,20 +16,37 @@ if (modkit_player_proto == nil) then
 			---@field get fun(self: GLOBAL_PLAYERS, id: integer): Player
 			GLOBAL_PLAYERS = modkit.MemGroup.Create("mg-players-global");
 
+			---comment
+			---@param player Player
+			local ensureIndicatorTech = function (player)
+				local granted = nil;
+				for _, racename in modkit.races:names() do
+					local res_name = "race" .. racename;
+
+					if (player:canResearch(res_name)) then
+						player:grantResearchOption(res_name);
+					end
+				end
+			end
+
 			for i = 0, Universe_PlayerCount() - 1 do
-				GLOBAL_PLAYERS:set(i, modkit.table:merge(
+				local player = GLOBAL_PLAYERS:set(i, modkit.table:merge(
 					modkit_player_proto,
 					{
 						id = i
 					}
 				));
+				ensureIndicatorTech(player);
 			end
 
 			-- map/ambient units
 			GLOBAL_PLAYERS:set(-1, modkit.table:merge(
 				modkit_player_proto,
 				{
-					id = -1
+					id = -1,
+					race = modkit.table.find(modkit.races.racelist, function (race_conf)
+						return race_conf.name == 'hiigaran';
+					end);
 				}
 			));
 
@@ -48,6 +65,12 @@ if (modkit_player_proto == nil) then
 					return player:isAlive();
 				end);
 			end
+
+			function GLOBAL_PLAYERS:human()
+				return modkit.table.filter(self:all(), function (player)
+					return player:isHuman();
+				end);
+			end
 		end
 	end
 
@@ -55,6 +78,7 @@ if (modkit_player_proto == nil) then
 
 	---@class Player
 	---@field id integer
+	---@field _race? RaceConfig Index of `modkit.races.racelist`
 	modkit_player_proto = {};
 
 	function modkit_player_proto:shipsGroup()
@@ -103,8 +127,8 @@ if (modkit_player_proto == nil) then
 	function modkit_player_proto:canResearch(item)
 		local name = modkit.research:resolveName(item); -- item or item.name if table
 		if (name) then
-			print("can " .. self.id  .. " res " .. name);
-			return Player_CanResearch(self.id, name);
+			-- print("can " .. self.id  .. " res " .. name .. "?: " .. (Player_CanResearch(self.id, name) or 'nil'));
+			return Player_CanResearch(self.id, name) == 1;
 		end
 	end
 
@@ -118,6 +142,7 @@ if (modkit_player_proto == nil) then
 	---@param item string | ResearchItem
 	---@param recursive? bool
 	function modkit_player_proto:grantResearchOption(item, recursive)
+		print("TG: " .. tostring(item));
 		if (type(item) == "string") then
 			item = modkit.research:find(strlower(item));
 		end
@@ -159,7 +184,10 @@ if (modkit_player_proto == nil) then
 	---@return bool
 	function modkit_player_proto:hasResearch(item)
 		local name = modkit.research:resolveName(item);
-		return Player_HasResearch(self.id, name) == 1;
+		if (name) then
+			-- print("does " .. self.id  .. " have res " .. name .. "?: " .. (Player_HasResearch(self.id, name) or 'nil'));
+			return Player_HasResearch(self.id, name) == 1;
+		end
 	end
 
 	function modkit_player_proto:doResearch(item)
@@ -281,6 +309,20 @@ if (modkit_player_proto == nil) then
 		end
 
 		return team;
+	end
+
+	--- Returns the player's race info, initialising it if its not already set.
+	---
+	---@return RaceConfig|nil
+	function modkit_player_proto:race()
+		self._race = self._race or modkit.table.find(modkit.races.racelist, function (race_cfg)
+			print("ATTEMPT TO FIND " .. 'race' .. race_cfg.name);
+			local tech = modkit.research:find('race' .. race_cfg.name, race_cfg.name);
+			print("(check for " .. tostring(tech) .. ")");
+			return %self:hasResearch(tech);
+		end);
+
+		return self._race;
 	end
 
 	--- Kills this player.
