@@ -17,7 +17,7 @@ COMMANDS.shiptypes = COMMANDS.shiptypes or {
                 return strfind(ship_type, %pattern);
             end);
 
-            modkit.table.printTbl(src, "src");
+            -- modkit.table.printTbl(src, "src");
         end
 
         if (src and modkit.table.length(src) > 0) then
