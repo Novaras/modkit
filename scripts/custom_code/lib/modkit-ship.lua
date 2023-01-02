@@ -170,6 +170,7 @@ end
 ---@return number
 function modkit_ship:subsHP(subs_name, HP)
 	if (HP) then
+		HP = max(0, min(1, HP));
 		SobGroup_SetHardPointHealth(self.own_group, subs_name, HP);
 	end
 	return SobGroup_GetHardPointHealth(self.own_group, subs_name);
