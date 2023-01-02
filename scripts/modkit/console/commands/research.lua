@@ -23,17 +23,18 @@ Valid<b><c=ffffff> verb</c></b> arguments are: grant, all, start, cancel, has, l
         ---@type string?
         local res_name = param_vals.research_name;
 
-        modkit.table.printTbl(flags, "flags");
         local recurse = flags.r or flags.recurse;
 
         local verb = words[2] or 'grant';
 
+        if (not player:race()) then
+            consoleError("No race was resolvable for current race (id: " .. Player_GetRace(player.id) .. "), see `races.lua`");
+            return nil;
+        end
+
         if (verb == 'list') then
-            ---@type Ship
-            local ship = modkit.table.first(player:ships());
-            print("prefix: " .. ship:racePrefix());
-            local src = modkit.research:getRaceItems(ship:raceName());
-            modkit.table.printTbl(src, "SRC");
+            local src = modkit.research:getRaceItems(player:race()) or {};
+            -- modkit.table.printTbl(src, "SRC");
 
             local names = modkit.table.map(src, function (item)
                 if (%player:hasResearch(item)) then
@@ -50,16 +51,24 @@ Valid<b><c=ffffff> verb</c></b> arguments are: grant, all, start, cancel, has, l
         end
 
         if (res_name) then
-            if (player:hasResearchCapableShip() == nil) then
-                consoleError("research: no research capable ship found");
-                return nil;
-            end
-
-            modkit.table.printTbl(modkit.table.firstValue(player:ships()):racePrefix(), "OH");
             ---@type ResearchItem
-            local research_item = modkit.research:find(res_name, modkit.table.firstValue(player:ships()):racePrefix());
+            local research_item = modkit.research:find(res_name, player:race());
 
             if (research_item) then
+                if (verb == 'has') then
+                    local phrase = "<cff0000>doesn't have</c>";
+                    if (player:hasResearch(research_item)) then
+                        phrase = '<c=00ff00>has</c>';
+                    end
+                    consoleLog("Player " .. player.id .. " " .. phrase .. " tech " .. research_item.name);
+                    return nil;
+                end
+
+                if (player:hasResearchCapableShip() == nil) then
+                    consoleError("research: no research capable ship found");
+                    return nil;
+                end
+
                 if (verb == 'grant') then
                     -- consoleLog("GRANT " .. research_item.name);
                     -- consoleLog("recurse?: " .. (recurse or 'no'));
@@ -68,12 +77,6 @@ Valid<b><c=ffffff> verb</c></b> arguments are: grant, all, start, cancel, has, l
                     player:doResearch(research_item);
                 elseif (verb == 'cancel') then
                     player:cancelResearch(research_item);
-                elseif (verb == 'has') then
-                    local phrase = "doesn't have";
-                    if (player:hasResearch(research_item)) then
-                        phrase = 'has';
-                    end
-                    consoleLog("Player " .. player.id .. " " .. phrase .. " tech " .. research_item.name);
                 else
                     consoleError("research: missing required argument 1 'verb' {grant|start|cancel|has}, i.e 'research start t=corvettedrive");
                 end
