@@ -13,6 +13,8 @@ if (MODKIT_TEXTCAPTURE == nil) then
 
     -- ===
 
+    --!!TODO!! this is still just global state
+
     input_recall = {
         ---@type integer
         idx = 0,
@@ -38,16 +40,46 @@ if (MODKIT_TEXTCAPTURE == nil) then
     end
 
     function input_recall:next()
+        -- print("get next line");
+        -- print("idx is " .. self.idx);
         if (self.lines[1] == nil) then
             return nil;
         end
         self.idx = max(1, self.idx - 1);
+        -- print("set to " .. self.idx);
+        -- print("returning " .. self.lines[self.idx]);
         return self.lines[self.idx];
     end
 
     function input_recall:previous()
         self.idx = min(modkit.table.length(self.lines), self.idx + 1);
         return self.lines[self.idx];
+    end
+
+    -- ===
+
+    input_cursor = {
+        pos = -1,
+    };
+
+    function input_cursor:reset()
+        pos = strlen(key_buffer);
+    end
+
+    function input_cursor:back(amount)
+        return self:set(self.pos + (amount or 1))
+    end
+
+    function input_cursor:forward(amount)
+        return self:set(self.pos - (amount or 1));
+    end
+
+    function input_cursor:set(pos)
+        -- print("attempt set cursor pos to " .. (pos or 'nil'));
+        self.pos = max(0, min(strlen(key_buffer), pos));
+        -- print("cursor pos now " .. self.pos);
+        UI_SetTextLabelText("MK_ConsoleScreen", 'cursor_offset', strsub(prefix .. key_buffer, 1, self.pos + strlen(prefix) + 1));
+        return self.pos;
     end
 
     -- ===
@@ -62,26 +94,37 @@ if (MODKIT_TEXTCAPTURE == nil) then
     ---@param val string
     function setKeyBuffer(val)
         key_buffer = val;
-        UI_SetTextLabelText("MK_ConsoleScreen", 'input_target', prefix .. key_buffer);
+        local full = prefix .. (key_buffer or '');
+        UI_SetTextLabelText("MK_ConsoleScreen", 'input_target', full);
     end
 
     --- Pushes a character to the end of the key buffer, implementing character input behavior.
     ---
     ---@param letter string
     function pushKeyBuffer(letter)
+        input_cursor:back();
         input_recall:resetIdx();
-        setKeyBuffer((key_buffer or "") .. letter);
+        local pre = strsub(key_buffer, 1, input_cursor.pos);
+        local post = strsub(key_buffer, input_cursor.pos + 1, strlen(key_buffer));
+        setKeyBuffer(pre .. letter .. post);
     end
 
     --- Pops a character from the end of the key buffer, implementing backspace/delete behavior.
     ---
     ---@return string popped The popped char
     function popKeyBuffer()
-        input_recall:resetIdx();
         local popped = "";
         if (strlen(key_buffer) > 0) then
-            popped = strsub(key_buffer, strlen(key_buffer) - 1, strlen(key_buffer));
-            setKeyBuffer(strsub(key_buffer, 0, strlen(key_buffer) - 1));
+            popped = strsub(key_buffer, input_cursor.pos, input_cursor.pos - 1);
+            local pre = strsub(key_buffer, 0, input_cursor.pos);
+            local post = strsub(key_buffer, input_cursor.pos + 2, strlen(key_buffer));
+            setKeyBuffer(pre .. post);
+            if (strlen(key_buffer) > 0) then
+                input_cursor:forward();
+            else
+                input_cursor:reset();
+            end
+            input_recall:resetIdx();
         end
         return popped;
     end
@@ -159,6 +202,8 @@ if (MODKIT_TEXTCAPTURE == nil) then
         end
 
         setKeyBuffer('');
+        input_cursor:reset();
+        input_recall:resetIdx();
     end
 
     --- Enables/disables 'text capture mode', which force binds most of the keys on the keyboard to custom events used by the console.
@@ -173,6 +218,10 @@ if (MODKIT_TEXTCAPTURE == nil) then
         end
         print("=== " .. verb .. " TEXT CAPTURE MODE ===");
 
+        if (input_cursor.pos == -1) then
+            input_cursor:reset();
+        end
+
         -- !!TODO!! All of these definition tables should be moved into conf files or at least free tables
 
         local letters = {
@@ -184,11 +233,14 @@ if (MODKIT_TEXTCAPTURE == nil) then
         local extras = {
             'PLUS', 'MINUS', 'SLASH', 'APOSTROPHE', 'SPACE', 'F1', 'F2', 'F3', 'F4',
         };
-        local nav = {
-            'PAGEUP', 'PAGEDOWN',
+        local recall = {
+            'PAGEUP', 'ARRUP', 'PAGEDOWN', 'ARRDOWN',
         };
+        local cursor = {
+            'ARRRIGHT', 'ARRLEFT',
+        }
 
-        for group_type, group in { letters = letters, numbers = numbers, extras = extras, nav = nav } do
+        for group_type, group in { letters = letters, numbers = numbers, extras = extras, recall = recall, cursor = cursor } do
             for i, keyname in group do
                 local char = keyname;
 
@@ -222,7 +274,7 @@ if (MODKIT_TEXTCAPTURE == nil) then
                     end
                 end
 
-                local keycode = globals()[keyname .. 'KEY'];
+                local keycode = globals()[keyname .. 'KEY'] or globals()[keyname];
                 local callback_name = "pushKeyBuffer" .. keyname;
                 -- print('binding key ' .. keyname .. ' (' .. tostring(keycode) .. ')');
 
@@ -267,21 +319,43 @@ if (MODKIT_TEXTCAPTURE == nil) then
                         end
                         pushKeyBuffer(char);
                     end);
-                elseif (group_type == 'nav') then
+                elseif (group_type == 'recall') then
                     rawset(globals(), callback_name, function ()
                         local keyname = %keyname;
-                        local line = key_buffer;
+                        local line = '';
 
-                        if (keyname == 'PAGEUP') then
+                        if (keyname == 'PAGEUP' or keyname == 'ARRUP') then
                             line = input_recall:next();
                         end
 
-                        if (keyname == 'PAGEDOWN') then
-                            line = input_recall:previous();
+                        if (keyname == 'PAGEDOWN' or keyname == 'ARRDOWN') then
+                            if (input_recall.idx == modkit.table.length(input_recall.lines)) then
+                                line = '';
+                            else
+                                line = input_recall:previous();
+                            end
                         end
 
-                        modkit.table.printTbl(input_recall.lines, "rec lines");
-                        setKeyBuffer(line);
+                        -- modkit.table.printTbl(input_recall.lines, "rec lines");
+                        setKeyBuffer(line or '');
+                        input_cursor:reset();
+                    end);
+                elseif (group_type == 'cursor') then
+                    rawset(globals(), callback_name, function ()
+                        local keyname = %keyname;
+
+                        -- print("HELLO: " .. keyname .. ", " .. %group_type);
+
+                        if (keyname == 'ARRRIGHT') then
+                            input_cursor:back();
+                        end
+
+                        if (keyname == 'ARRLEFT') then
+                            input_cursor:forward();
+                        end
+
+                        setKeyBuffer(key_buffer or '');
+                        input_recall:resetIdx();
                     end);
                 else
                     rawset(globals(), callback_name, function ()
