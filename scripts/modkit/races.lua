@@ -46,6 +46,10 @@ if (MK_RACES == nil) then
 				prefix = "kpr",
 				name = "keeper"
 			},
+			{
+				prefix = "UNKNOWN",
+				name = "UNKNOWN"
+			},
 		}
 	};
 
@@ -67,6 +71,8 @@ if (MK_RACES == nil) then
 		end);
 	end
 
+	---@param name_or_prefix string
+	---@return RaceConfig
 	function races:find(name_or_prefix)
 		return modkit.table.find(self.racelist, function (race_config)
 			return (
