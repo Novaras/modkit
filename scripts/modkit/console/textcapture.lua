@@ -76,7 +76,7 @@ if (MODKIT_TEXTCAPTURE == nil) then
 
     function input_cursor:set(pos)
         -- print("attempt set cursor pos to " .. (pos or 'nil'));
-        self.pos = max(0, min(strlen(key_buffer), pos));
+        self.pos = max(-1, min(strlen(key_buffer), pos));
         -- print("cursor pos now " .. self.pos);
         UI_SetTextLabelText("MK_ConsoleScreen", 'cursor_offset', strsub(prefix .. key_buffer, 1, self.pos + strlen(prefix) + 1));
         return self.pos;
@@ -176,9 +176,8 @@ if (MODKIT_TEXTCAPTURE == nil) then
             local words = strsplit(line, " ", 1);
 
             if (words[1] == "do") then -- run as Lua code
-                local lua_str = modkit.table.reduce(modkit.table.slice(words, 2), function (acc, word)
-                    return acc .. word;
-                end, '');
+                local lua_str = strsub(line, 4);
+                print("DO: " .. (lua_str or 'nil'));
                 dostring(lua_str);
             elseif (words[1] == "run") then -- load & execute a file
                 local has_prefix = nil;
