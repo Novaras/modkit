@@ -56,11 +56,11 @@ Valid<b><c=ffffff> verb</c></b> arguments are: grant, all, start, cancel, has, l
 
             if (research_item) then
                 if (verb == 'has') then
-                    local phrase = "<cff0000>doesn't have</c>";
+                    local phrase = "<cff0000> doesn't have</c>";
                     if (player:hasResearch(research_item)) then
-                        phrase = '<c=00ff00>has</c>';
+                        phrase = '<c=00ff00> has</c>';
                     end
-                    consoleLog("Player " .. player.id .. " " .. phrase .. " tech " .. research_item.name);
+                    consoleLog("Player " .. player.id .. "<b>" .. phrase .. " </b>tech " .. research_item.name);
                     return nil;
                 end
 
