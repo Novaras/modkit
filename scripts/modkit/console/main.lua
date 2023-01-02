@@ -3,7 +3,7 @@ if (MK_CONSOLE == nil) then
 	dofilepath("data:scripts/modkit/table_util.lua");
 
 	MK_CONSOLE_SCREEN_NAME = "MK_ConsoleScreen";
-	MK_CONSOLE_LINE_LENGTH = 128;
+	MK_CONSOLE_LINE_LENGTH = 150;
 	MK_CONSOLE_MAX_LINES = 24;
 
 	s = makeStateHandle();
@@ -25,11 +25,12 @@ if (MK_CONSOLE == nil) then
 
 	function strToConsoleLines(str)
 		local lines = {};
-		local timestamp = "<c=22dd44>[" .. strsub(tostring(Universe_GameTime()), 0, 3) .. "]</c>: ";
+		-- local timestamp = "<c=22dd44>[" .. strsub(tostring(Universe_GameTime()), 0, 4) .. "]</c>: ";
+		local timestamp = '';
 		local max_length = MK_CONSOLE_LINE_LENGTH - strlen(timestamp);
 
 		for i = 1, strlen(str), max_length do
-			local line = strsub(str, i - 1, i + MK_CONSOLE_LINE_LENGTH);
+			local line = timestamp .. strsub(str, i - 1, i + max_length);
 			modkit.table.push(lines, line);
 		end
 
