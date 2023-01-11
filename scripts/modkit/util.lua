@@ -1,6 +1,6 @@
 --- Adds all the ships in `ships` to a new sobgroup `group_name`.
 ---@param ships Ship[]
----@param group_name string
+---@param group_name? string
 ---@return string
 function SobGroup_FromShips(ships, group_name)
 	local new_group = SobGroup_Fresh(group_name);
@@ -30,4 +30,23 @@ function Universe_GetPlayerShips(player)
 		return ship.player.id == %player.id;
 	end);
 	return ships;
+end
+
+--- Returns whether or not a 'Special_Splitter' has been spawned by the rule `sobgroups_init`, which is only called during
+--- skirmishes (not campaign). May return a flase positive on the very first few game ticks.
+---
+---@return bool
+function Universe_IsCampaign()
+	return Player_GetNumberOfSquadronsOfTypeAwakeOrSleeping(-1, "Special_Splitter") == 0;
+end
+
+--- Unbinds any previously bound functions, then binds to the supplied function.
+---
+---@param key number
+---@param fn_name? string
+function UI_ForceBindKeyEvent(key, fn_name)
+	UI_UnBindKeyEvent(key);
+	if (fn_name) then
+		UI_BindKeyEvent(key, fn_name);
+	end
 end

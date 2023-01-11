@@ -1,3 +1,4 @@
+dofilepath("data:scripts/modkit/console.lua");
 
 ---@class SchedulerAttribs
 ---@field init 'nil'|'1'

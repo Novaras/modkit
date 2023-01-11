@@ -70,7 +70,7 @@ end
 ---
 --- Values exceeding `1` may be passed.
 ---
----@param speed number
+---@param speed? number
 ---@return number
 function modkit_ship:speed(speed)
 	if (speed) then
@@ -170,35 +170,72 @@ end
 ---@return number
 function modkit_ship:subsHP(subs_name, HP)
 	if (HP) then
+		HP = max(0, min(1, HP));
 		SobGroup_SetHardPointHealth(self.own_group, subs_name, HP);
 	end
 	return SobGroup_GetHardPointHealth(self.own_group, subs_name);
 end
 
---- Returns whether or not this ship host's the named subsystem.
+--- Returns whether or not this ship hosts the named subsystem.
 ---
 ---@param subs_name string
----@return '0'|'1'
+---@return bool
 function modkit_ship:hasSubsystem(subs_name)
-	return SobGroup_HasSubsystem(self.own_group, subs_name);
+	return SobGroup_HasSubsystem(self.own_group, subs_name) == 1;
+end
+
+--- Returns whether or not this ship hosts a research module of any kind.
+---
+---@return bool
+function modkit_ship:hasResearchModule()
+	for _, name in {
+		'hgn_c_module_research',
+		'hgn_c_module_researchadvanced',
+		'hgn_ms_module_research',
+		'hgn_ms_module_researchadvanced',
+		'vgr_c_module_research',
+		'vgr_ms_module_research',
+		'hw1_researchmodule'
+	} do
+		if (self:hasSubsystem(name)) then
+			return 1;
+		end
+
+		if (name == 'hw1_researchmodule') then
+			for i = 1, 5 do
+				if (self:hasSubsystem(name .. i)) then
+					return 1;
+				end
+			end
+		end
+	end
+	return nil;
 end
 
 --- Returns the distance between this ship and the given other ship, or the average position if given multiple others.
 ---
----@param other Ship | Ship[]
+---@param other Ship | Ship[] | Position
 ---@return number
 function modkit_ship:distanceTo(other)
-	if (type(other.own_group) == "string") then -- assume ship
+	local a = self:position();
+
+	if (other.own_group) then -- ship
 		return SobGroup_GetDistanceToSobGroup(self.own_group, other.own_group);
-	else -- ship group
-		local a = self:position();
-		local b = SobGroup_GetPosition(SobGroup_FromShips(SobGroup_Fresh("__"), other));
-		return sqrt(
-			(b[1] - a[1]) ^ 2 +
-			(b[2] - a[2]) ^ 2 +
-			(b[3] - a[3]) ^ 2
-		);
 	end
+
+	---@type Position|Ship
+	local b = a;
+	if (other[1] and type(other[1]) == "number") then
+		b = other;
+	else
+		b = SobGroup_GetPosition(SobGroup_FromShips(other));
+	end
+
+	return sqrt(
+		(b[1] - a[1]) ^ 2 +
+		(b[2] - a[2]) ^ 2 +
+		(b[3] - a[3]) ^ 2
+	);
 end
 
 --- Returns the squad (batch) size of the ship, which may be a squadron.
@@ -232,7 +269,7 @@ function modkit_ship:attack(targets)
 	elseif (targets.own_group) then
 		return SobGroup_Attack(self.player.id, self.own_group, targets.own_group);
 	else
-		local temp_group = SobGroup_FromShips(self.own_group .. "-temp-attack-group", targets);
+		local temp_group = SobGroup_FromShips(targets, self.own_group .. "-temp-attack-group");
 		SobGroup_Attack(self.player.id, self.own_group, temp_group);
 	end
 end
@@ -248,7 +285,7 @@ function modkit_ship:capture(targets)
 	if (targets.own_group) then
 		SobGroup_CaptureSobGroup(self.own_group, targets.own_group);
 	else
-		local temp_group = SobGroup_FromShips(self.own_group .. "-temp-capture-group", targets);
+		local temp_group = SobGroup_FromShips(targets, self.own_group .. "-temp-capture-group");
 		SobGroup_CaptureSobGroup(self.own_group, temp_group);
 	end
 end
@@ -260,7 +297,7 @@ function modkit_ship:salvage(targets)
 	if (targets.own_group) then
 		SobGroup_SalvageSobGroup(self.own_group, targets.own_group);
 	else
-		local temp_group = SobGroup_FromShips(self.own_group .. "-temp-salvage-group", targets);
+		local temp_group = SobGroup_FromShips(targets, self.own_group .. "-temp-salvage-group");
 		SobGroup_SalvageSobGroup(self.own_group, temp_group);
 	end
 end
@@ -288,7 +325,7 @@ function modkit_ship:guard(target)
 	if (target.own_group) then
 		self._guard_group = target.own_group;
 	else -- collection of ships
-		self._guard_group = SobGroup_FromShips(self.own_group .. "_guard_group", target);
+		self._guard_group = SobGroup_FromShips({ target }, self.own_group .. "_guard_group");
 	end
 	return SobGroup_GuardSobGroup(self.own_group, self._guard_group);
 end
@@ -323,9 +360,9 @@ function modkit_ship:hyperspace(to)
 	SobGroup_HyperspaceTo(self.own_group, to);
 end
 
---- Gets or optionally sets the ship's auto-launch behavior. `1` for auto-launch, `0` for stay-docked manual launching.
+--- Gets or optionally sets the ship's auto-launch behavior.
 ---
----@param auto_launch AutoLaunchStatus
+---@param auto_launch? AutoLaunchStatus
 ---@return AutoLaunchStatus
 function modkit_ship:autoLaunch(auto_launch)
 	if (auto_launch) then
@@ -337,7 +374,7 @@ end
 
 --- Gets and optionally sets the ship's [Rules Of Engagement](https://github.com/HWRM/KarosGraveyard/wiki/Variable;-ROE).
 ---
----@param new_ROE ROE
+---@param new_ROE? ROE
 ---@return ROE
 function modkit_ship:ROE(new_ROE)
 	if (new_ROE) then
@@ -348,7 +385,7 @@ end
 
 --- Gets and optionally sets the ship's [Stance](https://github.com/HWRM/KarosGraveyard/wiki/Variable;-Stance).
 ---
----@param new_stance Stance
+---@param new_stance? Stance
 ---@return Stance
 function modkit_ship:stance(new_stance)
 	if (new_stance) then
@@ -386,22 +423,22 @@ end
 --- Returns the 3-character race string of the ship.
 --- **Note: This is the host race of the _ship type_, as opposed to the player's race.**
 ---
----@return string
-function modkit_ship:race()
+---@return RacePrefix
+function modkit_ship:racePrefix()
 	return strsub(self.ship_type, 0, 3);
+end
+
+--- Returns the actual race name of the ship (see `races.lua`)
+---
+---@return RaceName
+function modkit_ship:raceName()
+	return modkit.races:find(self:racePrefix()).name;
 end
 
 -- === Attack family queries ===
 
 function modkit_ship:attackFamily()
-	if (attackFamily == nil) then
-		dofilepath("data:scripts/familylist.lua");
-	end
-	for i, family in attackFamily do
-		if (SobGroup_AreAnyFromTheseAttackFamilies(self.own_group, family.name) == 1) then
-			return strlower(family.name);
-		end
-	end
+	return SobGroup_GetFirstAttackFamily(self.own_group);
 end
 
 ---@return bool
@@ -573,7 +610,7 @@ function modkit_ship:invulnerable(invulnerable)
 		end
 		SobGroup_SetInvulnerability(self.own_group, self._invulnerable or 0);
 	end
-	return self._invulnerable;
+	return self._invulnerable == 1;
 end
 
 --- Get or set the stunned status of the ship.
@@ -588,7 +625,7 @@ end
 
 --- Returns whether or not this ship is docked with anything. Optionally, checks if this ship is docked with a specific ship.
 ---@param with Ship
----@return '1'|'nil'
+---@return bool
 function modkit_ship:docked(with)
 	if (with) then
 		return SobGroup_IsDockedSobGroup(self.own_group, with.own_group) == 1;
@@ -598,7 +635,7 @@ end
 
 --- Returns `1` if this ship is attacking anything, else `nil`. If `target` is provided, check instead if
 -- this ship is attacking that target (instead of anything).
----@param target Ship | 'nil'
+---@param target? Ship
 ---@return bool
 function modkit_ship:attacking(target)
 	if (target) then
@@ -611,7 +648,7 @@ function modkit_ship:attacking(target)
 end
 
 --- Returns whether or not this ship is currently capturing anything, or just the specified `target` if supplied.
----@param target Ship | 'nil'
+---@param target? Ship
 ---@return bool
 function modkit_ship:capturing(target)
 	if (target) then
@@ -677,15 +714,17 @@ function modkit_ship:commandTargets(command, source)
 end
 
 function modkit_ship:beingCaptured()
-	return SobGroup_AnyBeingCaptured(self.own_group);
+	return SobGroup_AnyBeingCaptured(self.own_group) == 1;
 end
 
+---@return bool
 function modkit_ship:allInRealSpace()
-	return SobGroup_AreAllInRealSpace(self.own_group);
+	return SobGroup_AreAllInRealSpace(self.own_group) == 1;
 end
 
+---@return bool
 function modkit_ship:allInHyperSpace()
-	return SobGroup_AreAllInHyperspace(self.own_group);
+	return SobGroup_AreAllInHyperspace(self.own_group) == 1;
 end
 
 -- === Flags (need better name) ===
@@ -709,7 +748,7 @@ end
 --- Returns whether or not this ship can perform the given ability (an `AB_` value).
 ---
 ---@param ability integer
----@param enable '0'|'1'|'nil'
+---@param enable? 0|1
 ---@return '0'|'1'
 function modkit_ship:canDoAbility(ability, enable)
 	enable = enable or SobGroup_CanDoAbility(self.own_group, ability);
@@ -734,19 +773,19 @@ end
 --- Returns `1` is this ship is performing `ability` (one of the `AB_` global ability codes).
 ---
 ---@param ability integer
----@return '0'|'1'
+---@return bool
 function modkit_ship:isDoingAbility(ability)
-	return SobGroup_IsDoingAbility(self.own_group, ability);
+	return SobGroup_IsDoingAbility(self.own_group, ability) == 1;
 end
 
 --- Returns `1` if this ship is performing any ability in `abilities`, else `0`.
 ---
 ---@param abilities table
----@return '0'|'1'
+---@return bool
 function modkit_ship:isDoingAnyAbilities(abilities)
 	return modkit.table.any(abilities, function (ability)
 		return %self:isDoingAbility(ability) == 1;
-	end) or 0;
+	end);
 end
 
 function modkit_ship:isDocking()
@@ -886,6 +925,11 @@ end
 
 -- ==== printing (debugging) ====
 
+--- Calls `modkit.table.printTbl` for this 'Ship' (which is just a table).
+---
+--- By default, only outputs certain key details; for a full printing of this Ship table, `verbose` should be set.
+---
+---@param verbose? bool
 function modkit_ship:print(verbose)
 	if (verbose) then
 		modkit.table.printTbl(self, "ship: " .. self.id);

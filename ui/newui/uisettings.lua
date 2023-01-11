@@ -504,13 +504,13 @@ GameScreens = {
 		activated =0, -- Activate on front end startup (default is zero)
 		type = "PropertyEditorScreen",  -- Type of menu (default is UIScreen)
 	},
-	{
-		-- This is the LuaScript that has the code for the screen
-		name = "GameBalanceScreen",
-		filename = "DATA:\\UI\\NewUI\\Developer\\GameBalanceScreen.lua",
-		activated =0, -- Activate on front end startup (default is zero)
-		type = "GameBalanceScreen",  -- Type of menu (default is UIScreen)
-	},
+	-- {
+	-- 	-- This is the LuaScript that has the code for the screen
+	-- 	name = "SpawnerScreen",
+	-- 	filename = "DATA:\\UI\\NewUI\\Developer\\SpawnerScreen.lua",
+	-- 	activated =0, -- Activate on front end startup (default is zero)
+	-- 	type = "SpawnerScreen",  -- Type of menu (default is UIScreen)
+	-- },
 	-- {
 	-- 	-- This is the LuaScript that has the code for the screen
 	-- 	name = "DeveloperScreen",
@@ -532,4 +532,11 @@ GameScreens = {
 		filename = "DATA:\\UI\\NewUI\\DefaultStateScreen.lua",
 		activated = 0,
 	},
+
+	{
+		name = "MK_ConsoleScreen",
+		filename = "DATA:\\UI\\NewUI\\mk_consolescreen.lua",
+		activated = 0,
+	},
 }
+ 

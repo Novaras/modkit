@@ -2,10 +2,12 @@
 -- Ships hook here instead of their own nested scripts
 -- Do not edit unless you know what you're doing.
 
-function NOOP() end
+--- Does nothing: no-operation
+NOOP = NOOP or function()
+	--
+end
 
 if (H_DRIVER == nil) then
-
 	---@alias HookFn fun(self: DriverShip, group?: string, player_index?: number, ship_id?: number)
 
 	---@class DriverShip: Ship
@@ -80,6 +82,30 @@ if (H_DRIVER == nil) then
 			ship_id,
 			modkit.compose:instantiate(type_group, player_index, ship_id)
 		);
+
+		local l = {};
+		local f = function (...)
+			local line = "";
+			for k, v in arg do
+				if (k ~= "n") then
+					if (type(v) ~= "string") then
+						line = line .. tostring(v);
+					else
+						line = line .. v;
+					end
+				end
+			end
+			modkit.table.push(%l, line);
+		end
+		modkit.table.printTbl({ type_group = type_group, player_index = player_index, ship_id = ship_id }, "caller?", nil, f, 1);
+		local stateHnd = makeStateHandle();
+
+		local str_representation = type_group .. "," .. player_index .. "," .. ship_id;
+
+		stateHnd({
+			GLOBAL_SHIPS = modkit.table.push(stateHnd().GLOBAL_SHIPS or {}, str_representation);
+		});
+
 		-- ensure non-nil when calling these:
 		for i, v in {
 			"load",

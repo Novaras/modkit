@@ -234,6 +234,7 @@ if (H_SOBGROUP ~= 1) then
 	---@param vol_type? string
 	---@return string
 	function Volume_Fresh(name, position, radius, vol_type)
+		name = name or ("_Volume_Fresh_" .. %freshGroupIndex());
 		position = position or { 0, 0, 0 };
 		radius = radius or 10;
 		vol_type = vol_type or "sphere";
@@ -244,6 +245,53 @@ if (H_SOBGROUP ~= 1) then
 		};
 		vol_type_calls[vol_type]();
 		return name;
+	end
+
+	function SobGroup_GetFirstAttackFamily(group)
+		if (attackFamily == nil) then
+			dofilepath("data:scripts/familylist.lua");
+		end
+		for i, family in attackFamily do
+			if (SobGroup_AreAnyFromTheseAttackFamilies(group, family.name) == 1) then
+				return strlower(family.name);
+			end
+		end
+	end
+
+	function SobGroup_HasAnyFamilyOf(group, families)
+		for k, v in families do
+			if (SobGroup_GetFirstAttackFamily(group) == v) then
+				return 1;
+			end
+		end
+	end
+
+	function SobGroup_HasFighters(group)
+		return SobGroup_HasAnyFamilyOf(group, {
+			"fighter",
+			"fighter_hw1"
+		});
+	end
+
+	function SobGroup_HasCorvettes(group)
+		return SobGroup_HasAnyFamilyOf(group, {
+			"corvette",
+			"corvette_hw1"
+		});
+	end
+
+	function SobGroup_HasFrigates(group)
+		return SobGroup_HasAnyFamilyOf(group, {
+			"frigate"
+		});
+	end
+
+	function SobGroup_HasCapitals(group)
+		return SobGroup_HasAnyFamilyOf(group, {
+			"smallcapitalship",
+			"bigcapitalship",
+			"mothership"
+		});
 	end
 
 	DEFAULT_SOBGROUP = SobGroup_Fresh("__")

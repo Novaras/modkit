@@ -30,7 +30,8 @@ modkit_base = {
 			own_group = SobGroup_Clone(g, g .. "-" .. s),
 			player = GLOBAL_PLAYERS:get(p),
 			_tick = 0,
-			created_at = Universe_GameTime()
+			created_at = Universe_GameTime(),
+			ship_type = g,
 		};
 	end
 };

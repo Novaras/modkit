@@ -28,7 +28,7 @@ if (modkit.compose == nil) then
 	--- are overlayed on top of the final base.
 	---
 	---@param proto table
-	---@param type_filter string[]
+	---@param type_filter? string[]
 	function compose:addBaseProto(proto, type_filter)
 		self._base[modkit.table.length(self._base) + 1] = {
 			proto = proto,
