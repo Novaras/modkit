@@ -1,0 +1,25 @@
+filerange 60700 60843
+rangestart 60700 60843
+
+// Subtitles
+60701	Hyperspace interrupted.
+60702	Shutting down the inhibitor field has alerted the Taiidan to our presence.
+60703	Shutting down the inhibitor field has alerted the Kushan to our presence.
+60704	We are on a collision course with a very large object.  It appears to have escorts.  It must be destroyed before it impacts the Mothership.
+60705	Impact in twenty minutes.
+60706	Impact in fifteen minutes.
+60707	Impact in ten minutes.
+60708	Impact in five minutes.
+60709	Impact in four minutes.
+60710	Impact in three minutes.
+60711	Impact in two minutes.
+60712	Impact in one minute.
+60713	Standby for impact.
+60714	Hyperspace module charged and ready.
+60715	Taiidan Empire
+60735	Impact in thirty seconds.
+60736	Impact in ten seconds.
+60843	A very large object is on a collision course with the Mothership and closing quickly.  Destroy the object before it is able to impact the Mothership.
+60700	Massive Asteroid
+
+rangeend

@@ -1,0 +1,38 @@
+filerange 60376 60806
+rangestart 60376 60806
+
+// Subtitles
+60376	Fleet Intelligence going online.  Our task is to analyze all sensor data and generate mission objectives.  Before the hyperdrive test, several trials must be completed.
+60377	Test construction by building the primary research ship.
+60378	Test resource processing by harvesting the asteroids provided nearby.
+60379	Stand by to begin combat trials.  First, we will be monitoring formation performance.
+60380	Target Drones have been provided here.  Assign a formation to your Fighters and destroy the Drones.
+60381	Target Drones destroyed.  Replacement Drones are being sent to the same location.  Completion of this trial requires the use of a formation.  Begin again.
+60382	Formation trial complete.  Flight analysis shows a twenty-two percent increase in combat performance.
+60383	The next trial will test the effectiveness of tactics.  Stand by to begin tactics trial.  Use Aggressive or Evasive tactics, and engage the Target Drones here.
+60384	Target Drones destroyed.  Replacement Drones are being sent to the same location.  Completion of this trial requires the use of tactics.  Begin again.
+60385	Tactics trial complete.
+60386	The next trial will test the performance of the Salvage Corvette.  Build one and capture the Target Drone here.
+60387	Target Drone destroyed.  A replacement Drone is being sent to the same location.  Completion of this trial requires a successful capture of the drone.  Begin again.
+60388	Interceptors are ready for construction.
+60389	Advanced Target Drones with heavier armor have been provided.  Using Interceptors, begin the mock combat exercise here.
+60390	Target Drones destroyed.  Replacement Drones are being sent to the same location.  Completion of this trial requires the use of Interceptors.  Begin again.
+60391	Hyperspace module charging.  35% capacity and rising.  The Mothership will be ready for the Hyperdrive test in 10 minutes.
+60392	Stand by for Hyperdrive test.  Internal pressure doors will be sealed in 2 minutes.  Abort systems standing by.
+60393	Hyperspace module fully charged.  I am ready to initiate quantum wave generation on your mark.  Good luck, everyone.
+60394	All sections have reported in.  We are clear to proceed.  Trigger the hyperspace drive at your discretion.
+60395	Combat Training
+60734	The primary Research Ship has been constructed and the Research Division is online.  Begin Fighter Chassis research immediately.
+60800	We must test the Mothership's resource processing capability.  Collect useable hard materials from the remaining asteroids in Kharak's orbit.
+60801	Propulsion and weapons research is too hazardous to conduct within the Mothership.  Construct a research vessel to safely house these experiments.
+60802	Though unlikely, we must prepare for the possibility of encountering hostile alien craft.  We should finalize our plans for a proper zero-g fighter.
+60803	We need to test Fleet Command's command and control interface.  Assign strikecraft a formation and send them to destroy the assigned drones.
+60804	We must drill our pilots' handling of tactical adaptibility.  Assign them a new tactic and destroy the remaining drones.
+60805	It is time to test the hard asset retrieval process of the Salvage Corvette.  Capture the drone and return it to the Mothership for processing.
+60806	We must test the combat effectiveness of our new fighter class, the Interceptor.  Use Interceptors to destroy the advanced combat drones.
+60396	Formation Trial Target Drones
+60397	Tactics Trial Target Drones
+60398	Interceptor Trial
+60399	Salvage Trial Target Drone
+
+rangeend

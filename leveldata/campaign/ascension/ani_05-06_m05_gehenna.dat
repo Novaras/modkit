@@ -1,0 +1,10 @@
+filerange 55070 55073
+rangestart 55070 55073
+
+// Subtitles
+55070	Hyperdrive malfunction!
+55071	Emergency Override not responding!
+55072	The Oracle is interfering with the hyperspace NAV systems. It has taken over our course.
+55073	Standby for emergency hyperspace exit.
+
+rangeend

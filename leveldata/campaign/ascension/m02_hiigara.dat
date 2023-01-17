@@ -1,0 +1,163 @@
+filerange 40000 40475
+rangestart 40000 40475
+
+// Subtitles
+40000	Protect the crew transports.
+40001	Destroy Vaygr Fighter Facility.
+40002	Destroy Vaygr Carrier before it escapes.
+40003	Build a Corvette Facility.
+40004	Do not allow Captain Soban's ship to be destroyed.
+40010	Build Resource Collectors.
+40005	Hiigaran Navy
+40006	Vaygr
+40007	Hiigaran Navy
+40008	Ferin Sha Fleet
+40009	Ferin Sha Fleet
+40017	SAVING GAME...
+40020	HIIGARA - HOMEWORLD SYSTEM
+40021	MISSION FAILED
+40022	MISSION SUCCESSFUL
+40024	Hyperspace Jump successful.  The Core is operating at full capacity.
+40018	We made it.
+40023	Recommend construction of additional Resource Collectors to increase harvesting efficiency.
+40025	We have reached the Hiigaran system. Vaygr forces are being reported in all sectors. They will know we have arrived.
+40026	*** AXED *** Crew transports are inbound to dock with the Mothership.
+40019	A Vaygr Carrier has been detected in the area.
+40027	The transports are under attack and require immediate assistance.
+40028	*** AXED *** Defend the transports.
+40029	At least four transports must dock with the Mothership to meet minimum crew requirements.
+40039	Six Crew Transports are inbound to dock with the Mothership.
+40030	Transport Bishop One lost.
+40031	Threat eliminated.  Transport Bishop One is safe.
+40034	Transport Bishop One sustaining critical damage.
+40035	Send Interceptors immediately to defend Bishop One.
+40040	Transport Bishop Two lost.
+40041	Threat eliminated.  Transport Bishop Two is safe.
+40044	Transport Bishop Two sustaining critical damage.
+40045	Send Interceptors immediately to defend Bishop Two.
+40050	Transport Bishop Three lost.
+40051	Threat eliminated.  Transport Bishop Three is safe.
+40054	Transport Bishop Three sustaining critical damage.
+40055	Send Interceptors immediately to defend Bishop Three.
+40060	Transport Bishop Four lost.
+40061	Threat eliminated.  Transport Bishop Four is safe.
+40064	Transport Bishop Four sustaining critical damage.
+40065	Send Interceptors immediately to defend Bishop Four.
+40070	Transport Bishop Five lost.
+40071	Threat eliminated.  Transport Bishop Five is safe.
+40074	Transport Bishop Five sustaining critical damage.
+40075	Send Interceptors immediately to defend Bishop Five.
+40080	Transport Bishop Six lost.
+40081	Threat eliminated.  Transport Bishop Six is safe.
+40084	Transport Bishop Six sustaining critical damage.
+40085	Send Interceptors immediately to defend Bishop Six.
+40090	Engine systems running at minimal capacity.
+40091	Engine performance at twenty percent.
+40100	Crew transport docked.
+40101	Subsystem and Engineering personnel transferring.
+40102	*** AXED *** Crew transfer complete.
+40103	The Mothership now has additional construction capabilities.
+40104	Corvette Facility available for construction.
+40105	*** AXED *** Crew transport docked.
+40106	Sensor crews transferring.
+40107	*** AXED *** Crew transfer complete.
+40108	Mothership sensor systems are now operating at full capacity.
+40110	*** AXED *** Crew transport docked.
+40111	Research staff and science teams transferring.
+40112	*** AXED *** Crew transfer complete.
+40113	New research options available.
+40114	*** AXED *** Construct a Research Module.
+40120	*** AXED *** Crew transport docked.
+40121	Engine and powerplant crews transferring.
+40122	*** AXED *** Crew transfer complete.
+40123	Engine performance increased to normal levels.
+40125	*** AXED *** Standard Drive power output has increased to normal levels.
+40126	Four crew transports docked.  We have met minimum crew requirements.
+40130	*** AXED *** Crew transport docked.
+40131	Elite Fighter pilots transferring.
+40132	*** AXED *** Crew transfer complete.
+40133	*** AXED *** Elite Bomber squadrons launching.
+40134	Elite Bomber squadrons launching from Mothership.
+40140	*** AXED *** Crew transport docked.
+40141	Elite Corvette crews transferring.
+40142	*** AXED *** Crew transfer complete.
+40143	*** AXED *** Elite Corvette squadrons launching.
+40144	Elite Corvette squadrons launching from Mothership.
+40150	Three crew transports lost.
+40160	Hyperspace signature detected.
+40161	The Vaygr are using Frigates to attack the transports.
+40162	Some appear to be equipped with heavy anti-Fighter weaponry.
+40165	The Vaygr Frigates have been destroyed.
+40167	Receiving transmission from Hiigaran Defense Grid.
+40168	Allied forces are arriving.
+40170	With the help of Captain Soban we should be able to save the rest of the transports.
+40175	The Vaygr Carrier is retreating.
+40176	It must be destroyed before it can escape.
+40171	Captain Soban will attempt to capture it to gain intelligence on the Vaygr battle plans.
+40172	Damage the Carrier to allow Captain Soban easier access through the hull.
+40173	Do not allow the Carrier to be destroyed.
+40177	The Vaygr Carrier has escaped.
+40178	The Vaygr Carrier has been destroyed.
+40179	Fleet, this is Captain Soban.
+40180	The Homeworld system will soon be overrun by Vaygr forces.
+40181	Their objective is to capture the Mothership.
+40182	You must get the Pride of Hiigara out of here.
+40183	The enemy will follow and in doing so, you will buy the Homeworld some time.
+40185	Soban out.
+40190	Captain Soban's mission will be to track down the location of the Vaygr Leader.
+40191	His fleet has been dispatched. He will remain in contact with us.
+40192	We cannot allow the Mothership to fall into enemy hands.
+40193	Coordinates set for the Sarum system.
+40195	There we will regroup our forces and mount a counter-offensive.
+40194	All ships, standby for hyperspace.
+40197	Crew Transports returning to base.
+40198	Crew Transports returning to base.
+40200	The Vaygr Carrier is launching reinforcements.
+40201	Use Bombers to destroy the Carrier's Fighter Facility.
+40202	This will prevent it from sending further reinforcements.
+40230	Corvette Subsystem complete.
+40231	Gunship Corvettes now available for construction.
+40232	These ships are effective when used against fighter-class vessels.
+40234	Gunships now available for construction.
+40233	*** AXED *** Recommend using Corvettes to defeat the Vaygr bombers attacking our transports.
+40239	Recommend using Gunships to defeat the Vaygr bombers attacking our transports.
+40235	Pulsar Gunships now available for construction.
+40236	These ships are effective when used against Corvette-class vessels.
+40240	Captain Soban's ship is sustaining heavy damage.  We cannot afford to lose him.
+40241	Do not allow his ship to be destroyed.
+40242	Deploy additional fighters to assist.
+40243	Captain Soban's ship is sustaining critical damage.
+40245	Captain Soban is lost.
+40252	Vaygr Fighter Facility destroyed.  The Carrier can no longer build reinforcements.
+40260	Carrier hull comprimised.
+40261	Break off the attack.
+40262	Capture underway.
+40263	Capture complete.
+40265	Carrier hull critical.
+40390	Vaygr Carrier
+40391	Transport Bishop One
+40392	Transport Bishop Two
+40393	Transport Bishop Three
+40394	Transport Bishop Four
+40395	Transport Bishop Five
+40396	Transport Bishop Six
+40397	Captain Soban
+40398	Vaygr Frigates
+40400	Carrier exit point
+40420	Destroy the Vaygr Carrier before it can exit the map
+40425	Save the Transport
+40426	Protect Captain Soban
+40427	Destroy the Vaygr Frigates
+40450	These transports carry the crew of the Mothership.
+40451	Destroy the Vaygr forces attacking the crew transports so they can dock with the Mothership.
+40455	Destroy the Vaygr Fighter Facility on the Carrier.
+40456	Doing this will stop them from building fighter reinforcements.
+40460	The Vaygr Carrier is attempting to flee.
+40461	Destroy it before it reaches the exit point.
+40462	Target the Carrier's engines to slow it down.
+40465	Constructing a Corvette Facility will help us to deal with the Vaygr fighters more effectively.
+40466	Build a Corvette facility from the Subsystem section of the Build Menu.
+40470	Protect Captain Soban's ship.
+40475	Construct additional Resource Collectors to increase harvesting efficiency.
+
+rangeend

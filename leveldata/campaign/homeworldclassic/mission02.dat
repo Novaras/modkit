@@ -1,0 +1,43 @@
+filerange 60401 60813
+rangestart 60401 60813
+
+// Subtitles
+60401	We made it. Hyperspace jump complete!  All systems nominal, and the quantum wave effect has dissipated.
+60402	We have mis-jumped.  The support ship is not here.  Fleet Command will signal the Khar-Selim while we confirm our current position.
+60403	This is the Mothership calling Support Vessel Khar-Selim.  Come in, please.  We have mis-jumped and are requesting your beacon. . . This is the Mothership calling Support Vessel Khar-Selim.  Please respond. . .
+60404	Priority Alert.  We have picked up the Khar-Selim's automated beacon.
+60405	Send a probe to make contact and re-establish communications.
+60406	The Khar-Selim has been destroyed.  Heavy weapon damage is visible on the remaining fragment.  A Salvage Corvette must be sent to retrieve the mission data recorder.
+60407	They're attacking?!. . . The Mothership is under attack!!
+60408	Engage incoming units.  The Mothership must be defended.
+60409	Hostile units destroyed.  Threat eliminated.
+60410	Mothership sustained minor hull damage.  Repairs are underway.
+60411	Priority Alert!  Additional hostile units detected on an intercept course with the Khar-Selim.
+60412	Protection of the Salvage team is a primary Objective.  It must return to Mothership with the mission recorder.  We need that data.
+60413	Salvage Corvette has been destroyed.  Use an escort force to guard next team.  We need those records.
+60414	Salvage Team docked safely.  Downloading Mission Data Recording.  Replaying last entry:
+60415	What do you mean you detect a Hyperspace entry? The Mothership isn't due for...  - Sir, I have multiple contacts on closing vectors. Unknown profiles... No recognition codes... Uhh, they're not ours.  - Well if they're not ours, who the hell are they?  - Sir, they're coming in fast... Check... Incoming fire! We are under attack! They're getting through! Breaches across all decks! Hull integrity failing!  - Khar-Selim to Mothership.  If you are receiving, abort Hyperdrive test.  Repeat, abort Hyperdrive test!
+60416	We are detecting enemy units advancing on our position.  Organize a defensive force to protect the Mothership.
+60417	Large power signature detected nearby. Recommend immediate investigation.
+60418	It's an enemy Carrier.  They appear to be reinforcing their squadrons of Fighters and Corvettes with it.
+60419	We have determined that these enemy units are inferior to ours.
+60420	To protect against penetration of the Kharak system, destroy the attacking force completely.
+60421	Enemy units are retreating.  Objectives complete.  Stand by for immediate return to Kharak.
+60422	Unidentified Hostiles
+60423	Turanic Raiders
+60751	Objectives complete.  Stand by for immediate return to Kharak.
+60756	We have determined that these enemy units are inferior to ours.
+60757	To protect against penetration of the Kharak system, destroy the attacking force completely.
+60807	The Khar-Selim has activated its automated beacon.  Construct and deploy a probe to investigate the status of the Khar-Selim.
+60808	We need to find out what happened to the Khar-Selim.  Send a Salvage Corvette to the wreckage to retrieve its mission data recorder.
+60809	Unknown hostile vessels are attacking the Mothership!  Deploy strikecraft to protect the Mothership from these assailants.
+60810	Unknown hostiles are on an intercept course with our Salvage Corvette.  Ensure the delivery of the data recorder to the Mothership.
+60811	Sensors show a large force of hostiles on an attack vector.  We must deploy a sizable defense force to engage this threat.
+60812	We detect a large power source at the origin of the enemy fleet.  Send forces or a probe to investigate this anomaly.
+60813	The enemy carrier is constantly reinforcing the attack.  Destroy the carrier to put an end to the threat.
+60424	Khar-Selim
+60425	Enemy Ships
+60426	Hyperspace Test Recon Team
+60427	Enemy Carrier
+
+rangeend

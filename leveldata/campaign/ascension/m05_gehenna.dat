@@ -1,0 +1,131 @@
+filerange 42000 42450
+rangestart 42000 42450
+
+// Subtitles
+42000	Destroy Vaygr Garrisons.
+42001	Investigate Power Signatures.
+42002	Disable Proximity Detectors using the Scout EMP ability.
+42003	Destroy the Vaygr Destroyers.
+42004	Retrieve the Oracle.
+42005	Destroy the Vaygr Shipyard.
+42009	Destroy the Vaygr Carrier
+42010	Dock a Marine Frigate with the Gehenna dig site to retrieve the Oracle.
+42011	Destroy the Vaygr Shipyard to prevent it from building reinforcements.
+42012	Destroy the Vaygr Garrisons to prevent reinforcements.
+42020	GEHENNA
+42021	 -- ALERT! --
+42022	NIS 05
+42023	MISSION FAILED
+42024	MISSION SUCCESSFUL
+42025	Time to Detection:  %1MINUTES%:%2SECONDS%
+42030	Short Jump coordinates in perfect alignment.
+42031	A minor disturbance in the Hyperspace core has been detected.
+42032	We have arrived without alerting the Vaygr.
+42033	The Oracle is located here.
+42034	Local debris and dust will interfere with the Vaygr's sensors.
+42035	We must remain hidden inside the field to advance undetected.
+42036	*** AXED *** Begin resourcing operations.
+42037	A Marine Frigate must dock with the dig site in order to retrieve the Oracle.
+42038	Prepare for resistance.  The site will be well guarded.
+42039	Dust fields will interfere with the Vaygr's sensors.
+42040	The Vaygr are also searching for the Oracle, but without the information provided to us by the Bentusi they are unlikely to find it.
+42041	*** AXED *** Hyperspace gates link Vaygr Garrisons throughout the dust clouds.
+42042	If these Garrisons are alerted to our presence, they will bring reinforcements.
+42043	Destroy the Garrison fleets.
+42044	Intelligence data indicates Vaygr garrisons are stationed at these locations.
+42050	*** AXED *** The dust cloud is shielding our advance
+42051	*** AXED *** The Vaygr Garrison is now in range
+42052	*** AXED *** It must be eliminated quickly
+42056	*** AXED *** The Garrison is unaware of our presence.
+42057	*** AXED *** Destroy all Vaygr units before they can call in reinforcements.
+42060	*** AXED *** Detecting another Garrison.
+42061	*** AXED *** It must be defeated
+42066	*** AXED *** We have located the final Garrison.
+42067	It must be destroyed so that we can retrieve the Oracle.
+42070	*** AXED *** We have been detected!
+42071	*** AXED *** All enemy units must be eliminated.
+42076	Garrison eliminated.
+42077	*** AXED *** Proceed to the next location.
+42080	Enemy defeated.
+42081	There are no survivors.
+42086	All Garrisons neutralized.
+42087	*** AXED *** Before we can proceed to the Oracle, these Hyperspace Gates must be destroyed.
+42090	We have encountered a Vaygr patrol.
+42091	It must be destroyed.
+42100	Vaygr patrol destroyed.
+42101	We remain undetected.
+42102	*** AXED *** Exercise caution, addition patrols may be in the area.
+42106	*** AXED *** The Vaygr patrol has escaped and made contact with the main Garrison.
+42107	*** AXED *** Prepare for enemy contact
+42110	Additional Vaygr patrol detected.
+42116	Vaygr patrol detected.
+42120	*** AXED *** Vaygr patrol destroyed.
+42121	*** AXED *** We remain undetected.
+42126	Vaygr patrol destroyed.
+42127	*** AXED *** We remain undetected
+42130	Ion Cannon Frigates available for construction.
+42136	*** AXED *** Warning!
+42137	*** AXED *** Our ships are approaching the edge of the asteroid field.
+42138	*** AXED *** We are at risk of being detected by the enemy.
+42139	*** AXED *** Remain within the dust cloud.
+42146	Alert!
+42147	*** AXED *** We have left the asteroid field and are no longer under cover!
+42148	They will soon be detected by the enemy unless they return immediately.
+42149	Ships have left the dust field and are no longer under cover!
+42150	We have been detected!
+42151	Multiple enemy units detected on intercept course.
+42152	Prepare for immediate attack.
+42153	*** AXED *** Vaygr Hyperspace gates detected.
+42154	Prepare for immediate attack. The Gates must be destroyed.
+42160	*** AXED *** The Vaygr are bringing in reinforcements.
+42161	*** AXED *** It is critical that we destroy the Hyperspace gates.
+42166	*** AXED *** All enemy hyperspace gates have been destroyed
+42167	*** AXED *** The Oracle is now within our grasp.
+42170	An enemy Shipyard has been identified close to the Oracle dig site.
+42171	*** AXED *** A Destroyer is docked with it and is undergoing repairs.
+42172	*** AXED *** Destroy the enemy repair subsystem before it can complete repairs.
+42173	*** AXED *** Two enemy Shipyards have been identified close to the Oracle dig site.
+42174	*** AXED *** Two Destroyer are docked with them and are undergoing repairs.
+42175	*** AXED *** Destroy the enemy repair subsystems before they can complete repairs.
+42176	Destroy the Shipyard to prevent the enemy from building further reinforcements.
+42177	The Vaygr Shipyard has been destroyed.
+42180	We have studied the design of the Vaygr Destroyer and developed a better version of our own.
+42181	*** AXED *** Construction of Hiigaran Destroyers is now available.
+42186	*** AXED *** The enemy Destroyer has launched.
+42187	*** AXED *** The second enemy Destroyer has launched.
+42190	*** AXED *** A Mobile Refinery must dock with the dig site in order to retrieve the Oracle.
+42196	*** AXED *** We have successfully eliminated the Vaygr at Gehenna.
+42197	*** AXED *** Dock a Mobile Refinery with the dig site and retrieve the Oracle.
+42200	Approaching entry point at One-Zero-Seven.
+42201	Standby for extraction Fleet.
+42202	The Oracle has been secured.
+42203	Stand by receiving crews.
+42204	The Oracle is secure.
+42205	Integration complete.
+42206	Prepare to enter Hyperspace.
+42207	Hyperspace Core anomaly detected! Jump procedures initiated! All units prepare to enter hyperspace!
+42300	Destroy the Vaygr.
+42301	Keep all ships in the Nebula as long as possible to avoid detection.
+42302	The longer we wait to attack, the larger the Vaygr force will be.
+42310	Send ships to investigate the power signatures.
+42311	Keep ships hidden inside the Nebula.
+42320	Use the Scouts' EMP ability to disable the Vaygr Proximity Sensors.
+42321	Once the sensors are disabled, you will be able to attack them.
+42330	Focus your attacks on the Vaygr Shipyards to destroy them before the Destroyers come online.
+42390	Gehenna Defense Fleet
+42391	Hiigaran Navy
+42392	Oracle Dig Site
+42400	Mining Operation Alpha
+42401	Mining Operation Beta
+42402	Mining Operation Delta
+42403	Mining Operation Tango
+42404	Vaygr Destroyers
+42405	Gehenna
+42406	Garrison
+42407	Vaygr
+42420	Destroy the Vaygr Garrison
+42430	Destroy this to slow down the Vaygr attack
+42440	Destroy the Vaygr Shipyard
+42450	Dock a Marine Frigate with the dig site
+
+rangeend

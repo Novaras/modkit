@@ -1,0 +1,35 @@
+filerange 60587 60832
+rangestart 60587 60832
+
+// Subtitles
+60587	Anomaly detected.  Override engaged.
+60588	Sensors detect a vessel here.  It doesn't match any of the profiles we have encountered.  Send in a team to investigate.
+60589	We are detecting various ships surrounding the alien vessel.  They appear to be inactive.
+60590	Attention!  Those ships are operational.  We believe the control center is the alien vessel.  It should be neutralized.
+60591	We've lost control of capital ships in close proximity to the alien vessel.
+60592	We've determined that the alien control field covers this area.  No capital ships should cross into this zone or we will lose them.
+60593	Our weapons are having minimal effect on the alien vessel but each strike causes a tiny fluctuation in the control field.
+60594	Direct all fire at the alien ship in an attempt to disable the field.
+60595	After seizing the Missile Destroyer, construction reports we can now build a similar vessel.
+60596	Alien vessel neutralized.  Our crews have regained control.
+60597	While the field was up they were able to analyze the alien control system.  We now have control of the foreign vessels.  In addition, we detect no life signs aboard the alien vessel.  It is a derelict.
+60598	Research Division reports it has developed plans for gravity-warping technology based on the alien control field.  We advise commencing research immediately.
+60599	We have known of this ship but could never approach it.  We are particularly vulnerable to its influence.
+60600	The Bentusi would like the information you have acquired.  It will be transferred automatically if you choose to trade.
+60601	The information was successfully transferred.  Thank you.
+60602	The Taiidan are determined to destroy us.  Will you help us defeat them?
+60603	The Kushan are determined to destroy us.  Will you help us defeat them?
+60604	Conflict is not our way.  We will bring your cause to the Galactic Council.  The Taiidan rule the Empire, but even they must answer to the council.
+60605	Conflict is not our way.  We will bring your cause to the Galactic Council.  The Kushan rule the Empire but even they must answer to the council.
+60606	Hyperspace Module fully charged.  Engage at your discretion.
+60607	Alien Anomaly
+60608	Bentusi
+60775	While the field was up they were able to analyze the alien control system.  We now have control of the foreign vessels
+60776	Send a Salvage Team to further investigate the alien ship.
+60777	Alien vessel neutralized.
+60778	Salvage Team docked.  The alien ship is millions of years old.  Its purpose is unclear.
+60830	Sensors have picked up an anomalous vessel in the middle of space.  Send a scouting party to investigate the anomaly.
+60831	The alien vessel is hostile and controlling other ships in its immediate area.  Destroy the alien vessel before it threatens the Mothership.
+60832	Our forces have disabled the target.  Send in a Salvage Corvette to investigate and retrieve any useful materials or technology.
+
+rangeend

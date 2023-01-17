@@ -1,0 +1,26 @@
+filerange 60614 60835
+rangestart 60614 60835
+
+// Subtitles
+60614	Hyperspace jump successful.  We have cleared the Outer Rim dust bank.
+60615	The supernova is two hundred and fifteen light years away.  It is emitting intense radiation.
+60616	Strike Craft are especially vulnerable to this radiation.  Capital ships will be the most effective due to their heavy armor.
+60617	The Research Station is located here.  Assemble a heavy strike force and destroy it.
+60618	Radiation is much heavier than we expected.  Sensors indicate that asteroids may have shielding properties.
+60619	We recommend using the asteroid pockets for protection.
+60620	The radiation is disrupting our normal resource collecting operations.  Deploy a Resource Controller in the shielded asteroid pockets.
+60621	Research Division reports it is now equipped for Proximity Sensor technology.  We advise commencing research immediately.
+60622	The enemy is using mines.  Research Division reports it can produce a Corvette-class minelaying ship.  We advise commencing research immediately.
+60623	We must destroy the garrison protecting the station.  Enemy units cannot be allowed to escape or they may alert the Empire to our presence.
+60624	We are picking up a quantum wave effect.  A Taiidan Carrier is loading ships and powering up.  It must be destroyed before it can hyperspace.
+60625	We are picking up a quantum wave effect.  A Kushan Carrier is loading ships and powering up.  It must be destroyed before it can hyperspace.
+60626	Enemy base and fleet destroyed.  Hyperspace drives online.
+60627	Taiidan Empire
+60781	Radiation is much heavier than we expected.  Sensors indicate that these veins of space dust may have shielding properties. We recommend using the veins for protection.
+60833	We are in range of our target.  The loss of the research station will be a major blow to the Taiidan Empire.  Destroy it.
+60834	The station is heavily guarded by a Taiidan garrison.  Destroy them.  Do not let any ships warn the Taiidan of our presence.
+60835	The Taiidan carrier is attempting to hyperspace out of the system.  We can not allow this.  Destroy the carrier before it escapes.
+60628	Research Station
+60629	Escaping Carrier
+
+rangeend

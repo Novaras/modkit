@@ -1,0 +1,66 @@
+filerange 45000 45425
+rangestart 45000 45425
+
+// Subtitles
+45000	Retrieve the Bentusi Hyperspace Core
+45001	Research Radiation Shielding and Retrieve the Bentusi Core fragments
+45002	Destroy the Vaygr Forces
+45020	BENTUSI RUINS
+45021	MISSION FAILED
+45030	Hyperspace successful. We have cleared the shock wave.
+45031	Scans of the debris field have isolated three fragments of the Bentusi Hyperspace Core.
+45032	The Containment Units are located here.
+45033	The Core itself is here.
+45034	All three elements must be retrieved.
+45035	However, the destruction of Bentus has created a hazardous environment.
+45036	Proceed with caution.
+45037	Dispatch a Probe to analyze the core fragments.
+45040	Caution.
+45041	Dangerous particle emissions have been located near the Core Fragments.
+45042	Research division reports that they can adjust the Defense Field Generators in order to provide protection from the hazardous emissions.
+45043	Begin enhanced Defense Field Frigate research.
+45045	Alert!
+45046	Vaygr hyperspace signals identified.
+45050	The Vaygr are using shielded carriers to navigate the area.
+45055	The Vaygr have salvaged one of the core fragments.
+45056	They are moving the fragment to one of their carriers.
+45057	We must retrieve this fragment immediately.
+45060	 A Resource Collector has been destroyed while retrieving the core fragments.
+45061	The core fragment is now drifting.
+45062	Assign additional Collectors to secure the core.
+45065	A Bentusi core fragment has been loaded aboard a Vaygr Carrier.
+45066	Disable the Carrier before it can enter Hyperspace.
+45070	The Vaygr Carrier has entered hyperspace.
+45071	We have lost the Bentusi Core.
+45075	The first core fragment is secure.
+45076	Retrieve the remaining two.
+45080	Second core fragment retrieved.
+45081	We only require the final component. It must be secured immediately.
+45085	All three Bentusi Core fragments are safe.
+45086	The First of the Great Cores now belongs to us.
+45087	Dispatch the remaining Vaygr forces.
+45090	All Vaygr have been defeated. No additional hostile contacts detected.
+45091	We have re-established contact with Captain Soban's tracking device.
+45092	The Bentusi Core is stable and has established a positive link with our own.
+45093	Far jump coordinates locked in.
+45200	Send a Probe to investigate the Hyperspace disturbance around the Core fragments.
+45205	Research Radiation Shielding to retrieve the Bentusi Core Fragments. Defense Field Frigates will be required.
+45206	Defense Field Frigates will be able to shield the Collectors as they retrieve the Core fragments once Radiation Shielding is researched.
+45210	Destroy the Vaygr.
+45290	Bentusi Debris
+45291	Vaygr Forces
+45292	Hiigaran Navy
+45300	Hyperspace Disturbance
+45301	Hyperspace Disturbance
+45302	Hyperspace Disturbance
+45303	Bentusi Core Fragment
+45304	Bentusi Core Fragment
+45305	Bentusi Core Fragment
+45306	Vaygr Forces
+45400	Remnants of the Bentusi Core
+45405	Vaygr Carrier will hyperspace out in:  %1MINUTES%:%2SECONDS%
+45410	Use Resource Collectors to salvage the three core fragments.
+45420	Destroy the Vaygr Fleet.
+45425	SAVING GAME
+
+rangeend

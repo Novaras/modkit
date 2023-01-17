@@ -1,0 +1,67 @@
+filerange 46000 46467
+rangestart 46000 46467
+
+// Subtitles
+46000	Destroy the Vaygr forces attacking the Gate's power generators.
+46001	Destroy Vaygr Shipyard.
+46002	Investigate power signature
+46003	Use Dreadnaught to activate Balcora Gate
+46004	Protect the Dreadnaught
+46010	Hiigaran Navy
+46011	Vaygr
+46012	Progenitor
+46020	BALCORA GATE
+46021	SHOW NIS13
+46022	MISSION SUCCESSFUL
+46023	MISSION FAILED
+46024	INSERT NIS13B - PLAYER'S MOTHERSHIP GOES THROUGH GATE
+46029	Makaan has used a Progenitor Dreadnaught to open Balcora Gate.
+46025	Beyond lies Sajuuk, the Great Maker.
+46030	The Vaygr are concentrating fire on three power subsystems located here.
+46031	We must stop them before they disable the Gate.
+46038	Sensors indicate heavy damage to the Gate's power generators.
+46039	The Bentusi Archive, indicates that at least one generator must remain intact for the Gate to function.
+46037	According to the data provided by the Oracle, at least one generator must remain intact for the Gate to function.
+46040	The Vaygr have destroyed one power generator.
+46041	We need at least one operational generator for the Gate to function.
+46042	Prevent the Vaygr from destroying the remaining generators at all costs.
+46045	Vaygr forces destroyed.
+46046	One generator is safe.
+46050	Gate power generator lost.
+46051	Vaygr forces eliminated.  Balcora Gate is now under our control.
+46055	The gate has lost a second generator.
+46056	The last power subsystem must survive.
+46060	Vaygr forces destroyed.
+46061	Two of the generators are safe.
+46065	Vaygr forces have destroyed two power generators.
+46070	All three generators are destroyed.
+46071	The Gate is lost.
+46100	Vaygr Shipyard detected.
+46101	It must be destroyed to prevent the Vaygr from launching further attacks on the Gate.
+46105	The Vaygr Shipyard has been destroyed.
+46106	Sensors are detecting a large power signature in this area.
+46107	Send a Scout to investigate.
+46110	The Dreadnaught is communicating with the Gate. The initialization sequence has begun.
+46111	Bring the Dreadnaught within firing range of the gate and engage it.
+46115	The gate is open...
+46116	...stand by...
+46120	Dreadnaught hull integrity at 20 percent and falling.
+46121	We cannot lose the Dreadnaught.
+46122	Allocate combat vessels to protect it.
+46125	The Dreadnaught has been destroyed.
+46400	Gate attack force 1
+46401	Gate attack force 2
+46402	Gate attack force 3
+46403	Vaygr Shipyard
+46404	Power signature
+46420	Destroy the Vaygr forces.
+46425	Destroy the Vaygr Shipyard
+46430	Investigate the power signature.
+46450	Destroy the Vaygr before they are able to destroy the Gate.
+46455	Destroy the Vaygr Shipyard.
+46460	Investigate the Power Signature.
+46465	Use the Dreadnaught's special attack to open the Gate.
+46466	Select the DREADNAUGHT, then hold down CTRL and SHIFT and leftclick on the Gate to use the special attack.
+46467	Do not allow the Dreadnaught to be destroyed.
+
+rangeend

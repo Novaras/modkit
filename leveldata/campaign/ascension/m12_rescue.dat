@@ -1,0 +1,55 @@
+filerange 45500 45900
+rangestart 45500 45900
+
+// Subtitles
+45500	Destroy Makaan
+45501	Assault the Command Station Thaddis Sabbah
+45520	VAYGR OUTPOST THADDIS SABBAH
+45521	MISSION FAILED
+45522	MISSION SUCCESSFUL
+45530	We have arrived at the Vaygr rally point.
+45531	*** AXED *** The Mothership is inside a dense nebula. Our Hyperspace signature was not detected by the enemy.
+45532	Captain Soban's tracking signal is coming from the Carrier.
+45533	He is being transferred to the Command Station Thaddis Sabbah.
+45534	In order to rescue Soban, we must assault this Station.
+45535	*** AXED *** We recommend focusing our attacks here.
+45540	I can feel the presence of the Third Core.
+45541	Makaan is coming...
+45542	Mothership Class signature detected.
+45543	I see you have acquired the Bentusi Core.
+45544	Well done!
+45545	Surrender the Cores to me now and you will be spared.
+45546	There can only be one Sajuuk-Khar.
+45547	Makaan's Flagship is within striking distance.  It must be eliminated.
+45550	Marine Frigates will be required to extract Captain Soban.
+45551	The Marine Frigates must safely dock with the Vaygr Command Station.
+45560	Rescue operation successful, Fleet. Thanks for breaking me out of there!
+45561	I left them a little going-away present to remember me by...
+45570	Captain Soban must be protected.
+45571	Send escorts immediately.
+45580	Captain Soban is aboard the Mothership.
+45581	Soban is being debriefed. His information will be vital in defeating the Vaygr.
+45582	Our priority is now the Vaygr Flagship.
+45583	Makaan must be defeated.
+45590	Makaan is fleeing.
+45591	The Vaygr flagship has sustained heavy damage. It is initiating Hyperspace.
+45592	*** AXED *** Initiate Hyperspace Jump when ready.
+45600	We must not destroy the Command Station while Captain Soban is aboard.
+45601	Order all ships to cease firing on the Command Station immediately.
+45610	Information supplied by Captain Soban indicates Makaan is heading for Balcora Gate.
+45611	We must not allow Makaan to escape.
+45612	Initiate Hyperspace Jump when ready.
+45790	Hiigaran Navy
+45791	Vaygr Fleet
+45792	Soban
+45793	Makaan Elite Guard
+45800	Command Station Thaddis Sabbah
+45801	Makaan
+45802	Captain Soban
+45850	Makaan has arrived.
+45851	Eliminate him.
+45855	In order to rescue Captain Soban, we must first attack the Command Station Thaddis Sabbah.
+45856	Once this is accomplished, Marine Frigates will be required to retrieve Captain Soban from the Station.
+45900	Assault the Command Station
+
+rangeend
