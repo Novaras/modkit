@@ -1,6 +1,6 @@
 # hwrm console
 
-Modkit comes with an ingame console.
+Modkit comes with an ingame console. This is available as a mod [here](https://steamcommunity.com/sharedfiles/filedetails/?id=2894486483).
 
 The console can run whole files, and also comes prepackaged with many commands.
 
