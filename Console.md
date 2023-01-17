@@ -6,7 +6,7 @@ The console can run whole files, and also comes prepackaged with many commands.
 
 Post issues about bugs or feature requests [here](https://github.com/Novaras/modkit/issues).
 
-Code documentation for the console is [here](https://github.com/Novaras/modkit/tree/console-update/modkit-tools/docs/Console.md).
+Code documentation for the console is [here](https://github.com/Novaras/modkit/blob/master/modkit-tools/docs/Console.md).
 
 ## Controls
 
