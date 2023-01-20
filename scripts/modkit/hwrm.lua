@@ -4,7 +4,7 @@
 
 if (nil) then
 
-	---@alias bool '1'|nil|true|false|1
+	---@alias bool nil|any
 
 	AB_None = 0;
 	AB_Move = 1;
@@ -621,8 +621,7 @@ if (nil) then
 
 	--- Causes ships in target_group to become 'ghosted', which is pretty much akin to a 'no-clip' mode whereby the affected ships ignore collision with other objects.
 	---@param target_group string
-	---@param enable '0'|'1'
-	---@return nil
+	---@param enable 0|1
 	function SobGroup_SetGhost(target_group, enable)
 	end
 

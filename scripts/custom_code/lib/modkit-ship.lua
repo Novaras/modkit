@@ -396,7 +396,7 @@ end
 
 --- Causes this ship to be 'ghosted', which is pretty much akin to no-clip (no collisions will affect this ship).
 ---
----@param enabled '0'|'1'
+---@param enabled 0|1
 ---@return bool
 function modkit_ship:ghost(enabled)
 	if (enabled == 0) then
@@ -681,6 +681,7 @@ function modkit_ship:alliedWith(other)
 	if (other.HP) then -- caller is a ship
 		return self.player:alliedWith(other.player);
 	else
+		---@cast other Player
 		return self.player:alliedWith(other);
 	end
 end
@@ -757,7 +758,7 @@ function modkit_ship:canDoAbility(ability, enable)
 end
 
 ---comment
----@param enable '0'|'1'|'nil'
+---@param enable 0|1
 function modkit_ship:canHyperspace(enable)
 	return self:canDoAbility(AB_Hyperspace, enable);
 end
