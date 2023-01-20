@@ -28,9 +28,9 @@ end
 
 --- This rule grabs published ships from the ui scope and generates full ship objects (so `GLOBAL_` collections are accessible)
 function modkit_hoist_memgroups()
+	print("trying to hoist memgroups to superscope");
 	if (register == nil) then
 		dofilepath("data:scripts/modkit.lua");
-		loadModkit();
 		dofilepath("data:scripts/driver.lua");
 		print(">>");
 		print(register or "nil");
