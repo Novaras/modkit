@@ -47,7 +47,8 @@ m.flow:set({
 		dependencies = { 'a2' },
 		action = {
 			main = function (state)
-				consoleLog("death!");
+				modkit.table.printTbl(state, "a3 state");
+				consoleLog("death from a3!");
 				for _, ship in GLOBAL_SHIPS:all() do
 					ship:die();
 				end
@@ -65,7 +66,12 @@ m.flow:set({
 		end,
 	},
 	c1 = {
-
+		dependencies = { 'a3', 'b1' },
+		main = function (state)
+			print("c1 attempts time travel, tick is !" .. state.tick);
+			state.tick = 1000;
+			print(state.tick);
+		end
 	},
 });
 
