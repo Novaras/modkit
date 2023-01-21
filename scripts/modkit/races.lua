@@ -1,5 +1,6 @@
-if (MK_RACES == nil) then
+if (modkit == nil or modkit.races == nil) then
 	if (modkit == nil) then
+		modkit = {};
 		dofilepath("data:scripts/modkit/table_util.lua");
 	end
 

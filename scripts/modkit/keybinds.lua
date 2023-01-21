@@ -1,4 +1,10 @@
-if (MODKIT_KEYBINDS == nil) then
+if (1) then
+    print("[modkit] begin keybinds.lua...");
+
+    if (UI_ForceBindKeyEvent == nil) then
+        dofilepath("data:scripts/modkit/util.lua");
+    end
+
     MK_KeyFunctions = {
         showConsoleScreen = {
             key = PKEY,
@@ -26,6 +32,8 @@ if (MODKIT_KEYBINDS == nil) then
 		MK_KEYBINDS_COMPLETE = 1;
 		print("== keybinds applied ==");
     end
+
+    print("[modkit] keybinds.lua successful!");
 
     MODKIT_KEYBINDS = 1;
 end

@@ -56,7 +56,7 @@ if (MK_CONSOLE == nil) then
 	---
 	--- Calls `consoleInit`.
 	---
-	---@param ... any[]
+	---@param ... any
 	consoleLog = consoleLog or function (...)
 		consoleInit();
 
