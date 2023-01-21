@@ -61,9 +61,14 @@ function timer_updating()
     if timer_timing == 1 then
 				-- here we do setup for one-time modkit things
 				dofilepath("data:scripts/modkit.lua");
+				initPlayers();
+				initShips();
+
 				dofilepath("data:leveldata/multiplayer/lib/modkit-scheduler.lua");
-				dofilepath("data:leveldata/multiplayer/lib/modkit-hoist-memgroups.lua");
 				modkitBindKeys();
+
+				dofilepath("data:scripts/modkit/sp_helpers.lua");
+				Rule_AddInterval("syncGlobalShips", 2); -- ensures this `[RULES]` scope syncs its `GLOBAL_SHIPS` to the superscope
 
 				for playerIndex = 0,Universe_PlayerCount()-1,1 do
 						if Player_IsAlive(playerIndex) == 1 then
@@ -80,7 +85,6 @@ function timer_updating()
 				--Rule_AddInterval("balancing_updating",0.25) --dev. to remove
 
 				Rule_AddInterval("modkit_scheduler_spawn", 0.1);
-				Rule_AddInterval("modkit_hoist_memgroups", 2);
 
 
 				if nocruisers == 1 then
@@ -134,7 +138,7 @@ function timer_updating()
 	  end
 end
 
-function foo()
+function syncGlobalShips()
 	print("FOO CALL!");
 end
 
