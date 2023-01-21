@@ -66,9 +66,12 @@ if (H_CAMPAIGN_MISSION_FLOW == nil) then
 				action = action,
 				status = FLOW_NODE_STATUS.ready,
 				dependencies = dependencies,
-				state = state or {
-					tick = 0,
-				},
+				state = modkit.table:merge(
+					state or {},
+					{
+						tick = 0,
+					}
+				),
 			};
 
 			return node;
@@ -110,7 +113,7 @@ if (H_CAMPAIGN_MISSION_FLOW == nil) then
 					action[hook] = action[hook] or NOOP;
 				end
 
-				return makeFlowNode(id, action, def.dependencies);
+				return makeFlowNode(id, action, def.dependencies, def.state);
 			end);
 
 			self._nodes = {};
@@ -154,8 +157,10 @@ if (H_CAMPAIGN_MISSION_FLOW == nil) then
 		function flow:doNode(node_id)
 			local node = self._nodes[node_id];
 
+			local state_clone = modkit.table.clone(node.state); -- clone for safety
+
 			if (node.status == FLOW_NODE_STATUS.exited) then -- return early for exited nodes
-				node.action.exit(node.state);
+				node.action.exit(state_clone);
 				return nil;
 			elseif (node.status == FLOW_NODE_STATUS.ready) then -- if 'ready', we need to check its deps., if it has no outstanding, then run this node
 				local all_deps_finished = node.dependencies == nil or modkit.table.all(node.dependencies, function (dep)
@@ -169,19 +174,28 @@ if (H_CAMPAIGN_MISSION_FLOW == nil) then
 						return nil;
 					end
 
-					node.action.init(node.state);
+					node.action.init(state_clone);
 					node.status = FLOW_NODE_STATUS.running;
 				end
 			else -- if 'running', we need to execute the 'main' function of the node's action, if it returns non-nil, then we need to exit the node
-				local exit_code = node.action.main(node.state);
+				local exit_code = node.action.main(state_clone);
 				node.state.tick = node.state.tick + 1;
 				if (exit_code) then
 					node.status = 'exited';
 				end
 			end
 
-			if (node.state == nil or type(node.state) ~= "table") then -- ensure state is always a table in case of clumsy users
-				node.state = { [1] = node.state };
+			if (state_clone and type(state_clone) == "table") then
+				node.state = modkit.table:merge(
+					node.state,
+					modkit.table:merge( -- kinda lame you cant pass N tables to merge...
+						state_clone,
+						-- here we ensure the client code doesn't time travel by overwriting with increment from last known
+						{
+							tick = node.state.tick
+						}
+					)
+				);
 			end
 		end
 
