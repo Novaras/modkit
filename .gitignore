@@ -1,3 +1,4 @@
 modkit-tools/node_modules
 ship
 dev/
+**/custom_code/testing.lua
