@@ -4,6 +4,8 @@ if (H_CAMPAIGN_MISSION_FLOW == nil) then
 		modkit = {};
 	end
 
+	NOOP = NOOP or function() end;
+
 	LIFETIME_HOOK_KEYS = {
 		init = 'init',
 		main = 'main',
@@ -19,14 +21,17 @@ if (H_CAMPAIGN_MISSION_FLOW == nil) then
 	---@alias FlowNodeStatus 'ready'|'running'|'exited'
 
 	---@class Action
-	---@field init fun()
-	---@field main fun(): bool
-	---@field exit fun()
+	---@field init fun(state?: any)
+	---@field main fun(state?: any): bool
+	---@field exit fun(state?: any)
 
-	---@class FlowNode
+	---@class MissionNode
 	---@field action Action
-	---@field dependencies? FlowNode[]
+	---@field dependencies? string[]
+
+	---@class FlowNode : MissionNode
 	---@field status FlowNodeStatus
+	---@field state table
 
 
 	local createMissionFlow = function ()
@@ -52,14 +57,18 @@ if (H_CAMPAIGN_MISSION_FLOW == nil) then
 		---comment
 		---@param id string
 		---@param action Action
-		---@param dependencies? FlowNode[]
+		---@param dependencies? string[]
+		---@param state? any[]
 		---@return FlowNode
-		makeFlowNode = makeFlowNode or function (id, action, dependencies)
+		makeFlowNode = makeFlowNode or function (id, action, dependencies, state)
 			local node = {
 				id = id,
 				action = action,
 				status = FLOW_NODE_STATUS.ready,
 				dependencies = dependencies,
+				state = state or {
+					tick = 0,
+				},
 			};
 
 			return node;
@@ -77,18 +86,32 @@ if (H_CAMPAIGN_MISSION_FLOW == nil) then
 		---@param action Action
 		---@param dependencies? string[] IDs of other FlowNodes
 		---@return FlowNode
-		function flow:register(id, action, dependencies)
+		function flow:add(id, action, dependencies)
 			if (dependencies == nil) then dependencies = {}; end
-			dependencies = modkit.table.map(dependencies, function (str_or_flow_action)
-				if (type(str_or_flow_action) == 'string') then
-					return %self:get(str_or_flow_action);
-				end
-				return str_or_flow_action;
-			end);
 
 			self._nodes[id] = makeFlowNode(id, action, dependencies);
 
 			return self._nodes[id];
+		end
+
+		---comment
+		---@param nodes (Action|MissionNode|FlowNode)[]
+		function flow:set(nodes)
+			self._nodes = modkit.table.map(nodes, function (def)
+				local id = def.id or tostring(modkit.table.length(%self._nodes));
+				local action = {};
+				if (def.main) then
+					action = def;
+				else
+					action = def.action or {};
+				end
+
+				for _, hook in LIFETIME_HOOK_KEYS do
+					action[hook] = action[hook] or NOOP;
+				end
+
+				return makeFlowNode(id, action, def.dependencies);
+			end)
 		end
 
 		---@param id string
@@ -127,10 +150,12 @@ if (H_CAMPAIGN_MISSION_FLOW == nil) then
 			local node = self._nodes[node_id];
 
 			if (node.status == FLOW_NODE_STATUS.exited) then -- return early for exited nodes
+				node.action.exit(node.state);
 				return nil;
 			elseif (node.status == FLOW_NODE_STATUS.ready) then -- if 'ready', we need to check its deps., if it has no outstanding, then run this node
 				local all_deps_finished = node.dependencies == nil or modkit.table.all(node.dependencies, function (dep)
-					return dep.status == FLOW_NODE_STATUS.exited;
+					local dep_node = %self._nodes[dep];
+					return dep_node.status == FLOW_NODE_STATUS.exited;
 				end);
 				print("all deps ready for " .. node_id .. "?:\t" .. tostring(all_deps_finished));
 
@@ -139,14 +164,19 @@ if (H_CAMPAIGN_MISSION_FLOW == nil) then
 						return nil;
 					end
 
-					node.action.init();
+					node.action.init(node.state);
 					node.status = FLOW_NODE_STATUS.running;
 				end
 			else -- if 'running', we need to execute the 'main' function of the node's action, if it returns non-nil, then we need to exit the node
-				local exit_code = node.action.main();
+				local exit_code = node.action.main(node.state);
+				node.state.tick = node.state.tick + 1;
 				if (exit_code) then
 					node.status = 'exited';
 				end
+			end
+
+			if (node.state == nil or type(node.state) ~= "table") then -- ensure state is always a table in case of clumsy users
+				node.state = { [1] = node.state };
 			end
 		end
 
