@@ -97,8 +97,8 @@ if (H_CAMPAIGN_MISSION_FLOW == nil) then
 		---comment
 		---@param nodes (Action|MissionNode|FlowNode)[]
 		function flow:set(nodes)
-			self._nodes = modkit.table.map(nodes, function (def)
-				local id = def.id or tostring(modkit.table.length(%self._nodes));
+			nodes = modkit.table.map(nodes, function (def, idx)
+				local id = def.id or tostring(idx);
 				local action = {};
 				if (def.main) then
 					action = def;
@@ -111,7 +111,12 @@ if (H_CAMPAIGN_MISSION_FLOW == nil) then
 				end
 
 				return makeFlowNode(id, action, def.dependencies);
-			end)
+			end);
+
+			self._nodes = {};
+			for _, node in nodes do
+				self._nodes[node.id] = node;
+			end
 		end
 
 		---@param id string
