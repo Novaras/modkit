@@ -80,7 +80,6 @@ if (H_SP_HELPERS == nil) then
 	---@field rotation? Vec3
 	---@field in_hyperspace? 0|1
 	---@field group_name? string
-	---@field no_squad? bool
 
 	--- Called in the .level to place squads and assign them to groups
 	--- Called in the .lua gametime to register Ship objects for these defined ships

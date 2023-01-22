@@ -8,8 +8,7 @@ MISSION_SHIPS = {
      },
      {
           type = "kus_interceptor",
-          count = 10,
-          no_squad = 1
+          count = 10
      },
 };
 
