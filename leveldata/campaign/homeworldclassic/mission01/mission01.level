@@ -4,7 +4,7 @@ dofilepath("data:scripts/modkit/sp_helpers.lua");
 
 MISSION_SHIPS = {
      {
-          type = "kus_carrier",
+          type = "kus_mothership",
      },
      {
           type = "kus_interceptor",
