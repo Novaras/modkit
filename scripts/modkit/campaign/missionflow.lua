@@ -32,7 +32,7 @@ if (H_CAMPAIGN_MISSION_FLOW == nil) then
 
 	---@class Action
 	---@field init fun(state?: any)
-	---@field main fun(exitFlow: function, state?: any): bool
+	---@field main fun(exitCallback: function, state?: any): bool
 	---@field exit fun(state?: any)
 
 	---@class FlowNode
@@ -46,6 +46,7 @@ if (H_CAMPAIGN_MISSION_FLOW == nil) then
 	---@alias NodeLike (Action|FlowNode)
 
 	--- Convert a nodelike to its string id
+	---
 	---@param nodelike NodeLike
 	---@param index integer
 	nodelikeToString = nodelikeToString or function(nodelike, index)
@@ -57,62 +58,65 @@ if (H_CAMPAIGN_MISSION_FLOW == nil) then
 		return nodelike.id or index;
 	end
 
+	--- Creates an `Action` if given a partial definition.
+	---
+	---@param config table|Action
+	---@return Action
+	parseToAction = parseToAction or function (config)
+		config = config or {};
+
+		flow_action = modkit.table.clone(config); -- make sure its a clone instead of the original table (subreferences notwithstanding)
+
+		-- set up the lifetime hooks i.e 'init', 'main', 'exit'
+		for key, _ in LIFETIME_HOOK_KEYS do
+			flow_action[key] = config[key] or function (exitCallback)
+				print("(no hook set for '" .. %key .. "' on action " .. tostring(%id));
+				if (%key == "main") then
+					exitCallback();
+				end
+			end
+		end
+
+		return flow_action;
+	end
+
+	--- Creates a `FlowNode`.
+	---
+	---@param id string
+	---@param action Action
+	---@param await? (string|NodeLike)[]
+	---@param revives? (string|NodeLike)[]
+	---@param state? any[]
+	---@return FlowNode
+	makeFlowNode = makeFlowNode or function (id, action, await, revives, state)
+		
+		await = modkit.table.map(await or {}, nodelikeToString);
+		---@cast await string[]
+
+		revives = modkit.table.map(revives or {}, nodelikeToString);
+		---@cast revives string[]
+
+		---@type FlowNode
+		local node = {
+			id = id,
+			action = action,
+			status = FLOW_NODE_STATUS.ready,
+			await = await,
+			revives = revives,
+			state = modkit.table:merge(
+				state or {},
+				{
+					tick = 0,
+					node_id = id,
+				}
+			),
+		};
+
+		return node;
+	end
 
 	---@param mission_flow? NodeLike[]
 	local createMissionFlow = function (mission_flow)
-
-		---comment
-		---@param config table|Action
-		---@return Action
-		parseToAction = parseToAction or function (config)
-			config = config or {};
-
-			flow_action = modkit.table.clone(config); -- make sure its a clone instead of the original table (subreferences notwithstanding)
-
-			-- set up the lifetime hooks i.e 'init', 'main', 'exit'
-			for key, _ in LIFETIME_HOOK_KEYS do
-				flow_action[key] = config[key] or function ()
-					print("(no hook set for '" .. %key .. "' on action " .. tostring(%id));
-				end
-			end
-
-			return flow_action;
-		end
-
-		---comment
-		---@param id string
-		---@param action Action
-		---@param await? (string|NodeLike)[]
-		---@param revives? (string|NodeLike)[]
-		---@param state? any[]
-		---@return FlowNode
-		makeFlowNode = makeFlowNode or function (id, action, await, revives, state)
-			
-
-			await = modkit.table.map(await or {}, nodelikeToString);
-			---@cast await string[]
-
-			revives = modkit.table.map(revives or {}, nodelikeToString);
-			---@cast revives string[]
-
-			---@type FlowNode
-			local node = {
-				id = id,
-				action = action,
-				status = FLOW_NODE_STATUS.ready,
-				await = await,
-				revives = revives,
-				state = modkit.table:merge(
-					state or {},
-					{
-						tick = 0,
-						node_id = id,
-					}
-				),
-			};
-
-			return node;
-		end
 
 		---@class MissionFlow
 		---@field _nodes FlowNode[]
@@ -124,50 +128,70 @@ if (H_CAMPAIGN_MISSION_FLOW == nil) then
 			_global_rule_name = '__MK_MISSION_FLOW' .. "-" .. FLOW_INDEX,
 			_id = FLOW_INDEX
 		};
-		FLOW_INDEX = FLOW_INDEX + 1;
 
-		---@param node_id string
-		function flow:reviveNode(node_id)
-			if (self._nodes[node_id] == nil) then return nil; end
+		--- 'Revives' the given node, which re-creates the node and sets its status to `ready`.
+		---
+		---@param node string|FlowNode
+		function flow:reviveNode(node)
+			local node = self:get(node);
+			if (node == nil) then return nil; end
 
-			local node = self._nodes[node_id];
-			self._nodes[node_id] = makeFlowNode(node.id, node.action, node.await, node.revives, node.state);
-			print("just reset node " .. node_id);
+			self._nodes[node.id] = makeFlowNode(node.id, node.action, node.await, node.revives, node.state);
+			print("just reset node " .. node.id);
 		end
 
-		---comment
-		---@param nodes NodeLike[]
-		function flow:set(nodes)
-			nodes = modkit.table.map(nodes, function (def, idx)
+		--- Sets the nodes for this flow. `Action`s or other partial definitions are parsed into full `FlowNode`s.
+		---
+		--- The node IDs are given as the definitions `id` field or whatever table key they were set to:
+		---
+		--- ```lua
+		--- flow:setAll({ a1 = {} }); -- node id will be 'a1'
+		--- flow:setAll( a1 = { id = "foo" }); -- node id will be 'foo'
+		--- ```
+		---
+		---@param definitions table Should be a table of partial _or_ full `Action`s or `FlowNode`s
+		function flow:setAll(definitions)
+			definitions = modkit.table.map(definitions, function (def, idx)
 				local id = def.id or tostring(idx);
 				local action = {};
-				if (def.main) then
+				if (def.main) then -- if def has main, it's an `Action`
 					action = def;
-				else
+				else -- otherwise, try to find the action (if its a `FlowNode`), or default to `{}`
 					action = def.action or {};
 				end
 
-				for _, hook in LIFETIME_HOOK_KEYS do
-					action[hook] = action[hook] or function ()
-						return 1;
-					end;
-				end
+				-- ensure action definition is constructed correctly
+				action = parseToAction(action);
 
 				return makeFlowNode(id, action, def.await, def.revives, def.state);
 			end);
 
 			self._nodes = {};
-			for _, node in nodes do
+			for _, node in definitions do
 				---@cast node FlowNode
 
 				self._nodes[node.id] = node;
 			end
 		end
 
+		---@param node string|FlowNode
+		---@return FlowNode?
+		function flow:get(node)
+			if (type(node) == "string") then
+				return self._nodes[node];
+			end
+
+			return modkit.table.find(self._nodes, function (other_node)
+				return other_node.id == %node.id;
+			end);
+		end
+
+		--- Sets the node for `id`.
+		---
 		---@param id string
-		---@return FlowNode
-		function flow:get(id)
-			return self._nodes[id];
+		---@param node FlowNode
+		function flow:set(id, node)
+			self._nodes[id] = node;
 		end
 
 		--- Returns a _**clone**_ of the `_nodes` member table, optionally filtered.
@@ -195,77 +219,125 @@ if (H_CAMPAIGN_MISSION_FLOW == nil) then
 			return modkit.table.filter(self:nodes(), filter);
 		end
 
+		--- Causes the given node to be started, if its `await` dependencies are cleared, and its status is:
+		--- - `ready`, meaning the node has not been run yet (or was revived)
+		--- - `exited`, meaning the node has stopped running and also moved out of its `exiting` phase
+		---
+		---@param node string|FlowNode
+		---@param force? bool
+		function flow:startNode(node, force)
+			local node = self:get(node);
 
-		function flow:doNode(node_id)
-			local node = self._nodes[node_id];
+			if (node == nil) then return nil; end
 
-			--- probably needs refactor
-			--- 
-			--- given dependencies, starts the node if possible
-			---@param dependencies string[]
-			local startOn = function (dependencies)
+			local correct_status = node.status == FLOW_NODE_STATUS.ready or node.status == FLOW_NODE_STATUS.exited;
+			if (correct_status == nil and force == nil) then
+				return nil;
+			end
+
+			---@type fun(): bool
+			local checkDepsFinished = function () -- as a fn so we can defer calculating this in case `force` is set
 				local self = %self;
-				local node = %node;
-				dependencies = dependencies or {};
-				local all_deps_finished = modkit.table.all(dependencies, function (dep)
-					local dep_node = %self._nodes[dep];
+				return modkit.table.all(%node.await, function (await_dep)
+					local dep_node = %self._nodes[await_dep];
 					return dep_node.status == FLOW_NODE_STATUS.exited;
 				end);
-				print("all deps ready for " .. %node_id .. "?:\t" .. tostring(all_deps_finished));
-
-				if (all_deps_finished) then
-					if (node.status == FLOW_NODE_STATUS.running) then
-						return nil;
-					end
-
-					node.action.init(state_clone);
-					node.status = FLOW_NODE_STATUS.running;
-				end
 			end
+
+			print("all deps ready for " .. node.id .. "?:\t" .. tostring(checkDepsFinished()));
+			print("force go?: " .. tostring(force));
+
+			if (force or checkDepsFinished()) then
+				local log = "STARTING FLOW NODE: <c=0099ff>" .. node.id .. "</c>";
+				-- Subtitle_Message(log, 3);
+				consoleLog(log);
+
+				node.action.init(state_clone);
+				node.status = FLOW_NODE_STATUS.running;
+			end
+		end
+
+		--- Causes the given node to complete exit if its status is:
+		--- - `running`, meaning its still executing its `main` action hook
+		--- - `exiting`, meaning its `main` action hook returned non-nil and is awaiting cleanup
+		---
+		---@param node string|FlowNode
+		---@param force? bool
+		function flow:finishNode(node, force)
+			local node = self:get(node);
+
+			if (node == nil) then return nil; end
+
+			local correct_status = node.status == FLOW_NODE_STATUS.running or node.status == FLOW_NODE_STATUS.exiting;
+			if (correct_status == nil and force == nil) then
+				return nil;
+			end
+
 			local state_clone = modkit.table.clone(node.state); -- clone for safety
 
-			if (node.status == FLOW_NODE_STATUS.exited) then -- =
-				return nil;
-			elseif (node.status == FLOW_NODE_STATUS.exiting) then -- exiting calls the exit hook and sets exited
-				print("exiting node " .. node.id);
-				modkit.table.printTbl(node.revives or {}, "try to revive ");
-				node.action.exit(state_clone);
-				for _, node_to_revive in node.revives do
-					self:reviveNode(node_to_revive);
-				end
-				modkit.table.printTbl(self._nodes);
-				node.status = FLOW_NODE_STATUS.exited;
-			elseif (node.status == FLOW_NODE_STATUS.ready) then -- if 'ready', we need to check its deps., if it has no outstanding, then run this node
-				startOn(node.await);
-			else -- if 'running', we need to execute the 'main' function of the node's action, if it returns non-nil, then we need to begin exiting the node
-				print("&& self at declr: " .. tostring(self) .. " (id: " .. self._id .. ")");
-				rawset(globals(), "exitCallback", function ()
-					print("&& self after? " .. tostring(%self));
-					return %self;
-				end);
-				local exit_code = node.action.main(self.stop, state_clone);
-				node.state.tick = node.state.tick + 1;
-				if (exit_code) then
-					node.status = FLOW_NODE_STATUS.exiting;
-					if (exit_code == self) then -- they're exiting the mission itself, (`return exit()`)
-						self:stop();
-					end
-				end
-			end
+			local log = "FINISH FLOW NODE: <c=0099ff>" .. node.id .. "</c>";
+			-- Subtitle_Message(log, 3);
+			consoleLog(log);
+			modkit.table.printTbl(node.revives or {}, "try to revive ");
 
-			if (state_clone and type(state_clone) == "table") then
-				node.state = modkit.table:merge(
-					node.state,
-					modkit.table:merge( -- kinda lame you cant pass N tables to merge...
-						state_clone,
-						-- here we ensure the client code doesn't mess with key values
-						{
-							tick = node.state.tick,
-							node_id = node.state.node_id,
-						}
-					)
-				);
+			node.action.exit(state_clone);
+			for _, node_to_revive in node.revives do
+				self:reviveNode(node_to_revive);
 			end
+			-- modkit.table.printTbl(self._nodes);
+			node.status = FLOW_NODE_STATUS.exited;
+		end
+
+		--- Process the given node, based on it's status.
+		--- - `ready` nodes are started according to `startNode`
+		--- - `running` nodes have their action's `main` hook called and their tick is incremented
+		--- - `exiting` nodes are exited according to `exitNode`
+		--- - `exited` nodes do nothing
+		---
+		---@param node string|FlowNode
+		function flow:doNode(node)
+			local node = self:get(node);
+			if (node == nil) then return nil; end
+
+			---@type table<FlowNodeStatus, function>
+			local lookup = {
+				[FLOW_NODE_STATUS.ready] = function ()
+					%self:startNode(%node);
+				end,
+				[FLOW_NODE_STATUS.running] = function ()
+					local self = %self;
+					local node = %node;
+					local state_clone = modkit.table.clone(node.state); -- clone for safety
+
+					local exitCallback = function ()
+						%self:stop();
+					end
+					local exit_code = node.action.main(exitCallback, state_clone);
+					node.state.tick = node.state.tick + 1;
+
+					if (exit_code) then
+						node.status = FLOW_NODE_STATUS.exiting;
+					end
+				end,
+				[FLOW_NODE_STATUS.exiting] = function ()
+					%self:finishNode(%node);
+				end,
+				[FLOW_NODE_STATUS.exited] = function ()
+					return nil;
+				end
+			};
+
+			-- execute the status callback
+			lookup[node.status]();
+
+			-- here we ensure the client code doesn't mess with key values `tick` or `node_id`
+			node.state = modkit.table:merge(
+				node.state,
+				{
+					tick = node.state.tick,
+					node_id = node.state.node_id,
+				}
+			);
 		end
 
 		function flow:start()
@@ -274,7 +346,11 @@ if (H_CAMPAIGN_MISSION_FLOW == nil) then
 			print("rule is " .. self._global_rule_name);
 			if (Rule_Exists(keyname) ~= 1) then
 				local wrapper = function ()
-					print("doing nodes on " .. %self._id);
+					-- print("doing nodes on " .. %self._id);
+					-- modkit.table.printTbl(modkit.table.map(%self:nodes(), function (node)
+					-- 	return node.status;
+					-- end), "nodes");
+
 					for id, _ in %self:nodes() do
 						%self:doNode(id);
 					end
@@ -298,8 +374,10 @@ if (H_CAMPAIGN_MISSION_FLOW == nil) then
 		end
 
 		if (mission_flow) then
-			flow:set(mission_flow);
+			flow:setAll(mission_flow);
 		end
+
+		FLOW_INDEX = FLOW_INDEX + 1; -- each flow wants a unique id, so we need to incr. for the next guy
 
 		return flow;
 	end
