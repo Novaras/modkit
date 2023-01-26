@@ -1,10 +1,10 @@
-print("=== begin mission01.level ===")
+print("=== begin mission01.level ===");
 
 dofilepath("data:scripts/modkit/sp_helpers.lua");
 
 MISSION_SHIPS = {
      {
-          type = "kus_carrier",
+          type = "kus_mothership",
      },
      {
           type = "kus_interceptor",
@@ -104,4 +104,4 @@ player[3] = {
      startPos = 0,
 }
 
-print("=== end mission01.level ===")
+print("=== end mission01.level ===");

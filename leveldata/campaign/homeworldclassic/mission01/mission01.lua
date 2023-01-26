@@ -1,5 +1,7 @@
 print("=== beginning mission01.lua ===");
 
+dofilepath("data:scripts/SCAR/KASUtil.lua")
+
 dofilepath("data:scripts/modkit/campaign.lua");
 local CAMPAIGN = modkit.campaign;
 
@@ -25,7 +27,7 @@ local m = CAMPAIGN.makeMission('data:leveldata/campaign/homeworldclassic/mission
 -- <name>(dependencies){resets}
 
 local wait_5 = {
-	main = function (state)
+	main = function (exit, state)
 		modkit.table.printTbl(state, "state");
 		if (state.tick == 5) then
 			return 1;
@@ -36,17 +38,49 @@ local wait_5 = {
 -- rules have it PARENT =[exit & call]=> [...CHILDREN]
 -- nodes have it [...CHILDREN] <=[wait for exit]= PARENT
 
+local sub_flow = CAMPAIGN.createMissionFlow({
+	d1 = {
+		action = wait_5,
+	},
+	d2 = {
+		await = { 'd1' },
+		action = wait_5
+	},
+	d3 = {
+		await = { 'd2' },
+	},
+	d4 = {
+		await = { 'd3' },
+		revives = { 'd1', 'd2', 'd3', 'd4' },
+		action = {
+			main = function (exit, state)
+				if (state.tick >= 5) then
+					consoleLog("d4 out, exit...");
+					return exit();
+				end
+			end
+		}
+	},
+});
+
 m.flow:set({
-	a1 = wait_5,
+	a1 = {
+		main = function (exit, state)
+			print("ya boss im in " .. state.node_id);
+			if (state.tick >= 5) then
+				return 1;
+			end
+		end
+	},
 	a2 = {
-		dependencies = { 'a1' },
+		await = { 'a1' },
 		action = wait_5,
 	},
 	a3 = {
 		state = { 'hello' },
-		dependencies = { 'a2' },
+		await = { 'a2' },
 		action = {
-			main = function (state)
+			main = function (exit, state)
 				modkit.table.printTbl(state, "a3 state");
 				consoleLog("death from a3!");
 				for _, ship in GLOBAL_SHIPS:all() do
@@ -66,17 +100,31 @@ m.flow:set({
 		end,
 	},
 	c1 = {
-		dependencies = { 'a3', 'b1' },
-		main = function (state)
-			print("c1 attempts time travel, tick is !" .. state.tick);
-			state.tick = 1000;
-			print(state.tick);
-		end
+		await = { 'a3', 'b1' },
+		action = {
+			main = function (exit, state)
+				print("c1 run... tick is " .. state.tick);
+				if (1) then
+					print("DONE WITH THIS");
+					return exit();
+				end
+			end
+		}
 	},
+	sub = {
+		init = function ()
+			print("starting sub flow");
+			%sub_flow:start();
+		end,
+		main = function (exit, state)
+			print("subflow action main call...");
+			print("status of subflow?: " .. tostring(%sub_flow._status));
+		end
+	}
 });
 
 modkit.table.printTbl(m.flow._nodes, "flow nodes");
 
-m:start();
+m.flow:start();
 
 print("== end of mission script ==");

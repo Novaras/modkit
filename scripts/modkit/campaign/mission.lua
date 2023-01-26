@@ -15,26 +15,6 @@ modkit.campaign.makeMission = function (level_dir_path)
 		root = level_dir_path
 	};
 
-	function mission:start()
-		local keyname = '__MK_MISSION_ENGINE_WRAPPER';
-		if (Rule_Exists(keyname) ~= 1) then
-			local wrapper = function ()
-				for id, _ in %self.flow:nodes() do
-					%self.flow:doNode(id);
-				end
-				%self.tick = %self.tick + 1;
-			end;
-			rawset(globals(), keyname, wrapper);
-			Rule_AddInterval(keyname, 1);
-		end
-
-		dofilepath("data:leveldata/multiplayer/lib/modkit-scheduler.lua");
-		modkit_scheduler_spawn();
-
-		dofilepath("data:scripts/modkit/sp_helpers.lua");
-		Rule_AddInterval("syncGlobalShips", 2);
-	end
-
 	-- ===============
 	-- Here we set a tag on the mission object with a tag method (hook) on 'settable'.
 	-- This hook checks if they key is one of 'init' or 'startOrLoad', and if so, assigns the
@@ -51,7 +31,7 @@ modkit.campaign.makeMission = function (level_dir_path)
 		};
 
 		if (key and keymap[key]) then
-			rawset(globals(), keymap[key], value);
+			rawset(globals(), keymap[key], function () %value(%mission); end); -- here we pass mission as 'self'
 		end
 
 		rawset(mission, key, value);
@@ -59,10 +39,10 @@ modkit.campaign.makeMission = function (level_dir_path)
 	settagmethod(mission_tag, "settable", mission_settable_lifetime_hook);
 	settag(mission, mission_tag);
 
-	mission.startOrLoad = function ()
+	function mission:startOrLoad()
 		print("OSOL RUN");
 	end;
-	mission.init = function ()
+	function mission:init()
 		print("INIT RUN");
 		dofilepath("data:scripts/modkit.lua");
 		loadModkit();
@@ -70,6 +50,9 @@ modkit.campaign.makeMission = function (level_dir_path)
 		-- these are not redefinitions; the mission context and customcode context both need these defined
 		initPlayers();
 		initShips();
+
+		dofilepath("data:leveldata/multiplayer/lib/modkit-scheduler.lua");
+		modkit_scheduler_spawn();
 
 		dofilepath("data:scripts/modkit/keybinds.lua");
 		modkitBindKeys();
@@ -99,6 +82,16 @@ modkit.campaign.makeMission = function (level_dir_path)
 		-- });
 
 		-- modkit.table.printTbl(stateHnd().GLOBAL_SHIPS, "SUPERGLOBAL SHIPS");
+
+		local waitForFlowEnd = function ()
+			print("main flow status:\t" .. %self.flow._status);
+			if (%self.flow._status == FLOW_STATUS.exited) then
+				print("-===<<[ MAIN FLOW EXITED!! PASS TO NEXT MISSION, ADIOS FROM " .. %self.root .. "!");
+				setGameOver();
+			end
+		end
+		rawset(globals(), "waitForFlowEnd", waitForFlowEnd);
+		Rule_AddInterval("waitForFlowEnd", 1);
 	end;
 
 	return mission;
