@@ -1,4 +1,4 @@
-print("=== begin mission01.level ===")
+print("=== begin mission01.level ===");
 
 dofilepath("data:scripts/modkit/sp_helpers.lua");
 
@@ -105,4 +105,4 @@ player[3] = {
      startPos = 0,
 }
 
-print("=== end mission01.level ===")
+print("=== end mission01.level ===");
