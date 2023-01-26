@@ -55,7 +55,7 @@ if (modkit.compose == nil) then
 	---
 	---@param sobgroup string A SobGroup containing the ship(/squad) to link
 	---@param player_index? integer The index of the player this ship belongs to
-	---@param id? integer The ID of the ship (availble in the `create`/`update`/`destroy` hooks as linked via `addCustomCode` in the `.ship` file)
+	---@param id? string|integer The ID of the ship (availble in the `create`/`update`/`destroy` hooks as linked via `addCustomCode` in the `.ship` file)
 	---@param ship_type? string The ship's type (e.g `'kus_scout'`)
 	---@return Ship
 	function compose:instantiate(sobgroup, player_index, id, ship_type)
