@@ -32,7 +32,8 @@ if (H_SP_HELPERS == nil) then
 			---@class GLOBAL_MISSION_SHIPS : MemGroupInst
 			---@field _entities Ship[]
 			---@field all fun(): Ship[]
-			---@field get fun(id: string): Ship
+			---@field get fun(self: GLOBAL_MISSION_SHIPS, id: string): Ship
+			---@field set fun(self: GLOBAL_MISSION_SHIPS, id: string, ship: Ship)
 			GLOBAL_MISSION_SHIPS = modkit.MemGroup.Create("mg-global-mission-ships");
 		end
 	end
@@ -69,7 +70,7 @@ if (H_SP_HELPERS == nil) then
 			print("GAMETIME CONTEXT");
 			initGlobalMissionShips();
 
-			GLOBAL_MISSION_SHIPS:set(id, modkit.compose:instantiate(group_name, player, id, type));
+			GLOBAL_MISSION_SHIPS:set(tostring(id), modkit.compose:instantiate(group_name, player, id, type));
 		end
 	end
 
