@@ -61,13 +61,13 @@ if (H_SP_HELPERS == nil) then
 		SHIP_NEXT_ID = SHIP_NEXT_ID + 1;
 
 		if (addSquadron ~= nil and createSOBGroup ~= nil) then -- defined only during .level load by engine
-			print("LEVEL CONTEXT");
+			-- print("LEVEL CONTEXT");
 			local squad_name = group_name .. "_squad";
 			addSquadron(squad_name, type, position,	player, rotation, 1, in_hyperspace);
 			createSOBGroup(group_name); -- group is accessible in the script
 			addToSOBGroup(squad_name, group_name); -- this fn assigns the squad to the sob
 		else
-			print("GAMETIME CONTEXT");
+			-- print("GAMETIME CONTEXT");
 			initGlobalMissionShips();
 
 			GLOBAL_MISSION_SHIPS:set(tostring(id), modkit.compose:instantiate(group_name, player, id, type));

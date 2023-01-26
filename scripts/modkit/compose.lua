@@ -59,8 +59,16 @@ if (modkit.compose == nil) then
 	---@param ship_type? string The ship's type (e.g `'kus_scout'`)
 	---@return Ship
 	function compose:instantiate(sobgroup, player_index, id, ship_type)
-		-- print("instantiate run for " .. type_group .. "(pid: " .. player_index .. ")");
 		local ship_type = ship_type or sobgroup;
+
+		--print("instantiate run for " .. ship_type .. "(pid: " .. player_index .. ")");
+
+		-- modkit.table.printTbl({
+		-- 	sobgroup = sobgroup,
+		-- 	player_index = player_index,
+		-- 	id = id,
+		-- 	ship_type = ship_type
+		-- }, "vals");
 
 		local base_protos = modkit.table.map(
 			modkit.table.filter(
@@ -92,7 +100,7 @@ if (modkit.compose == nil) then
 				local result = {};
 				if (attribs) then
 					if (type(attribs) == "function") then
-						result = attribs(%sobgroup, %player_index, %id);
+						result = attribs(%sobgroup, %player_index, %id, %ship_type);
 					end
 				end
 
