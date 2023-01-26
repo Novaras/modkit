@@ -44,7 +44,7 @@ if (H_SP_HELPERS == nil) then
 	---@param position? Vec3
 	---@param rotation? Vec3
 	---@param in_hyperspace? 0|1
-	---@param id? integer
+	---@param id? integer|string
 	---@param group_name? string
 	function registerShip(type, player, position, rotation, in_hyperspace, id, group_name)
 		local group_name = group_name or ("_registergroup_" .. SHIP_NEXT_ID);
@@ -68,7 +68,7 @@ if (H_SP_HELPERS == nil) then
 		else
 			print("GAMETIME CONTEXT");
 			initGlobalMissionShips();
-			id = id or modkit.table.length(GLOBAL_MISSION_SHIPS._entities);
+
 			GLOBAL_MISSION_SHIPS:set(id, modkit.compose:instantiate(group_name, player, id, type));
 		end
 	end
@@ -91,16 +91,21 @@ if (H_SP_HELPERS == nil) then
 			dofilepath(level_path);
 		end
 
-		for _, ship in MISSION_SHIPS do
+		for ship_id, ship in MISSION_SHIPS do
 			local count = ship.count or 1;
-			for _ = 1, count, 1 do
+			for i = 1, count, 1 do
+				local count_id = ship.id or ship_id;
+				if (count > 1) then
+					count_id =  count_id .. "_" .. i;
+				end
+
 				registerShip(
 					ship.type,
 					ship.player,
 					ship.position,
 					ship.rotation,
 					ship.in_hyperspace,
-					ship.id,
+					count_id,
 					ship.group_name
 				);
 			end
