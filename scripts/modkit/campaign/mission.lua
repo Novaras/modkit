@@ -15,34 +15,25 @@ modkit.campaign.makeMission = function (level_dir_path)
 		root = level_dir_path
 	};
 
-	-- ===============
-	-- Here we set a tag on the mission object with a tag method (hook) on 'settable'.
-	-- This hook checks if they key is one of 'init' or 'startOrLoad', and if so, assigns the
-	-- associated global function i.e setting 'init' on 'mission' causes 'OnInit' to be set on
-	-- 'globals()'.
-	-- These always-fired functions are called 'lifetime hooks/methods/functions'
-	-- ===============
+	function mission:start()
+		ensureMissionHooks(self);
 
-	local mission_tag = newtag();
-	local mission_settable_lifetime_hook = function (mission, key, value)
-		local keymap = {
-			init = 'OnInit',
-			startOrLoad = 'OnStartOrLoad'
-		};
-
-		if (key and keymap[key]) then
-			rawset(globals(), keymap[key], function () %value(%mission); end); -- here we pass mission as 'self'
-		end
-
-		rawset(mission, key, value);
+		self.flow:start();
 	end
-	settagmethod(mission_tag, "settable", mission_settable_lifetime_hook);
-	settag(mission, mission_tag);
 
-	function mission:startOrLoad()
+	--- Ensure `init` and `startOrLoad` are set at least to the default `_init` and `_startOrLoad`.
+	---
+	---@param mission Mission
+	ensureMissionHooks = ensureMissionHooks or function (mission)
+		for _, hook in { 'init', 'startOrLoad' } do
+			mission[hook] = mission[hook] or globals()["_" .. hook];
+		end
+	end
+
+	function _startOrLoad(mission)
 		print("OSOL RUN");
 	end;
-	function mission:init()
+	function _init(mission)
 		print("INIT RUN");
 		dofilepath("data:scripts/modkit.lua");
 		loadModkit();
@@ -63,36 +54,43 @@ modkit.campaign.makeMission = function (level_dir_path)
 		dofilepath("data:scripts/modkit/sp_helpers.lua");
 		registerShips(full_path);
 
-		-- GLOBAL_SHIPS._entities = modkit.table:merge(
-		-- 	GLOBAL_SHIPS._entities,
-		-- 	GLOBAL_MISSION_SHIPS._entities
-		-- );
-
-		-- print("just merged into GS (id: " .. tostring(GLOBAL_SHIPS));
-		-- print("entities count?: " .. tostring(modkit.table.length(GLOBAL_SHIPS._entities)));
-
-		-- local stateHnd = makeStateHandle();
-		-- local superglobal_ships = stateHnd().GLOBAL_SHIPS or {};
-		-- for id, ship in GLOBAL_SHIPS:all() do
-		-- 	print("now adding " .. ship.own_group .. " to the superglobal state");
-		-- 	superglobal_ships[id] = superglobal_ships[id] or ship.own_group;
-		-- end
-		-- stateHnd({
-		-- 	GLOBAL_SHIPS = superglobal_ships
-		-- });
-
-		-- modkit.table.printTbl(stateHnd().GLOBAL_SHIPS, "SUPERGLOBAL SHIPS");
-
 		local waitForFlowEnd = function ()
-			print("main flow status:\t" .. %self.flow._status);
-			if (%self.flow._status == FLOW_STATUS.exited) then
-				print("-===<<[ MAIN FLOW EXITED!! PASS TO NEXT MISSION, ADIOS FROM " .. %self.root .. "!");
-				setGameOver();
+			 --print("main flow status:\t" .. %mission.flow._status);
+			if (%mission.flow._status == FLOW_STATUS.exited) then
+				print("-===<<[ MAIN FLOW EXITED!! PASS TO NEXT MISSION, ADIOS FROM " .. %mission.root .. "! ]>>===-");
+				setGameOver(); -- actually ends the mission
 			end
 		end
 		rawset(globals(), "waitForFlowEnd", waitForFlowEnd);
 		Rule_AddInterval("waitForFlowEnd", 1);
 	end;
+
+	-- ===============
+	-- Here we set a tag on the mission object with a tag method (hook) on 'settable'.
+	-- This hook checks if they key is one of 'init' or 'startOrLoad', and if so, assigns the
+	-- associated global function i.e setting 'init' on 'mission' causes 'OnInit' to be set on
+	-- 'globals()'.
+	-- These always-fired functions are called 'lifetime hooks/methods/functions'
+	-- ===============
+
+	local mission_tag = newtag();
+	local mission_settable_lifetime_hook = function (mission, key, value)
+		local keymap = {
+			init = 'OnInit',
+			startOrLoad = 'OnStartOrLoad'
+		};
+
+		if (key and keymap[key]) then
+			rawset(globals(), keymap[key], function ()
+				%value(%mission); -- here we pass mission as 'self'
+				globals()["_" .. %key](%mission); -- here we call _init or _startOrLoad
+			end);
+		end
+
+		rawset(mission, key, value);
+	end
+	settagmethod(mission_tag, "settable", mission_settable_lifetime_hook);
+	settag(mission, mission_tag);
 
 	return mission;
 end
