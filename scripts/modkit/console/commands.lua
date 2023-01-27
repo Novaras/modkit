@@ -45,7 +45,9 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 	end
 
 	function shipsFromParamValues(params)
-		local src = GLOBAL_SHIPS:all();
+		local src = modkit.table.filter(GLOBAL_SHIPS:all(), function (ship)
+			return ship.player ~= nil;
+		end);
 
 		if (params.type and params.family) then
 			consoleLog("destroy: ignoring family param (f=" .. params.family .. ") due to presence of type param (t=" .. params.type .. ")");
@@ -140,7 +142,8 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 			local param_values = parseParams(line, command.params or {});
 			local flags = parseFlags(line, command.flags or {});
 
-			-- consoleLog("> " .. command_str);
+			consoleLog("> " .. command_str);
+			consoleLog(line);
 			-- COMMANDS[command].fn(line, words);
 			command.fn(param_values, words, flags, line);
 		else
