@@ -92,6 +92,8 @@ if (H_SP_HELPERS == nil) then
 			dofilepath(level_path);
 		end
 
+		MISSION_SHIPS = MISSION_SHIPS or {};
+
 		for ship_id, ship in MISSION_SHIPS do
 			local count = ship.count or 1;
 			for i = 1, count, 1 do
