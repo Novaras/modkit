@@ -142,13 +142,13 @@ if (H_DRIVER == nil) then
 		local stateHnd = makeStateHandle();
 		local superglobal_ships = stateHnd().GLOBAL_SHIPS or {};
 		if (superglobal_ships[caller.id] == nil and Universe_GameTime and Universe_GameTime() > 0) then -- intentionally ignore ships set by the .level; we let the mission handle these cases
-			print("now adding " .. g .. "-" .. i .. " to the superglobal state");
+			-- print("now adding " .. g .. "-" .. i .. " to the superglobal state");
 
 			superglobal_ships[caller.id] = caller.own_group;
 			stateHnd({
 				GLOBAL_SHIPS = superglobal_ships,
 			});
-			modkit.table.printTbl(stateHnd().GLOBAL_SHIPS, "SUPERGLOBAL SHIPS");
+			-- modkit.table.printTbl(stateHnd().GLOBAL_SHIPS, "SUPERGLOBAL SHIPS");
 		end
 
 		SobGroup_SobGroupAdd(caller.own_group, g); -- ensure own group is filled on update

@@ -57,6 +57,10 @@ if (nil) then
 	COMMAND_Retire = 16;
 	-- ...todo
 
+	NISHandle_Invalid = 1;
+
+	---@alias NISHandle integer|'NISHandle_Invalid'
+
 	-- used by UI_ShowScreen
 	ePopup = 0;
 	eTransition = 1;
