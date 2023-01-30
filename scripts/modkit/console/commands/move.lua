@@ -2,7 +2,7 @@ COMMANDS = COMMANDS or {};
 
 COMMANDS.move = COMMANDS.move or {
     description = "Causes ships to move to a position. If '--force' is set, teleports the units to the positon.",
-    syntax = "move (type=[ship-type] or family=[attack-family]) player=[player-id] position=[x y z] ?--force",
+    syntax = "move ?(type=[ship-type] or family=[attack-family]) player=[player-id] position=[x y z] ?--force",
     example = "move type=tai_assaultfrigate p=0 pos=0 0 0 --force",
     params = {
         type = PARAMS.str({ 't', 'type' }),
