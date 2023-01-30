@@ -34,6 +34,21 @@ if (H_DRIVER == nil) then
 
 	initPlayers(); -- modkit/player.lua
 
+	--- Returns selected ships.
+	---
+	---@return Ship[]
+	function GLOBAL_SHIPS:selected()
+		local selected = {};
+		for _, ship in GLOBAL_SHIPS:all() do
+			---@cast ship Ship
+			if (ship:selected()) then
+				modkit.table.push(selected, ship);
+			end
+		end
+
+		return selected;
+	end
+
 	--- Returns all ships which are allied with the `caller`.
 	---
 	---@param caller Ship
