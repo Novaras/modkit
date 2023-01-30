@@ -20,7 +20,7 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 	---@field example? string
 	---@field fn fun(params: any[], words: string[], flags: any[], line: string): any
 
-	---@alias ParamConfigGenerator fun(names: string[], default: any): ParamConfig
+	---@alias ParamConfigGenerator fun(names?: string[], default?: any): ParamConfig
 
 	function makeSpawnVolGenerator(radius)
 		radius = radius or 1500;
@@ -59,6 +59,8 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 			src = modkit.table.filter(src, function (ship)
 				return ship:attackFamily() == %params.family;
 			end);
+		else
+			src = GLOBAL_SHIPS:selected();
 		end
 
 		if (params.player) then
@@ -148,7 +150,7 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 		end
 	end
 
-	---@type ParamConfigGenerator[]
+	---@type table<string, ParamConfigGenerator>
 	PARAMS = {
 		int = function (names, default)
 			names = names or { 'n', 'v', 'val', 'value' };
@@ -168,8 +170,10 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 				{
 					transform = function (value)
 						value = tonumber(value);
-						print("trying to fetch player id " .. value);
-						return GLOBAL_PLAYERS:get(value);
+						if (value) then
+							print("trying to fetch player id " .. value);
+							return GLOBAL_PLAYERS:get(value);
+						end
 					end
 				}
 			);
