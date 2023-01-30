@@ -65,7 +65,7 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 		end
 
 		if (params.type and params.family) then
-			consoleLog("destroy: ignoring family param (f=" .. params.family .. ") due to presence of type param (t=" .. params.type .. ")");
+			consoleLog("ignoring family param (f=" .. params.family .. ") due to presence of type param (t=" .. params.type .. ")");
 		end
 
 		if (params.type) then
@@ -86,6 +86,10 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 				return ship:selected();
 			end);
 		end
+
+		-- modkit.table.printTbl(modkit.table.map(src, function (ship)
+		-- 	return { id = ship.id, group = ship.own_group, player = ship.player.id, type = ship.type_group }
+		-- end), "command selection");
 
 		return src;
 	end
