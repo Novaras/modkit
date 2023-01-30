@@ -2,7 +2,7 @@
 
 Modkit comes with an ingame console.
 
-The console can run whole files, and also comes prepackaged with many commands.
+The console can run whole files, and also comes prepackaged with many commands. Use the '`help`' command for info while ingame.
 
 Post issues about bugs or feature requests [here](https://github.com/Novaras/modkit/issues).
 
