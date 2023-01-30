@@ -396,7 +396,7 @@ end
 
 --- Causes this ship to be 'ghosted', which is pretty much akin to no-clip (no collisions will affect this ship).
 ---
----@param enabled '0'|'1'
+---@param enabled 0|1
 ---@return bool
 function modkit_ship:ghost(enabled)
 	if (enabled == 0) then
@@ -681,6 +681,7 @@ function modkit_ship:alliedWith(other)
 	if (other.HP) then -- caller is a ship
 		return self.player:alliedWith(other.player);
 	else
+		---@cast other Player
 		return self.player:alliedWith(other);
 	end
 end
@@ -756,8 +757,9 @@ function modkit_ship:canDoAbility(ability, enable)
 	return SobGroup_CanDoAbility(self.own_group, ability);
 end
 
----comment
----@param enable '0'|'1'|'nil'
+--- Gets and optionally sets whether or not this ship can hyperspace.
+---
+---@param enable? 0|1
 function modkit_ship:canHyperspace(enable)
 	return self:canDoAbility(AB_Hyperspace, enable);
 end
@@ -802,6 +804,39 @@ end
 function modkit_ship:isBeingCaptured()
 	local temp = SobGroup_GetSobGroupBeingCapturedGroup(self.own_group, DEFAULT_SOBGROUP);
 	return SobGroup_Count(temp) > 0;
+end
+
+-- === Selection stuff ===
+
+--- Gets and optionally sets the 'selected' state of this ship. This is a real UI selection, not to be confused with a selection from `Section_` functions.
+---
+--- A further parameter, `add_to_current`, indicates whether or not to add this ship to a possible current selection or to set it as the only selected ship when setting.
+---
+---@param selected? 0|1
+---@param add_to_current? bool
+---@return bool
+function modkit_ship:selected(selected, add_to_current)
+	if (selected == 1) then
+		local to_select_group = SobGroup_Fresh();
+		SobGroup_SobGroupAdd(to_select_group, self.own_group);
+		if (add_to_current) then
+			local current = SobGroup_FromShips(GLOBAL_SHIPS:selected());
+			modkit.table.printTbl(modkit.table.map(GLOBAL_SHIPS:selected(), function (ship)
+				return { own_group = ship.own_group, selected = ship:selected() };
+			end), "selected ships");
+			print("current selected group count: " .. tostring(SobGroup_Count(current)));
+			SobGroup_SobGroupAdd(to_select_group, current);
+		end
+		SobGroup_SelectSobGroup(to_select_group);
+	elseif (selected == 0) then
+		local current = SobGroup_FromShips(GLOBAL_SHIPS:selected());
+		local after = SobGroup_Fresh();
+		SobGroup_FillSubstract(after, current, self.own_group); -- save the selection sans this ship
+		SobGroup_DeSelectAll();
+		SobGroup_SelectSobGroup(after); -- now re-select (so we only end up deselecting this ship)
+	end
+
+	return SobGroup_Selected(self.own_group) == 1;
 end
 
 -- === Command stuff ===
