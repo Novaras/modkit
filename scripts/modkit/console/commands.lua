@@ -44,6 +44,14 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 		end
 	end
 
+	--- Constructs a `Ship[]` from the incoming _param values_:
+	---
+	--- - By default, return the _ currently selected_ ships
+	--- - If 'type' is set, return all ships of that type
+	--- - Else if 'family' is set, return all ships of that family
+	---
+	---@param params any
+	---@return Ship[]
 	function shipsFromParamValues(params)
 		local src = GLOBAL_SHIPS:all();
 
