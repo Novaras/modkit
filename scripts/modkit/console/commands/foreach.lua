@@ -10,10 +10,6 @@ If you pass a lua string with 'lua=', you can include replacement tokens in your
     syntax = "foreach (type=[ship-type] or family=[attack-family]) player=[player-id] (lua=[lua-str] or command=[console-command])",
     example = "foreach type=kus_resourcecollector player=0 lua=SobGroup_SetHealth($g, 0.1)",
     params = {
-        lua = {
-            names = { "lua" },
-            pattern = ".+"
-        },
         type = PARAMS.str({ 't', 'type' }),
         family = PARAMS.str({ 'f', 'family' }),
         player = PARAMS.intToPlayer(),
@@ -23,7 +19,11 @@ If you pass a lua string with 'lua=', you can include replacement tokens in your
             transform = function (value)
                 return COMMANDS[value];
             end
-        }
+        },
+        lua = {
+            names = { "lua" },
+            pattern = ".+"
+        },
     },
     fn = function (param_vals, _, _, line)
         if (param_vals.lua) then
@@ -46,6 +46,10 @@ If you pass a lua string with 'lua=', you can include replacement tokens in your
                     return { id = ship.id, type = ship.type_group, player_id = ship.player.id };
                 end)
             });
+
+            -- modkit.table.printTbl(modkit.table.map(src, function (ship)
+            --     return { id = ship.id, type = ship.type_group, player_id = ship.player.id };
+            -- end), "foreach on src");
 
             local parsed = gsub(lua_str, "$t", type or '');
             parsed = gsub(parsed, "$f", family or '');

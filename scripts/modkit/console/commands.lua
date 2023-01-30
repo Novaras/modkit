@@ -55,6 +55,8 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 	function shipsFromParamValues(params)
 		local src = GLOBAL_SHIPS:all();
 
+		-- modkit.table.printTbl(params, "params");
+
 		if (params.player) then
 			src = modkit.table.filter(src, function (ship)
 				---@cast ship Ship
@@ -69,12 +71,12 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 		if (params.type) then
 			src = modkit.table.filter(src, function (ship)
 				---@cast ship Ship
-				return ship.ship_type == %params.type;
+				return strfind(ship.type_group, %params.type);
 			end);
 		elseif (params.family) then
 			src = modkit.table.filter(src, function (ship)
 				---@cast ship Ship
-				return ship:attackFamily() == %params.family;
+				return strfind(ship:attackFamily(), %params.family);
 			end);
 		end
 
@@ -198,7 +200,7 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 			return {
 				names = names,
 				default = default,
-				pattern = "[%a%d_-]+"
+				pattern = "[%a%d_-%.]+"
 			};
 		end,
 		vec3 = function (names, default)
