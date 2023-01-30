@@ -599,7 +599,7 @@ end
 -- === State queries ===
 
 ---
----@param invulnerable '0'|'1'
+---@param invulnerable 0|1
 ---@return bool
 function modkit_ship:invulnerable(invulnerable)
 	if (invulnerable) then

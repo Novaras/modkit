@@ -648,6 +648,21 @@ if (nil) then
 	function SobGroup_SetHealth(target_group, fraction)
 	end
 
+	--- Sets the invulnerability of the given sobgroup.
+	---
+	---@param target_group string
+	---@param invulnerable 0|1
+	function SobGroup_SetInvulnerability(target_group, invulnerable)
+	end
+
+	--- Sets the invulnerability of a group's hardpoint (by name).
+	---
+	---@param target_group string
+	---@param hardpoint_name string
+	---@param invulnerable 0|1
+	function SobGroup_SetInvulnerabilityOfHardPoint(target_group, hardpoint_name, invulnerable)
+	end
+
 	--- Sets the _inherent_ visibility of the `target_group` for player `target_player`.
 	---
 	--- Note: there is no corresponding getter for this value, so you should store it yourself if you need to get it later.
