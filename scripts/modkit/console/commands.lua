@@ -55,25 +55,33 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 	function shipsFromParamValues(params)
 		local src = GLOBAL_SHIPS:all();
 
+		if (params.player) then
+			src = modkit.table.filter(src, function (ship)
+				---@cast ship Ship
+				return ship.player.id == %params.player.id;
+			end);
+		end
+
 		if (params.type and params.family) then
 			consoleLog("destroy: ignoring family param (f=" .. params.family .. ") due to presence of type param (t=" .. params.type .. ")");
 		end
 
 		if (params.type) then
 			src = modkit.table.filter(src, function (ship)
+				---@cast ship Ship
 				return ship.ship_type == %params.type;
 			end);
 		elseif (params.family) then
 			src = modkit.table.filter(src, function (ship)
+				---@cast ship Ship
 				return ship:attackFamily() == %params.family;
 			end);
-		else
-			src = GLOBAL_SHIPS:selected();
 		end
 
-		if (params.player) then
+		if (params.player == nil and params.type == nil and params.family == nil) then
 			src = modkit.table.filter(src, function (ship)
-				return ship.player.id == %params.player.id;
+				---@cast ship Ship
+				return ship:selected();
 			end);
 		end
 
@@ -158,7 +166,7 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 		end
 	end
 
-	---@type table<string, ParamConfigGenerator>
+	---@class PARAMS : table<string, ParamConfigGenerator>
 	PARAMS = {
 		int = function (names, default)
 			names = names or { 'n', 'v', 'val', 'value' };
