@@ -1,7 +1,7 @@
 if (MODKIT_KEYBINDS == nil) then
     MK_KeyFunctions = {
         showConsoleScreen = {
-            key = PKEY,
+            key = XKEY,
             fn = function ()
                 if (modkit == nil or modkit.console == nil) then
                     dofilepath("data:scripts/modkit/console.lua");
