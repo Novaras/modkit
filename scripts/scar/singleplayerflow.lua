@@ -376,8 +376,13 @@ function singlePlayerOnStartOrLoad(missionNumber)
     if (modkit_poll_text_capture == nil or Rule_Exists("modkit_bindkeys") == 0) then
         print("CONSOLE BIND FOR SINGLEPLAYER");
         dofilepath("data:scripts/modkit.lua");
+        initPlayers();
+        initShips();
+
         dofilepath("data:leveldata/multiplayer/lib/modkit-scheduler.lua");
-        dofilepath("data:leveldata/multiplayer/lib/modkit-hoist-memgroups.lua");
+        dofilepath("data:scripts/sp_helpers.lua");
+        Rule_AddInterval("syncGlobalShips", 2);
+
         modkitBindKeys();
     end
 end

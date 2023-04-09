@@ -1,0 +1,98 @@
+filerange 44000 44180
+rangestart 44000 44180
+
+// Subtitles
+44000	Destroy the remaining Vaygr
+44001	Defend the Dreadnaught.
+44002	Dock the Dreadnaught with the Shipyard for repairs
+44003	Bring the Dreadnaught engines online.
+44004	Eradicate the Hyperspace Gates.
+44005	Destroy the Vaygr Carriers
+44006	Build a Shipyard and repair the Dreadnaught
+44010	Eliminate all Vaygr forces in the region
+44011	Protect the Dreadnaught from enemy attack.
+44012	We have sacrificed much in order to acquire it.
+44013	The Shipyard Nabaal can repair the Dreadnaught.
+44014	Use Resource Collectors to repair the Dreadnaught's main engines.
+44015	The Vaygr are using Hyperspace Gates to launch attacks against the Dreadnaught.
+44016	Destroy the Gates before we are overwhelmed.
+44017	The Vaygr are using Carriers to launch further attacks forces.  Destroy them.
+44018	Build a Shipyard and continue repairs on the Dreadnaught.
+44020	NIS09
+44021	VAYGR ASSEMBLY POINT - SHINING HINTERLANDS
+44030	The Dreadnaught has slowed the initial Vaygr assault; however, it suffered heavy damage when the Phased Cannon misfired.
+44034	The Dreadnaught engines are offline.
+44035	Send Resource Collectors to begin preliminary repairs.
+44040	The Vaygr are using hyperspace gates to launch attacks upon the Dreadnaught.
+44041	These gates must be destroyed.
+44045	The Dreadnaught's engines are now online.
+44046	Basic movement is restored. However, more extensive repairs are needed.
+44033	The Shipyard Nabaal is en-route.
+44036	The Dreadnaught must dock with the Shipyard to complete repairs.
+44050	Fleet, this is Captain Elohim.
+44051	Hyperspace shortjump successful. Crews are standing by to repair the Dreadnaught.
+44052	Dock the Dreadnaught with the Shipyard.
+44053	Repairs will commence at once.
+44055	Gates destroyed.
+44060	Priority alert!
+44061	Vaygr Carriers exiting hyperspace. They have surrounded us.
+44065	Additonal enemy Carriers detected.
+44066	The Mothership and Dreadnaught must be defended.
+44070	Enemy Carriers eliminated.
+44071	Vaygr super-capital ships approaching.
+44072	Repairs to the Dreadnaught must be completed at once.
+44075	Docking clamps engaged.
+44076	Signal lock confirmed.
+44077	The Shipyard reports that preliminary analysis and repairs of the Dreadnaught systems will take time.
+44078	Repairs will be complete in 10 minutes.
+44079	Repairs will be complete in 15 minutes.
+44080	Repairs will be complete in 20 minutes.
+44081	Repairs will be complete in 25 minutes.
+44082	Repairs will be complete in 30 minutes.
+44085	Repairs to the Dreadnaught will be complete in 1 minute.
+44086	Repairs to the Dreadnaught will be complete in 5 minutes.
+44087	Repairs to the Dreadnaught will be complete in 10 minutes.
+44088	Repairs to the Dreadnaught will be complete in 15 minutes.
+44089	Repairs to the Dreadnaught will be complete in 20 minutes.
+44090	Repairs to the Dreadnaught will be complete in 25 minutes.
+44091	Repairs to the Dreadnaught will be complete in 30 minutes
+44095	The Shipyard is under attack.
+44100	The Shipyard has been destroyed.
+44105	Dreadnaught hull integrity at 20 percent and falling.
+44106	We cannot lose the Dreadnaught.
+44107	Allocate combat vessels to protect it.
+44110	The Dreadnaught has been destroyed.
+44113	MISSION FAILED
+44115	Fleet, the Dreadnaught's systems are on-line.
+44116	Crew has been transferred. She is ready for action.
+44117	The Shipyard has restored the Dreadnaught to full combat status.  However, the Phased Cannon Array sustained irreparable damage.
+44180	The remaining weapons are operational and firing crews are standing by.
+44118	Multiple hyperspace signatures detected.
+44119	The Vaygr are launching an attack.
+44120	The Vaygr are retreating.
+44121	Eliminate any survivors before they can escape.
+44125	The Vaygr have been defeated
+44126	Before being captured, Captain Soban activated an emergency tracking device.
+44131	Using this signal, we will be able to locate his destination point.
+44132	Stand by for hyperspace jump.
+44140	30 MINUTES UNTIL DREADNAUGHT REPAIRED
+44141	25 MINUTES UNTIL DREADNAUGHT REPAIRED
+44142	20 MINUTES UNTIL DREADNAUGHT REPAIRED
+44143	15 MINUTES UNTIL DREADNAUGHT REPAIRED
+44144	10 MINUTES UNTIL DREADNAUGHT REPAIRED
+44145	5 MINUTES UNTIL DREADNAUGHT REPAIRED
+44146	%1MINUTES%:%2SECONDS% Until Dreadnaught repairs complete
+44147	SHIPYARD AT 50 PERCENT HEALTH
+44148	SHIPYARD AT 10 PERCENT HEALTH
+44150	Hiigaran Navy
+44151	Vaygr Staging Force
+44155	Vaygr Attackers
+44156	Carrier
+44157	Hyperspace Gate
+44160	Mission lost
+44170	Destroy the Vaygr Battlecruisers.
+44171	These Carriers are launching attacks upon the Mothership.  Destroy them to cripple the Vaygr attack.
+44172	The Vaygr are using gates to stage attacks upon the Dreadnaught.
+44175	SAVING GAME
+
+rangeend

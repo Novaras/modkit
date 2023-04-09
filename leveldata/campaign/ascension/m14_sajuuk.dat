@@ -1,0 +1,45 @@
+filerange 46500 46999
+rangestart 46500 46999
+
+// Subtitles
+46500	Destroy Makaan.
+46501	Destroy the Vaygr Shipyard.
+46502	Protect the Mothership.
+46600	Destroy Makaan to prevent him from uniting the cores and claiming Sajuuk.
+46601	Destroy the Vaygr Shipyard to prevent it from providing reinforcements.
+46602	Protect the Mothership against the incoming Vaygr attack.
+46801	Hiigaran Navy
+46802	Vaygr
+46803	Progenitor
+46520	BALCORA
+46521	MISSION FAILED
+46522	MISSION SUCCESFFUL
+46525	Makaan cannot be allowed to unite the Cores.
+46526	The Prophecy must not end this way.
+46527	Multiple incoming Vaygr units detected.
+46528	Protect the Mothership.
+46530	The Vaygr are regrouping around Makaan's Flagship.
+46531	He must be destroyed.
+46533	Makaan's Flagship is heavily damaged.
+46535	Makaan's Flagship is critically damaged.
+46536	Concentrate all fire on Makaan!
+46540	Makaan is repairing his Flagship.
+46541	Target the Vaygr Resource Collectors to prevent repairs.
+46545	The Vaygr are using a shipyard to provide reinforcements.
+46546	It must be destroyed.
+46547	The Vaygr shipyard has been destroyed.
+46550	Vaygr Carrier detected.
+46555	The Vaygr have become desperate.
+46556	Their Fighters are making suicide attacks.
+46557	*** AXED *** Recommend using Assault Frigates to protect against these attacks.
+46558	Recommend using Flak Frigates to counter these attacks.
+46570	At this moment, a dark cloud gathers above the skies of Hiigara...
+46571	The Warriors of the Fringe will never be defeated.
+46572	Makaan has been defeated.
+46573	Begin recovery of the Vaygr Core.
+46574	The Trinity must be united.
+46999	MISSION FAILED
+46900	Makaan
+46901	Vaygr Shipyard
+
+rangeend

@@ -1,0 +1,86 @@
+filerange 41500 41995
+rangestart 41500 41995
+
+// Subtitles
+41500	Destroy the Hyperspace Inhibitors.
+41501	Destroy the Command Station.
+41502	Capture the Vaygr Hyperspace Gate.
+41503	Destroy the remaining Vaygr forces.
+41504	Use Minelayers to clear the Minefields
+41505	Build a Minelayer Corvette
+41506	Destroy the Carrier to slow repairs
+41520	MISSION FAILED.  COMMAND STATION REPAIRS COMPLETE
+41521	GEHENNA OUTSKIRTS
+41522	MISSION FAILED
+41523	MISSION SUCCESSFUL
+41530	We have exited Hyperspace on the outskirts of the Gehenna asteroid field.
+41532	The Vaygr's Hyperspace Inhibitors are located on asteroids throughout this sector.
+41533	We must destroy the Inhibitors and disable the field if we are to reach Gehenna undetected.
+41534	The Vaygr Command Station is located here.
+41535	It must be neutralized.
+41536	Long range scans detect heavy Vaygr activity in this region, advise caution.
+41540	The Inhibitors are protected by minefields.
+41541	Construct Minelayers to clear the mines.
+41542	There are minefields surrounding the inhibitors.  The mines must be destroyed.
+41550	Minelayer Corvette complete.
+41551	Use the minelayer to clear the minefield surrounding each hyperspace inhibitor.
+41552	Combat vessels must then destroy the inhibitors as soon as possible.
+41560	The enemy is using Hyperspace Gates to bring in reinforcements. We can use this to our advantage.
+41561	Marine Frigates will be able to capture the Gates.
+41562	The enemy is using hyperspace gates to bring in reinforcements.
+41563	Destroy the gates.
+41564	If we capture the gate, we can destroy the source of the reinforcements.
+41570	The enemy Command Station is being repaired by a Carrier.
+41571	We must prevent the Vaygr from completing these repairs or they will transmit our position.
+41572	Destroy the Vaygr Carrier.
+41575	We estimate the enemy's repairs are nearing completion.
+41576	Time is running out.
+41580	The repairs to the Command Station are nearly complete.
+41581	Send an attack force immediately.
+41585	The enemy Station has been repaired.
+41586	The Vaygr have been alerted. We have failed.
+41588	The Carrier has been destroyed.  Repairs to the Communications Subsystem delayed.
+41590	Hyperspace Inhibitor destroyed.
+41595	The second Hyperspace Inhibitor has been destroyed.
+41600	The Hyperspace inhibitor field has been neutralized.
+41601	Tactical hyperspace is now possible.
+41620	We can now initiate a Tactical Hyperspace jump and move our Fleet to within striking distance of the Command Station.
+41623	This Communications Subsystem Must Be Destroyed.
+41624	If it is not, the Vaygr will know of our arrival at Gehenna.
+41640	Signals show that the enemy Station has fighter construction capabilities.
+41650	The enemy Command Station has been neutralized.
+41651	We can now safely move forward into the Gehenna asteroid field undetected.
+41652	Oracle coordinates locked in.
+41653	We must defeat the remaining Vaygr Carriers before they can transmit our location.
+41630	Capital Ship Construction Facility available for construction.
+41610	The enemy is using Corvettes effectively.
+41611	Construct Torpedo Frigates to counter this threat.
+41850	Hiigaran Navy
+41851	Vaygr Fleet
+41852	Vaygr Command Outpost
+41900	Hyperspace Inhibitor
+41901	Hyperspace Inhibitor
+41902	Hyperspace Inhibitor
+41903	Command Station
+41904	Resource Pocket
+41905	Vaygr Fleet
+41950	Destroy all of the Hyperspace Inhibitors.
+41951	Once destoyed Hyperspace will be re-enabled.
+41960	Destroy the Command Station before it is repaired.
+41961	Its destruction will prevent the Vaygr from calling in reinforcements.
+41970	Move the Fleet to this Secondary Resource Pocket.
+41971	Eliminate the remaining Vaygr forces in the area.
+41980	Target the  Hyperspace Inhibitors Subsystems on the Asteroids to stop the grav-well preventing Hyperspace.
+41985	Destroy the Command Station before is is fully operational.
+41990	Use a Marine Frigate to capture a Vaygr Hyperspace Gate.
+41991	This will allow you to use the gate and launch an attack directly upon the Carrier supplying reinforcements to the Hyperspace Inhibitors.
+41995	We cannot afford to leave Vaygr behind us as we move into Gehenna.  Destroy the remaining Vaygr forces at the Command Station.
+41975	Minelayers are perfect for clearing Minefields.
+41976	Their attack, while weak against most ships, will destroy mines quickly.
+41977	Use this function to clear the minefields around the Hyperspace Inhibitors in order to allow safe passage for your combat vessels.
+41955	Build Minelayer Corvettes to deal with the minefields.
+41957	The Vaygr Carrier is providing Resource Collectors to repair the Command Station.
+41958	Destroy the Carrier to prevent these repairs from finishing.
+41959	%1MINUTES%:%2SECONDS% Until Command Station repairs are completed
+
+rangeend

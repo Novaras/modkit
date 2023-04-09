@@ -3,7 +3,7 @@ if (modkit == nil) then
 	dofilepath("data:scripts/modkit/table_util.lua");
 end
 
-if (H_SCHEDULER == nil) then
+if (modkit.scheduler == nil) then
 	--- The scheduler keeps a register of 'events', which are functions bound to a scheduler tick interval.
 	--- These ticks happenen every `seconds_per_tick` seconds. Every time the interval amount of ticks pass,
 	--- functions which are bound to that interval are fired. This allows ship `update` hooks to bypass their own

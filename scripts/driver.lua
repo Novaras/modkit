@@ -19,49 +19,13 @@ if (H_DRIVER == nil) then
 	---@field finish HookFn
 	---@field auto_exec table
 
-	if (modkit == nil) then
+	if (modkit == nil or initPlayers == nil) then
+		print("driver loading modkit...");
 		dofilepath("data:scripts/modkit.lua");
-	end
+		dofilepath("data:scripts/modkit/player.lua");
 
-	---@class ShipCollection : SheduledFilters, MemGroupInst
-	---@field _entities Ship[]
-	---@field get fun(self: ShipCollection, entity_id: number): Ship
-	---@field set fun(self: ShipCollection, entity_id: number, ship: Ship): Ship
-	---@field all fun(self: ShipCollection): Ship[]
-	---@field find fun(self: ShipCollection, predicate: ShipFilterPredicate): Ship | 'nil'
-	---@field filter fun(self: ShipCollection, predicate: ShipFilterPredicate): Ship[]
-	GLOBAL_SHIPS = modkit.MemGroup.Create("mg-ships-global");
-
-	initPlayers(); -- modkit/player.lua
-
-	--- Returns all ships which are allied with the `caller`.
-	---
-	---@param caller Ship
-	---@param filter_predicate ShipFilterPredicate
-	---@return Ship[]
-	function GLOBAL_SHIPS:allied(caller, filter_predicate)
-		local allied_ships = {};
-		for index, ship in self:all() do
-			if (ship:alliedWith(caller) and filter_predicate(ship)) then
-				allied_ships[index] = ship;
-			end
-		end
-		return allied_ships;
-	end
-
-	--- Returns all ships which are not allied with the `caller`.
-	---
-	---@param caller Ship
-	---@param filter_predicate ShipFilterPredicate
-	---@return Ship[]
-	function GLOBAL_SHIPS:enemies(caller, filter_predicate)
-		local enemy_ships = {};
-		for index, ship in self:all() do
-			if (ship:alliedWith(caller) == nil and filter_predicate(ship)) then
-				enemy_ships[index] = ship;
-			end
-		end
-		return enemy_ships;
+		initPlayers();
+		initShips();
 	end
 
 	--- Registers the incoming sobgroup, player index, and ship id into a Ship table within the global registry.
@@ -71,6 +35,8 @@ if (H_DRIVER == nil) then
 	---@param ship_id integer
 	---@return Ship
 	register = register or function (type_group, player_index, ship_id)
+		-- print("register a " .. type_group .. " for player " .. player_index);
+
 		type_group = strlower(type_group); -- immediately make this lowercase
 		local caller = GLOBAL_SHIPS:get(ship_id);
 		if (caller ~= nil) then -- fast return if already exists
@@ -97,14 +63,6 @@ if (H_DRIVER == nil) then
 			end
 			modkit.table.push(%l, line);
 		end
-		modkit.table.printTbl({ type_group = type_group, player_index = player_index, ship_id = ship_id }, "caller?", nil, f, 1);
-		local stateHnd = makeStateHandle();
-
-		local str_representation = type_group .. "," .. player_index .. "," .. ship_id;
-
-		stateHnd({
-			GLOBAL_SHIPS = modkit.table.push(stateHnd().GLOBAL_SHIPS or {}, str_representation);
-		});
 
 		-- ensure non-nil when calling these:
 		for i, v in {
@@ -142,6 +100,8 @@ if (H_DRIVER == nil) then
 	---@param i integer The ship's unique id
 	---@return DriverShip
 	create = create or function(g, p, i)
+		-- print("calling create for " .. tostring(g .. "-" .. i));
+		---@type DriverShip
 		local caller = register(g, p, i);
 
 		caller:create(); -- run the caller's custom create hook
@@ -158,19 +118,37 @@ if (H_DRIVER == nil) then
 	---@return DriverShip
 	update = update or function(g, p, i)
 		local caller = GLOBAL_SHIPS:get(i);
+		-- print("update for " .. caller.own_group);
 		if (caller == nil or caller.own_group == nil) then -- can happen when loading a save etc.
 			---@type DriverShip
 			caller = create(g, p, i);
 		end
 
-		-- if (caller.own_group == nil) then
-		-- 	print("og: " .. (caller.own_group or "nil"));
-		-- 	modkit.table.printTbl(caller);
+		-- if (caller.player == nil) then
+		-- 	print("pl?: " .. tostring(modkit.table.filter(caller.player, function (val, index, tbl)
+		-- 		return type(val) ~= "function";
+		-- 	end)));
+		-- 	modkit.table.printTbl(modkit.table.filter(caller, function (val, index, tbl)
+		-- 		return type(val) ~= "function";
+		-- 	end));
+		-- 	modkit.table.printTbl(GLOBAL_PLAYERS, "GP");
 		-- end
 
 		local engine_player_index = SobGroup_GetPlayerOwner(caller.own_group);
 		if (caller.player.id ~= engine_player_index and engine_player_index >= 0 and engine_player_index < 8) then
 			caller.player = GLOBAL_PLAYERS:get(engine_player_index);
+		end
+
+		local stateHnd = makeStateHandle();
+		local superglobal_ships = stateHnd().GLOBAL_SHIPS or {};
+		if (superglobal_ships[caller.id] == nil and Universe_GameTime and Universe_GameTime() > 0) then -- intentionally ignore ships set by the .level; we let the mission handle these cases
+			print("now adding " .. g .. "-" .. i .. " to the superglobal state");
+
+			superglobal_ships[caller.id] = caller.own_group;
+			stateHnd({
+				GLOBAL_SHIPS = superglobal_ships,
+			});
+			modkit.table.printTbl(stateHnd().GLOBAL_SHIPS, "SUPERGLOBAL SHIPS");
 		end
 
 		SobGroup_SobGroupAdd(caller.own_group, g); -- ensure own group is filled on update

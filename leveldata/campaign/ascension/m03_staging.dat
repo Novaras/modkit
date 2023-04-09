@@ -1,0 +1,153 @@
+filerange 41000 41499
+rangestart 41000 41499
+
+// Subtitles
+41000	Protect the Shipyard Nabaal.
+41001	Begin Resourcing Operations.
+41002	Defend the Forward Resourcing Operation.
+41003	Repair the Shipyard.
+41004	Destroy the Vaygr Probes.
+41005	Prevent the Shipyard from being captured.
+41006	Recapture the Shipyard.
+41007	Defeat the Vaygr Attackers.
+41008	Defeat all remaining Vaygr Forces.
+41009	Build an Advanced Frigate Facility
+41010	Research Tier 2
+41380	The Shipyard must be protected.
+41381	Eliminate all Vaygr attackers.
+41382	Build a Mobile Refinery and order it and your Resource Collectors to the indicated Asteroid field.
+41383	Mobile Refineries allow you to have multiple Resource drop points.
+41384	Build Gun Platforms. \n\nGun Platforms are excellent static defenses, perfect for protecting Resourcing Operations.
+41385	Press "R" to access the Research Manager and select Research Collector Repair Ability. This allows Collectors to repair friendly ships.
+41386	Vaygr forces are inbound. Destroy the Probes and prepare for enemy attacks.
+41387	Defend the Shipyard from Vaygr forces. Build Marine Frigates to counter the Vaygr Infiltrator Frigates.
+41388	All Vaygr forces must be destroyed.
+41389	Build Marine Frigates to Re-Capture the Shipyard. At least 2 Marine Frigates are needed.
+41390	All Vaygr combat forces must be eliminated to secure Sarum.
+41391	The Vaygr are using Carriers to build Infiltrator Frigates. Use Bombers and Flak Frigates to Destroy them.
+41392	To repair, select a Resource Collector and Click on the Repair Icon (Hotkey Y) on the Task Bar.
+41393	The Shipyard must be at 85% to be operational.
+41020	SARUM - FLEET STAGING AREA
+41030	Hyperdrive systems nominal. We have arrived at Sarum in the outskirts of the Hiigaran Control Zone.
+41031	Vaygr recon elements have been identified. The Shipyard is located here and is under attack.
+41032	It is under attack.
+41033	Incoming transmission:
+41034	Attention Pride of Hiigara.
+41035	This is Captain Elohim of the Shipyard Naabal.
+41036	We are sustaining heavy damage and request immediate assistance.
+41037	The Shipyard must be defended.
+41045	In order to do so we must establish a forward resource operation.
+41046	Scans have detected resources at this location.
+41047	Engineering reports they are now able to build Mobile Refineries to help resourcing operations.
+41048	Begin Resourcing operations at once.
+41040	The Vaygr have been defeated.
+41041	Incoming transmission from the Shipyard Naabal...
+41042	Thanks for the help.
+41043	We have been battling Vaygr raids and have sustained heavy damage to all our systems.
+41044	We require immediate repairs, Fleet.
+41051	Forward resourcing operations established. Mobile Refinery in position.
+41052	Advise construction of Platform Facilities.
+41053	Gun Platforms will allow us to defend vulnerable resource operations.
+41061	Upgrades to the Research Module are complete.
+41062	*** AXED *** Research reports upgrades to the Research Module are complete.
+41063	New Research and Build Options now available.
+41064	Recommend researching Resource Collector Repair ability.
+41065	This will enable us to use Resource Collectors to repair the Shipyard.
+41055	Resource Collector upgrades complete. Repair systems enabled.
+41056	Dispatch Resource Collectors to begin repairs on the shipyard.
+41066	Enemy probes detected.
+41067	The Vaygr are using probes to pinpoint our location.
+41068	An attack is imminent unless the Probes are destroyed.
+41069	Probes Destroyed. All units remain on high alert.
+41070	All repairs completed.
+41071	We have basic power to all systems.
+41073	Construction of a carrier was underway before we were attacked.
+41074	*** AXED *** Carrier is launching and we're transferring control to the fleet.
+41075	The Shipyard has transferred control of the Carrier to us. It is equipped with a Frigate Facility.
+41076	Recommend building Frigates to strengthen the fleet
+41077	New Build Options are now available.
+41080	Multiple Hyperspace signatures detected.
+41081	Vaygr forces have arrived.
+41082	They are attacking our Forward Resourcing Operation.
+41083	All units to combat stations.
+41084	Additional Vaygr Hyperspace Signals detected near the Mothership.
+41085	Defend the Mothership at all costs.
+41086	Vaygr Carrier Destroyed.
+41091	Fleet, we have multiple hostiles inbound.
+41092	Repeat, the Vaygr are attacking.
+41093	The Shipyard has been located by the enemy and is under attack.
+41094	The Vaygr are using Infiltration Frigates to board the Shipyard.
+41095	If they succeed we will require Marine Frigates to re-capture it.
+41096	The Shipyard must not fall into Vaygr hands. Build Marine Frigates immediately.
+41100	Alert.
+41101	Vaygr Infiltration Frigates are attempting to board the Shipyard.
+41102	We cannot maintain the Fleet if they succeed.
+41105	Attention Fleet.
+41106	The Shipyard has been boarded, repeat the Shipyard has been boarded.
+41107	We are sustaining casualties on all decks.
+41108	We have barricaded the bridge and I have initiated the Self-Destruct sequence.
+41109	We cannot fall to the Vaygr.
+41110	Captain Elohim out.
+41111	The automated self-destruct sequence of the Shipyard has been activated.
+41112	It MUST be re-captured.
+41113	Sensors detect incoming Vaygr reinforcements.
+41114	Eliminate these Carriers to prevent the Vaygr from building more Infiltration Frigates.
+41120	The Shipyard will Self-Destruct in 10 Minutes.
+41121	The Shipyard will Self-Destruct in 9 Minutes.
+41122	The Shipyard will Self-Destruct in 8 Minutes.
+41123	The Shipyard will Self-Destruct in 7 Minutes.
+41124	The Shipyard will Self-Destruct in 6 Minutes.
+41125	The Shipyard will Self-Destruct in 5 Minutes.
+41126	The Shipyard will Self-Destruct in 4 Minutes.
+41127	The Shipyard will Self-Destruct in 3 Minutes.
+41128	The Shipyard will Self-Destruct in 2 Minutes.
+41129	The Shipyard will Self-Destruct in 1 Minute.
+41130	The Shipyard Self-Destructed.
+41131	Hyperspace signature detected.
+41132	Vaygr reinforcements have arrived.
+41140	This is Captain Elohim, Self-destruct sequence terminated. All Vaygr onboard have been neutralized and the Shipyard is secure.
+41141	Nice job.
+41142	Our Marines have successfully re-taken the Shipyard.
+41143	We can now build Capital Class vessels to strengthen the Fleet.
+41144	The Vaygr are retreating.
+41145	Eliminate all Vaygr resistance before they can escape.
+41146	All Vaygr Infiltrators destroyed.
+41147	The Shipyard is secure.
+41150	Mothership class Hyperspace signature detected.
+41151	Prepare for immediate contact.
+41159	We must find the Oracle at Gehenna.
+41160	The Shipyard is safe and fully operational.
+41161	It will remain here to reinforce the Hiigaran Defense Fleet and maintain a supply line to Hiigara.
+41162	Hyperspace module fully charged.
+41163	Coordinates for the Gehenna System locked in.
+41164	Our fate now rests with the Bentusi.
+41300	Timer to Probes:  %1MINUTES%:%2SECONDS%
+41301	Timer to Shipyard Events:  %1MINUTES%:%2SECONDS%
+41302	Shipyard Self-Destruct in:  %1MINUTES%:%2SECONDS%
+41320	MISSION FAILED. SHIPYARD LOST.
+41321	MISSION FAILED.
+41322	SAVING GAME...
+41400	Resources
+41401	Convoy 2
+41402	Convoy 3
+41403	Convoy 4
+41404	Convoy 5
+41405	Marine Frigate
+41406	Shipyard Nabaal
+41407	Send Scouts to Investigate Area
+41408	Repair the Shipyard Nabaal
+41409	Defend the Shipyard from Vaygr forces
+41410	Possible Vaygr Contact
+41411	Advise Caution. Vaygr Hyperspace Signal Detected
+41412	The Vaygr are boarding the Shipyard
+41413	Establish a Forward Resource Operation here
+41414	Hiigaran Survivors
+41415	Use Resource Collectors to repair the Shipyard
+41416	Build Marine Frigates to re-capture Shipyard
+41490	Hiigaran Navy
+41491	Vaygr Raiders
+41492	Hiigaran Defense Fleet
+41493	Hiigaran Survivors
+41499	MISSION SUCCESSFUL
+
+rangeend

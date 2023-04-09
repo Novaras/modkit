@@ -1,0 +1,32 @@
+filerange 60478 60819
+rangestart 60478 60819
+
+// Subtitles
+60478	Hyperspace jump successful.
+60479	Scanner data indicates asteroid density is highest in this region.  Commence resource gathering.
+60480	Resource Controllers are available for construction.  To improve the efficiency of collection, build one and position it near the asteroid vein.
+60481	Long range sensors indicate a Mothership-class mass signature.  It's coming in fast.  Power readings are off the scale.  Full combat alert.  Stand by for contact.
+60492	Turanic Raiders, servants of the Taiidan, are arriving.  They must not learn of our contact.  We must depart.  All that moves is easily heard in the void.  We will listen for you.  Farewell.
+60493	Turanic Raiders, servants of the Kushan, are arriving.  They must not learn of our contact.  We must depart.  All that moves is easily heard in the void.  We will listen for you.  Farewell.
+60494	The Bentusi wish only to trade and make contact.  Your attack is unwarranted and ill-advised.  Stop now.
+60495	Recommend immediate cease-fire.
+60496	You insist on conflict.  This is most unfortunate.
+60497	Turanic Raider fighters are attacking our resource operation.  Defend it and prepare for more hostile ships to arrive.
+60498	Several Turanic Raider capital ships have just emerged from hyperspace near the Mothership.
+60499	The Raider Carrier has been located.  It is reinforcing their squadrons of Fighters and Corvettes.
+60500	The Carrier is retreating.  If it escapes, they will warn the Taiidan fleet of our pursuit.  Do not allow them to hyperspace.
+60501	The Carrier is retreating.  If it escapes, they will warn the Kushan fleet of our pursuit.  Do not allow them to hyperspace.
+60502	The Turanic Raiders have been defeated.  We can now return to our immediate goal: preparation for an attack on the Taiidan fleet that devastated Kharak.  Using data from the Taiidan vessel captured at Kharak, we have been able to determine their location.  If we strike now, we can take advantage of their damaged condition.  Hyperspace coordinates have been transferred to Fleet Command.
+60503	The Turanic Raiders have been defeated.  We can now return to our immediate goal: preparation for an attack on the Kushan fleet that devastated Kharak.  Using data from the Kushan vessel captured at Kharak, we have been able to determine their location.  If we strike now, we can take advantage of their damaged condition.  Hyperspace coordinates have been transferred to Fleet Command.
+60504	Turanic Raiders
+60505	Bentusi
+60761	To increase harvesting efficiency, move your Resource Controller as close to heavy resource areas as possible.
+60816	Turanic Raider fighters are attacking.   Prepare for more hostile ships to arrive
+60817	We require additional resources to expand our fleet.  Build and deploy a Resource Controller to maximize raw material collection.
+60818	Hostiles identified as Turanic Raiders are again attacking the Mothership.  Defend the fleet and destroy the attackers.
+60819	The Turanic Raider carrier is attempting to retreat to warn the Taiidan fleet of our pursuit.  Destroy them before they hyperspace.
+60506	Additional usable materials identified.  Deploy Resource Collectors to begin collection of these valuable resources.
+60507	Turanic Raider Ion Array Frigate
+60508	Turanic Raider Mothership
+
+rangeend

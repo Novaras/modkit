@@ -1,0 +1,95 @@
+filerange 43500 43907
+rangestart 43500 43907
+
+// Subtitles
+43500	Confirm location of Dreadnaught.
+43501	Use Movers to retrieve the Dreadnaught.
+43502	Protect the Fleet.
+43503	Use Movers to collect Progenitor devices.
+43504	Send probes to scan for trigger devices.
+43810	Send a Scout to confirm the Dreadnaught's location.
+43811	Dock six Movers with the Dreadnaught
+43812	Dock six Movers with the Dreadnaught to transport it to the Mothership
+43813	Use Capital Ships and Frigates to combat the Keeper.
+43814	Dock a Mover with the device to collect it.
+43815	Dock a Mover with a device to collect it.  The Mover will automatically install it on a Progenitor Power Module.
+43816	Send a probe to each scan area.
+43803	Hiigaran Navy
+43804	Progenitor
+43520	DREADNAUGHT BERTH
+43521	NIS 08 - Meet the Keeper
+43522	Estimated time to Keeper Self-Destruct:  %1MINUTES%:%2SECONDS%
+43530	Hyperspace successful.
+43531	We are alone.
+43532	Telemetry data confirms this is the Engineering section of the wreckage.
+43536	The Dreadnaught is located here.
+43537	We're detecting intense power fluctuations in the surrounding Progenitor derelicts.
+43534	Send in Scouts to confirm the location of the Dreadnaught.
+43600	*** AXED *** The local derelicts are interfering with the Hyperdrive system.
+43602	*** AXED *** Hyperspace offline.
+43605	The Progenitor ship is generating a massive Hyperspace interference field.
+43606	Unable to charge Hyperspace Core.  We are trapped!
+43610	The Progenitor Dreadnaught has been located.
+43611	Use Movers to retrieve it.
+43612	At least six Movers will be required to transport the Dreadnaught.
+43615	Progenitor Drones are attacking the Movers.
+43616	Scans indicate they are vulnerable to anti-Corvette weaponry.
+43617	Recommend using Torpedo Frigates and Pulsar Gunships to protect the Movers.
+43620	Movers locked on.
+43621	Dreadnaught retrieval underway.
+43630	Mover lost. Dreadnaught retrieval halted.
+43631	Assign additional Movers to retrieve the Dreadnaught.
+43640	Dreadnaught docked.
+43641	Science teams and crew transferring to Dreadnaught.
+43642	Crew transfer complete.
+43650	Science teams have completed an initial analysis of the Dreadnaught.
+43651	Scans indicate that the engines and Hyperspace drives are operational.
+43652	Science teams are now working to bring the Dreadnaught's other systems on-line.
+43590	The Keeper is attacking.
+43591	The Oracle refers to these ships as "Keepers."
+43592	They are ancient machines dedicated to the protection of the Progenitor Empire.
+43593	It will stop at nothing to destroy us.
+43594	Defend the Fleet.
+43700	Combat data indicates we cannot defeat the Keeper with conventional weapons...
+43701	...but we believe we have found a weakness.
+43702	We have identified Progenitor Power Modules in the local area.
+43703	Science Division speculates that these modules could be activated and cause the Keeper to overload.
+43704	Each Power Module is activated by a trigger device.
+43705	Send probes to these locations to scan for trigger devices.
+43709	The Oracle indicates that these modules could be activated and cause the Keeper to overload.
+43706	We have confirmed that the Power Modules can be activated using these devices...
+43707	*** AXED *** Use Movers to collect these devices and install them on the power modules.
+43708	Use Movers to collect them and install them on the Power Modules.
+43720	Probe in position.
+43725	Scans negative.
+43726	No devices found.
+43727	Scan results negative.
+43721	Trigger devices located.
+43710	Device en route.
+43740	Device One installed.
+43741	*** AXED *** Power siphon on-line.
+43742	Power Module activated.
+43745	Device Two installed.
+43750	Device Three installed.
+43755	*** AXED *** Distortion field activated.
+43756	The distortion field is building.
+43578	The Keeper is trapped!
+43579	The Hyperspace Core is back on-line.
+43580	Sensors detect a large power cascade building up inside the Keeper.
+43582	We must escape before the Keeper self-destructs.
+43583	Less than one minute to Keeper self-destruct.
+43584	Less than thirty seconds to Keeper self-destruct.
+43770	Hyperspace module fully charged.
+43771	Initiating Hyperspace.
+43880	MISSION FAILED
+43881	MISSION SUCCESSFUL
+43900	Power Signature
+43901	Dreadnaught
+43902	Keeper
+43903	Progenitor Power Module
+43904	Progenitor Power Module
+43905	Progenitor Power Module
+43906	Device
+43907	Scan area
+
+rangeend

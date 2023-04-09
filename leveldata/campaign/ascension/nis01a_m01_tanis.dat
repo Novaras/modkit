@@ -1,0 +1,20 @@
+filerange 56000 56013
+rangestart 56000 56013
+
+// Subtitles
+56000	This is Tanis Control.
+56001	We have visual contact with the Core. Proceed with transfer.
+56002	Roger that Tanis.
+56003	Trajectory and alignment confirmed.
+56004	Take it to one-fifteen and initiate capture procedures.
+56005	The Mothership recognizes the Core and confirms signal lock.
+56006	Fleet Command on-line.
+56007	Mothership status report.
+56008	Navigation on-line.
+56009	Stand by to initiate engine sequence.
+56010	Main Engines on-line.
+56011	Engine test complete, all standard drives are operational.
+56012	Engineering on-line.
+56013	The Mothership is standing by.
+
+rangeend

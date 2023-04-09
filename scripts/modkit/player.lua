@@ -11,6 +11,7 @@ if (modkit_player_proto == nil) then
 
 	function initPlayers()
 		if (GLOBAL_PLAYERS == nil) then
+
 			---@class GLOBAL_PLAYERS : MemGroupInst
 			---@field _entities Player[]
 			---@field get fun(self: GLOBAL_PLAYERS, id: integer): Player
@@ -19,7 +20,10 @@ if (modkit_player_proto == nil) then
 			---comment
 			---@param player Player
 			local ensureIndicatorTech = function (player)
-				local granted = nil;
+				if (modkit.races == nil) then
+					dofilepath("data:scripts/modkit/races.lua");
+				end
+
 				for _, racename in modkit.races:names() do
 					local res_name = "race" .. racename;
 
@@ -49,6 +53,7 @@ if (modkit_player_proto == nil) then
 					end);
 				}
 			));
+
 
 			function GLOBAL_PLAYERS:all()
 				local out = {};
@@ -252,7 +257,7 @@ if (modkit_player_proto == nil) then
 
 	-- === end of research stuff ===
 
-	--- Return `1` if this player is allied with the `other`. `0` otherwise.
+	--- Return non-nil if this player is allied with the `other`.
 	---@param other Player
 	---@return bool
 	function modkit_player_proto:alliedWith(other)

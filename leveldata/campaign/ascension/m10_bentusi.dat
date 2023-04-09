@@ -1,0 +1,105 @@
+filerange 44500 44700
+rangestart 44500 44700
+
+// Subtitles
+44500	Defeat the Keepers.
+44501	Repair the Dreadnaught.
+44502	Defend Bentus.
+44503	Minimum Safe Distance
+44504	Move to this location to escape the blast
+44505	Hiigaran Navy
+44506	Progenitors
+44507	Bentusi
+44510	GREAT WASTELANDS - EN ROUTE TO THADDIS SABBAH
+44520	Keeper
+44521	Bentus
+44540	Something's wrong.
+44541	We've been pulled out of Hyperspace.
+44542	Massive anomaly detected.
+44553	*** AXED *** It's a Keeper.  It must have been lying in wait for us.
+44543	TRANSLATION IN PROGRESS
+44544	Alert!
+44545	Second hyperspace signature detected.
+44546	There are now two Keepers.
+44554	*** AXED *** It appears the Keeper has summoned reinforcements.
+44547	TRANSLATION IN PROGRESS
+44548	Translating:
+44549	"We are the Keepers of Abassid."
+44550	"We are the servants of Sajuuk."
+44551	The Keepers are assuming attack formation and launching attack drones.
+44552	Full combat alert!
+44555	A Keeper has vanished.
+44556	Sensors indicate there was a major energy distortion in the vessel before it disappeared.
+44557	There are no signs of debris.
+44560	The Keepers are using an unknown energy weapon.
+44565	The Keeper is using Movers to capture the Dreadnaught.
+44566	They must be stopped!
+44570	The Keeper has seized control of the Dreadnaught.  Recapture it immediately!
+44571	Critical alert!
+44575	The Dreadnaught is back under our control.
+44580	The Dreadnaught cannon seems useless against the Keepers.
+44581	They have been designed to withstand it.
+44585	The Keepers have simply disappeared!
+44586	No known cloaking field signature was detected.
+44587	The Bentusi are here.
+44588	We see you have acquired a Progenitor Dreadnaught.
+44589	This is a most powerful weapon.
+44590	Bring it to us and we will repair the Great Cannon.
+44645	The Bentusi can repair the Dreadnaught cannon.
+44646	We must dock the Dreadnaught with Bentus.
+44600	Alert! Four inbound contacts acquired.
+44601	The Keepers have returned.
+44602	We must defend Bentus at all costs.
+44655	The Keeper has phased out to avoid destruction.
+44656	Analysis confirms the Keepers energy profile is gaining in power.
+44667	It appears they're getting stronger with every Hyperspace jump.
+44668	The Keepers are avoiding our weapon fire by phasing out.
+44669	The Keepers cannot be stopped.
+44692	Keeper phase out detected.
+44695	Keeper return detected.
+44697	A Keeper has emerged.
+44698	Status report.  A Keeper has returned.
+44605	Beginning Archive transfer.
+44606	Bentus and the Dreadnaught must be defended.
+44603	The Keepers are focusing their attacks on Bentus.
+44610	Bentus is taking heavy damage.  We must defend it from the Keepers.
+44615	A Keeper has phased out.
+44616	Analysis confirms the Keeper energy profile is gaining in power.
+44617	It appears they're getting stronger with time
+44693	*** AXED *** Continue pressing the attack.  We've forced another Keeper to phase out.  Keep it up.
+44694	*** AXED *** We've stopped another Keeper.  But for how long?
+44696	*** AXED *** No matter what we do, they keep coming back.
+44620	*** AXED *** The Bentusi have finished transferring the Great Archive.
+44621	The Dreadnaught has been repaired.
+44622	We have repaired the Great Cannon.
+44623	You will find it requires time to recharge after it has been fired.
+44625	There is only one way to destroy the Keepers.
+44626	They must be taken with us.
+44627	Our task is now done. But yours remains.
+44630	Power surge detected on Bentus.
+44631	They are collapsing their quantum wave field to consume the Keepers in its blast.
+44632	They will not survive.
+44633	We must move away from Bentus or we will be caught in the explosion.
+44634	5 minutes before detonation.
+44635	4 minutes before detonation.
+44636	3 minutes before detonation.
+44637	2 minutes before detonation.
+44638	1 minute before detonation.
+44640	Bentus is going critical!
+44641	Hyperspace initiated.
+44650	This weapon is more than you imagine.  We will initiate repairs.
+44690	The Dreadnaught is taking heavy damage.
+44691	The Dreadnaught has been destroyed.
+44680	Defeat the Keepers.
+44687	Recommend using Capital Ships to fight the Keepers.
+44688	The Keepers appear to be indestructible. Our only hope are the Bentusi.
+44700	Defend against the Keepers for as long as possible.
+44681	Dock the Dreadnaught with Bentus to repair the Phased Cannon.
+44682	Defend Bentus from attack.
+44685	Phased Cannon Repair in %1MINUTES%:%2SECONDS%
+44689	SAVING GAME
+44670	MISSION FAILED.  BENTUS DESTROYED.
+44671	MISSION FAILED.  DREADNAUGHT LOST.
+44672	MISSION FAILED.  MOTHERSHIP LOST.
+
+rangeend

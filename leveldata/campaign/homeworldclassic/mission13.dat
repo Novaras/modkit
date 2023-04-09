@@ -1,0 +1,23 @@
+filerange 60673 60840
+rangestart 60673 60840
+
+// Subtitles
+60674	Hyperspace transition complete.  We have arrived at Karos.
+60675	The Communication Relay is here.  A Fighter or Corvette must dock with it to establish the link.
+60676	Attention.  We have lost contact with one of our capital ships.  Its last recorded position is here.
+60677	Hyperspace signatures have been found at these locations but we detect no new ships.
+60678	We've located one of the missing ships.  It appears that it can be salvaged and reactivated.
+60679	The Graveyard is defended by autoguns.  They will complicate our attempt to reach the communications array.
+60680	I'm in!  Communication link established.
+60681	Patching into command node now... The Taiidan resistance has been informed of your actions and are preparing the fleets.  You have our thanks.
+60682	Patching into command node now... The Kushan resistance has been informed of your actions and are preparing the fleets.  You have our thanks.
+60683	The hyperspace coordinates you require have been transferred to your Mothership.  Farewell.
+60684	Hyperspace Enabled.
+60685	Karos Automata
+60686	Taiidan Rebels
+60780	Research Division reports it is now equipped for Cloaked Generator technology.  We advise commencing research immediately.
+60781	Research Division reports it is now equipped for Heavy Guns technology.  We advise commencing research immediately.
+60840	Captain Elson needs to use the communication relay hidden in this area to contact the rebel fleet.  Dock a Fighter or Corvette with the relay to activate it.
+60673	Communications Relay
+
+rangeend

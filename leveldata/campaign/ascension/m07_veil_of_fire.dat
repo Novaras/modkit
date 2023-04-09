@@ -1,0 +1,69 @@
+filerange 43000 43141
+rangestart 43000 43141
+
+// Subtitles
+43000	Build Movers to clear the radioactive debris.
+43001	Use Movers to destroy the radioactive debris.
+43002	Investigate the derelict hulks
+43003	Destroy all remaining Vaygr Forces
+43005	MISSION FAILED.
+43006	PROGENITOR FOUNDRY
+43007	MISSION FAILED
+43010	Debris
+43011	Radiation
+43012	Progenitor Derelict
+43013	Vaygr Probe
+43014	Vaygr Production Ship
+43020	Hyperspace jump interrupted.
+43021	We are surrounded by Progenitor wreckage.
+43026	We have exited Hyperspace in close proximity to a debris field.
+43022	The Oracle confirms this wreckage was once the engineering bay of the Progenitor Ship.
+43023	*** AXED *** This entire region is flooded with radioactive clouds.
+43024	 Scans of the surrounding hulks have detected Quantum Wave Form irregularities. They are preventing us from initiating a Hyperspace jump.
+43025	 If we are to reach the Dreadnaught, the debris must be cleared.  Send a probe to investigate the local hulks.
+43030	Priority alert.
+43031	A Vaygr long-range probe has been activated.
+43032	It must be destroyed before it can relay our position to the enemy.
+43035	The probe is transmitting data to the enemy.
+43036	A Vaygr attack is now imminent.
+43040	Probe destroyed.
+43041	It is likely the enemy will send patrols to investigate.
+43042	Prepare for possible Vaygr attacks.
+43045	Alert!
+43046	Hyperspace signature detected.
+43047	Elite Vaygr forces are using shielded carriers to penetrate the radiation.
+43049	 Alert. We are detecting dangerous levels of radiation.
+43050	*** AXED *** Our ships cannot withstand this radiation.
+43051	They must be destroyed to allow the Mothership to Hyperspace.
+43052	These hulks appear to be the source.
+43053	Progenitor Movers have been located within the cloud.
+43054	They appear to be able to withstand the radiation.
+43055	Research division has completed analysis of the Mover we found.  We can now replicate Mover technology.
+43056	Build a Mover Construction Facility.
+43057	Movers will be able to safely enter the radiation cloud and destroy the contaminated hulks.
+43060	Mover Construction Facility online.
+43061	Use Movers to destroy the debris.
+43065	Debris destroyed.
+43066	The radiation in the area is diminishing.
+43070	Radioactive hulk destroyed.
+43075	Radiation levels dropping. The Quantum Wave Form is returning to normal tolerance.
+43076	We are now clear to enter Hyperspace.
+43080	Hyperspace Core fully charged.
+43081	Detecting only minor Quantum Waveform fluctuations. We are clear to jump.
+43082	Initiate Hyperspace.
+43090	We cannot be followed. Eradicate all remaining Vaygr forces.
+43110	Hiigaran Navy
+43111	Vaygr Forward Assault
+43112	Progenitor debris
+43113	Progenitor
+43120	Radioactive debris.  Destroy it to reduce the Quantum irregularities in this area.
+43121	Send a probe to  investigate the debris.
+43124	Destroy the probe before it can broadcast our location.
+43130	Build a Mover Production Subsystem on the Mothership. It is located in the Corvette Panel.
+43131	Use Movers to destroy all seven radioactive hulks.
+43135	This will reduce the Quantum Interference, allowing the Mothership to Hyperspace freely.
+43132	Send a ship to investigate the debris producing the irregularities in this area.
+43140	We cannot allow the Vaygr to follow us.  Destroy all remaining Vaygr forces.
+43141	SAVING GAME
+
+rangeend
