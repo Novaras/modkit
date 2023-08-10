@@ -47,14 +47,14 @@ if (modkit.MemGroup == nil) then
 			end
 
 			--- Returns the specified entity if it exists.
-			---@param entityID number
+			---@param entityID number|string
 			---@return any
 			function new_group:get(entityID)
 				return self._entities[entityID];
 			end
 			--- Sets the entity with the given id, overriding if already set.
 			---@generic EntityType
-			---@param entityID number
+			---@param entityID number|string
 			---@param entity EntityType
 			---@return EntityType
 			function new_group:set(entityID, entity)
