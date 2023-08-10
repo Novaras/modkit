@@ -9,10 +9,6 @@ if (modkit.research == nil) then
 		dofilepath("data:scripts/modkit/table_util.lua");
 	end
 
-	if (modkit.races == nil) then
-		dofilepath("data:scripts/modkit/races.lua");
-	end
-
 	---@class ResearchItem
 	---@field name string
 	---@field displayedname string
@@ -32,6 +28,8 @@ if (modkit.research == nil) then
 		---@type table<RaceName, ResearchItem[]>
 		items = {},
 	};
+
+	dofilepath("data:scripts/modkit/races.lua");
 
 	for _, race in modkit.races:names() do
 		local def_research_path = "data:scripts/races/" .. race .. "/scripts/def_research.lua";
