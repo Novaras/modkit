@@ -2,7 +2,7 @@ COMMANDS = COMMANDS or {};
 
 COMMANDS.hp = COMMANDS.hp or {
     description = "Sets the HP (as a fraction [0..1]) for ships.",
-    syntax = "hp [hp-fraction] (type=[ship-type] or family=[attack-family]) player=[player-id]",
+    syntax = "hp [hp-fraction] ?(type=[ship-type] or family=[attack-family]) player=[player-id]",
     example = "hp 0.9 type=kus_mothership p=1",
     fn = function (_, words, _, line)
         if (words[2]) then

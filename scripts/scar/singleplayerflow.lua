@@ -372,14 +372,8 @@ function singlePlayerOnStartOrLoad(missionNumber)
     --reset the music to whatever it was when saved
     KAS_SavedMusicRestore()
 
-    -- load modkit
-    if (modkit_poll_text_capture == nil or Rule_Exists("modkit_bindkeys") == 0) then
-        print("CONSOLE BIND FOR SINGLEPLAYER");
-        dofilepath("data:scripts/modkit.lua");
-        dofilepath("data:leveldata/multiplayer/lib/modkit-scheduler.lua");
-        dofilepath("data:leveldata/multiplayer/lib/modkit-hoist-memgroups.lua");
-        modkitBindKeys();
-    end
+    dofilepath("data:scripts/modkit.lua");
+    loadModkit();
 end
 
 --

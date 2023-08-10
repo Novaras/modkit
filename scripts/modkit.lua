@@ -6,12 +6,21 @@
 ---
 --- This function should only be invoked at the beginning of game time (`deathmatch.lua` or `singleplayerflow.lua` are good targets).
 loadModkit = loadModkit or function ()
-	modkit = {};
-	doscanpath("data:scripts/modkit", "*.lua");
+	print("GAMETIME INIT");
+	if (modkit == nil) then
+		doscanpath("data:scripts/modkit", "*.lua");
+	end
+
+	dofilepath("data:leveldata/multiplayer/lib/modkit-scheduler.lua");
+	dofilepath("data:leveldata/multiplayer/lib/modkit-hoist-memgroups.lua");
+	modkitBindKeys();
+
+	Rule_AddInterval("modkit_scheduler_spawn", 0.1);
+	Rule_AddInterval("modkit_hoist_memgroups", 5);
 end
 
 if (modkit == nil) then -- header guard
 	print("\n\nmodkit.lua init...");
-	loadModkit();
+	doscanpath("data:scripts/modkit", "*.lua");
 	print("modkit.lua loaded successfully!\n\n");
 end

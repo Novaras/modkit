@@ -4,6 +4,8 @@
 
 if (nil) then
 
+	arg = {};
+
 	---@alias bool '1'|nil|true|false|1
 
 	AB_None = 0;

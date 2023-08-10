@@ -61,9 +61,7 @@ function timer_updating()
     if timer_timing == 1 then
 				-- here we do setup for one-time modkit things
 				dofilepath("data:scripts/modkit.lua");
-				dofilepath("data:leveldata/multiplayer/lib/modkit-scheduler.lua");
-				dofilepath("data:leveldata/multiplayer/lib/modkit-hoist-memgroups.lua");
-				modkitBindKeys();
+				loadModkit();
 
 				for playerIndex = 0,Universe_PlayerCount()-1,1 do
 						if Player_IsAlive(playerIndex) == 1 then
@@ -78,9 +76,6 @@ function timer_updating()
 				--Rule_AddInterval("UI_updating",0.5)
 				Rule_AddInterval("cpuplayers_updating",0.1)
 				--Rule_AddInterval("balancing_updating",0.25) --dev. to remove
-
-				Rule_AddInterval("modkit_scheduler_spawn", 0.1);
-				Rule_AddInterval("modkit_hoist_memgroups", 2);
 
 
 				if nocruisers == 1 then

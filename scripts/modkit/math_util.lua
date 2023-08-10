@@ -9,7 +9,7 @@ if (modkit.math == nil) then
 		--- By default, rounds to the nearest integer.
 		---
 		---@param num number
-		---@param numDecimalPlaces integer
+		---@param numDecimalPlaces? integer
 		---@return number
 		round = function (num, numDecimalPlaces)
 			local mult = 10^(numDecimalPlaces or 0)

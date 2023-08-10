@@ -28,14 +28,12 @@ end
 
 --- This rule grabs published ships from the ui scope and generates full ship objects (so `GLOBAL_` collections are accessible)
 function modkit_hoist_memgroups()
-	if (register == nil) then
+	if (modkit == nil or register == nil) then
+		print("load from hoist rule");
 		dofilepath("data:scripts/modkit.lua");
-		loadModkit();
-		dofilepath("data:scripts/driver.lua");
-		print(">>");
-		print(register or "nil");
 	end
 
+	print("HOISTING GROUPS...");
 	local incoming = makeStateHandle()().GLOBAL_SHIPS;
 	-- modkit.table.printTbl(incoming, "incoming");
 	if (incoming) then

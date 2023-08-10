@@ -2,7 +2,7 @@ COMMANDS = COMMANDS or {};
 
 COMMANDS.tumble = COMMANDS.tumble or {
     description = "Tumbles specified ships, meaning they are given angular momentum (they spin).",
-    syntax = "tumble (type=[ship-type] or family=[attack-family]) ?player=[player-id] amount=[x y z]",
+    syntax = "tumble ?(type=[ship-type] or family=[attack-family]) ?player=[player-id] amount=[x y z]",
     example = "tumble t=kus_mothership amount=3 0 1",
     params = {
         type = PARAMS.str({ 't', 'type' }),
