@@ -4,6 +4,8 @@
 
 if (nil) then
 
+	arg = {};
+
 	---@alias bool '1'|nil|true|false|1
 
 	AB_None = 0;
@@ -277,7 +279,7 @@ if (nil) then
 	---
 	---@param player_index integer
 	---@param item_name string
-	---@return 0|1
+	---@return '0'|'1'
 	function Player_CanResearch(player_index, item_name)
 	end
 
@@ -285,7 +287,7 @@ if (nil) then
 	---
 	---@param player_index integer
 	---@param item_name string
-	---@return 0|1
+	---@return '0'|'1'
 	function Player_HasResearch(player_index, item_name)
 	end
 
@@ -499,7 +501,7 @@ if (nil) then
 	---@param player_index integer
 	---@param group_name string
 	---@param target_selection string
-	---@param attack 0|1
+	---@param attack '0'|'1'
 	function SobGroup_AttackSelection(player_index, group_name, target_selection, attack)
 	end
 
@@ -604,21 +606,6 @@ if (nil) then
 	function SobGroup_ManualEngineGlow(group_name, thrust_value)
 	end
 
-	--- Checks whether or not the given sobgroup is selected (a real UI selection, not a 'selection' ala `Selection_*`)
-	---@param group_name string
-	---@return 0|1
-	function SobGroup_Selected(group_name)
-	end
-
-	--- Selects the given sobgroup (a real UI selection, not a 'selection' ala `Selection_*`)
-	---@param group_name string
-	function SobGroup_SelectSobGroup(group_name)
-	end
-
-	--- Deselects any selected ships globally.
-	function SobGroup_DeSelectAll()
-	end
-
 	--- Spawn stuff
 
 	--- Spawns a `ship_type` squadron named `new_squad_name`, and adds it to `target_group`. The squad is spawned at `volume_name`.
@@ -636,7 +623,7 @@ if (nil) then
 
 	--- Causes ships in target_group to become 'ghosted', which is pretty much akin to a 'no-clip' mode whereby the affected ships ignore collision with other objects.
 	---@param target_group string
-	---@param enable 0|1
+	---@param enable '0'|'1'
 	---@return nil
 	function SobGroup_SetGhost(target_group, enable)
 	end
@@ -646,21 +633,6 @@ if (nil) then
 	---@param target_group string
 	---@param fraction number
 	function SobGroup_SetHealth(target_group, fraction)
-	end
-
-	--- Sets the invulnerability of the given sobgroup.
-	---
-	---@param target_group string
-	---@param invulnerable 0|1
-	function SobGroup_SetInvulnerability(target_group, invulnerable)
-	end
-
-	--- Sets the invulnerability of a group's hardpoint (by name).
-	---
-	---@param target_group string
-	---@param hardpoint_name string
-	---@param invulnerable 0|1
-	function SobGroup_SetInvulnerabilityOfHardPoint(target_group, hardpoint_name, invulnerable)
 	end
 
 	--- Sets the _inherent_ visibility of the `target_group` for player `target_player`.
@@ -682,7 +654,7 @@ if (nil) then
 	function SobGroup_SobGroupAdd(source_group, target_group)
 	end
 
-	--- Selection stuff (NEEDS TESTING):
+	--- Selection stuff (NEEDS TESTING, USED ONLY BY DEFENSE FIGHTER CUSTOM CODE):
 
 	--- Creates a new selection `selection_name` (returns nothing).
 	---@param selection_name string
