@@ -2,6 +2,7 @@
 
 -- Notice we never run this code, these defines are just used for IDE assistance.
 
+---@diagnostic disable: missing-return
 if (nil) then
 
 	arg = {};
@@ -63,7 +64,7 @@ if (nil) then
 	ePopup = 0;
 	eTransition = 1;
 
-	---@alias ScreenTransition '0' | '1' | 'ePopup' | 'eTransition'
+	---@alias ScreenTransition 0|1 | 'ePopup' | 'eTransition'
 
 	VisNone = 0;
 	VisSecondary = 1;
@@ -71,23 +72,28 @@ if (nil) then
 
 	---@alias Visibility 'VisNone'|'VisSecondary'|'VisFull'
 
-	OffensiveROE = 0;
-	DefensiveROE = 1;
-	PassiveROE = 2;
+	---@enum ROE
+	ROE = {
+		OffensiveROE = 0,
+		DefensiveROE = 1,
+		PassiveROE = 2
+	};
 
-	---@alias ROE 'OffensiveROE'|'DefensiveROE'|'PassiveROE'
+	---@enum Stance
+	Stance = {
+		AggressiveStance = 0,
+		NeutralStance = 1,
+		EvasiveStance = 2
+	};
 
-	AggressiveStance = 0;
-	NeutralStance = 1;
-	EvasiveStance = 2;
+	---@enum ShipHold
+	ShipHold = {
+		ShipHoldLaunch = 0,
+		ShipHoldStayDockedUpToLimit = 1,
+		ShipHoldStayDockedAlways = 2
+	};
 
-	---@alias Stance 'AggressiveStance'|'NeutralStance'|'EvasiveStance'
-
-	ShipHoldLaunch = 0;
-	ShipHoldStayDockedUpToLimit = 1;
-	ShipHoldStayDockedAlways = 2;
-
-	---@alias AutoLaunchStatus 'ShipHoldLaunch'|'ShipHoldStayDockedUpToLimit'|'ShipHoldStayDockedAlways'
+	---@alias AutoLaunchStatus 0|1|2
 
 	--- probably needs updating, see https://github.com/HWRM/KarosGraveyard/wiki/Modifiable-Values
 	---@alias ShipMultiplier
@@ -127,7 +133,7 @@ if (nil) then
 
 	---@param str string
 	---@param start number
-	---@param finish number
+	---@param finish? number
 	---@return string
 	function strsub(str, start, finish)
 	end
@@ -279,7 +285,7 @@ if (nil) then
 	---
 	---@param player_index integer
 	---@param item_name string
-	---@return '0'|'1'
+	---@return 0|1
 	function Player_CanResearch(player_index, item_name)
 	end
 
@@ -287,7 +293,7 @@ if (nil) then
 	---
 	---@param player_index integer
 	---@param item_name string
-	---@return '0'|'1'
+	---@return 0|1
 	function Player_HasResearch(player_index, item_name)
 	end
 
@@ -501,7 +507,7 @@ if (nil) then
 	---@param player_index integer
 	---@param group_name string
 	---@param target_selection string
-	---@param attack '0'|'1'
+	---@param attack 0|1
 	function SobGroup_AttackSelection(player_index, group_name, target_selection, attack)
 	end
 
@@ -549,7 +555,7 @@ if (nil) then
 	--- `SobGroup_Count` to get the value of just ONE of this ship type.
 	---
 	---@param ship_type string
-	---@param attribute "\"buildCost\"" | "\"buildTime\""
+	---@param attribute "buildCost" | "buildTime" | "buildBatch"
 	---@return integer
 	function SobGroup_GetStaticF(ship_type, attribute)
 	end
@@ -558,7 +564,7 @@ if (nil) then
 	---
 	---@param group string
 	---@param subs_name string
-	---@return '0' | '1'
+	---@return 0|1
 	function SobGroup_HasSubsystem(group, subs_name)
 	end
 
@@ -623,7 +629,7 @@ if (nil) then
 
 	--- Causes ships in target_group to become 'ghosted', which is pretty much akin to a 'no-clip' mode whereby the affected ships ignore collision with other objects.
 	---@param target_group string
-	---@param enable '0'|'1'
+	---@param enable 0|1
 	---@return nil
 	function SobGroup_SetGhost(target_group, enable)
 	end
@@ -720,7 +726,7 @@ if (nil) then
 	---
 	---@param screen_name string
 	---@param element_name string
-	---@param enabled '0' | '1'
+	---@param enabled 0|1
 	function UI_SetElementEnabled(screen_name, element_name, enabled)
 	end
 
@@ -732,7 +738,7 @@ if (nil) then
 	---
 	---@param screen_name string
 	---@param element_name string
-	---@param visible '0' | '1'
+	---@param visible 0|1
 	function UI_SetElementVisible(screen_name, element_name, visible)
 	end
 
@@ -741,7 +747,7 @@ if (nil) then
 	--- Note: A 'screen' is just an entity which hosts UI elements (not necessarily a 'screen' as such).
 	---
 	---@param screen_name string
-	---@param enabled '0' | '1'
+	---@param enabled 0|1
 	function UI_SetScreenEnabled(screen_name, enabled)
 	end
 
@@ -750,14 +756,14 @@ if (nil) then
 	--- Note: A 'screen' is just an entity which hosts UI elements (not necessarily a 'screen' as such).
 	---
 	---@param screen_name string
-	---@param visible '0' | '1'
+	---@param visible 0|1
 	function UI_SetScreenVisible(screen_name, visible)
 	end
 
 	--- Returns whether or not the given screen is 'active' (enabled and visible?)
 	---
 	---@param screen_name string
-	---@return '0' | '1'
+	---@return 0|1
 	function UI_IsScreenActive(screen_name)
 	end
 

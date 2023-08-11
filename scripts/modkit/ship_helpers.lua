@@ -8,7 +8,7 @@ if (modkit.shipGroup == nil) then
 
 	--- Returns the avg position of `ships` or `GLOBAL_SHIPS`.
 	---
-	---@param ships Ship[]
+	---@param ships? Ship[]
 	---@return Position
 	function lib:avgPosition(ships)
 		-- we could use the ship:position, but the game provides group position averaging already so we'll just use that
@@ -24,21 +24,28 @@ if (modkit.shipGroup == nil) then
 	--- The argument may be a `Ship` or a filter predicate. If given a `Ship`, matches by `id`.
 	---
 	---@param predicate_or_ship Ship|ShipFilterPredicate
-	---@return Ship
+	---@return Ship?
 	function lib:find(predicate_or_ship)
 		if (predicate_or_ship == nil) then
 			return nil;
 		end
 
 		local predicate = NOOP;
-		if (type(ship) == "table") then
+		if (type(predicate_or_ship) == "table") then
 			predicate = function (other)
 				return other.id == ship.id;
 			end
 		else
+			---@cast predicate_or_ship ShipFilterPredicate
 			predicate = predicate_or_ship;
 		end
 		return modkit.table.find(self._entities, predicate);
+	end
+
+	function lib:findType(type)
+		return self:find(function (ship)
+			return ship.type_group == %type;
+		end);
 	end
 
 	local _ships = function (ships)
@@ -46,6 +53,6 @@ if (modkit.shipGroup == nil) then
 		return %lib:shallowCopy(ships);
 	end;
 
-	---@type fun(ships: Ship[]): ShipCollectionExt
+	---@type fun(ships?: Ship[]): ShipCollectionExt
 	modkit.ships = _ships;
 end

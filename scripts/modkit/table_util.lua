@@ -18,19 +18,23 @@ function _printTbl(table, indent, output, no_recurse)
 		end
 	end
 	for k, v in table do
-		if type(v) == "table" then
-			if (no_recurse) then
-				output(indent_str .. tostring(v)); -- just print address
+		if (type) then
+			if type(v) == "table" then
+				if (no_recurse) then
+					output(indent_str .. tostring(v)); -- just print address
+				else
+					output(indent_str .. "\"" .. k .. "\": {");
+					_printTbl(v, indent + 1, output, no_recurse);
+					output(indent_str .. "},");
+				end
 			else
-				output(indent_str .. "\"" .. k .. "\": {");
-				_printTbl(v, indent + 1, output, no_recurse);
-				output(indent_str .. "},");
+				if (type(v) ~= "number") then
+					v = "\"" .. tostring(v) .. "\"";
+				end
+				output(indent_str .. "\"" .. k .. "\": " .. v .. ',');
 			end
 		else
-			if (type(v) ~= "number") then
-				v = "\"" .. tostring(v) .. "\"";
-			end
-			output(indent_str .. "\"" .. k .. "\": " .. v .. ',');
+			output(indent_str .. "\"" .. k .. "\": " .. tostring(v) .. ',');
 		end
 	end
 end

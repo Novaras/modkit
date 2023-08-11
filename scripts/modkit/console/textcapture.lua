@@ -321,6 +321,8 @@ if (MODKIT_TEXTCAPTURE == nil) then
                 elseif (group_type == 'recall') then
                     rawset(globals(), callback_name, function ()
                         local keyname = %keyname;
+
+                        ---@type string?
                         local line = '';
 
                         if (keyname == 'PAGEUP' or keyname == 'ARRUP') then

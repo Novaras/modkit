@@ -6,11 +6,12 @@ if (H_SP_HELPERS == nil) then
 	--- In the context of a .level script, creates squads & groups for the ships and positions them on the map etc.
 	--- In the context of a .lua script, creates `Ship` definitions from this information instead, stored in `GLOBAL_MISSION_SHIPS`
 	---@param type string
-	---@param player integer
-	---@param position Vec3
-	---@param rotation Vec3
-	---@param in_hyperspace '0'|'1'
-	---@param id_override string
+	---@param player? integer
+	---@param position? Vec3
+	---@param rotation? Vec3
+	---@param in_hyperspace? 0|1
+	---@param id_override? string|number
+	---@param group_name_override? string
 	function RegisterShip(type, player, position, rotation, in_hyperspace, id_override, group_name_override)
 		local group_name = group_name_override or ("_registergroup_" .. SHIP_NEXT_ID);
 
@@ -35,10 +36,7 @@ if (H_SP_HELPERS == nil) then
 			if (GLOBAL_MISSION_SHIPS == nil) then
 				dofilepath("data:scripts/modkit.lua");
 
-				---@class GLOBAL_MISSION_SHIPS : MemGroup
-				---@field _entities Ship[]
-				---@field all fun(): Ship[]
-				---@field get fun(id: string): Ship
+				---@class GLOBAL_MISSION_SHIPS : MemGroupInst
 				GLOBAL_MISSION_SHIPS = modkit.MemGroup.Create("mg-global-mission-ships");
 			end
 			GLOBAL_MISSION_SHIPS:set(id_override, modkit.compose:instantiate(group_name, player, id_override, type));

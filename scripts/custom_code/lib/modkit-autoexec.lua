@@ -37,7 +37,7 @@ end
 
 --- Returns whether or not this current move-action is over
 function _ma:finished(caller)
-	return self.actioning == 1 and self:next().finished(caller, self);
+	return self.actioning == 1 and self:next().finished(caller);
 end
 
 --- Takes a list of 'move actions', and executes them one by one until completion (using driver's auto-exec feature).

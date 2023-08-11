@@ -82,7 +82,7 @@ if (modkit.MemGroup == nil) then
 
 			--- Finds the first entity matching the given predicate, or `nil` if not existing.
 			---@param predicate function
-			---@return 'any'|'nil'
+			---@return any|nil
 			function new_group:find(predicate)
 				return modkit.table.find(self._entities, predicate);
 			end

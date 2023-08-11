@@ -1,11 +1,12 @@
-if (MK_RACES == nil) then
+if (MK_RACES == nil or (modkit ~= nil and modkit.races == nil)) then
 	if (modkit == nil) then
+		modkit = {};
 		dofilepath("data:scripts/modkit/table_util.lua");
 	end
 
-	---@alias RacePrefix 'hgn'|'vgr'|'kus'|'tai'|'kad'|'tur'|'ben'|'kpr'
+	---@alias RacePrefix 'hgn'|'vgr'|'kus'|'tai'|'kad'|'tur'|'ben'|'kpr'|'horde'|'UNKNOWN'
 
-	---@alias RaceName 'hiigaran'|'vaygr'|'kushan'|'taiidan'|'kadeshi'|'turanic radiers'|'bentusi'|'keeper'
+	---@alias RaceName 'hiigaran'|'vaygr'|'kushan'|'taiidan'|'kadeshi'|'turanic raiders'|'bentusi'|'keeper'|'horde'|'UNKNOWN'
 
 	---@class RaceConfig
 	---@field prefix RacePrefix
@@ -45,6 +46,10 @@ if (MK_RACES == nil) then
 			{
 				prefix = "kpr",
 				name = "keeper"
+			},
+			{
+				prefix = "horde",
+				name = "horde"
 			},
 			{
 				prefix = "UNKNOWN",

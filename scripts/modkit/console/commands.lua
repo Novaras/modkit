@@ -20,7 +20,7 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 	---@field example? string
 	---@field fn fun(params: any[], words: string[], flags: any[], line: string): any
 
-	---@alias ParamConfigGenerator fun(names?: string[], default?: any): ParamConfig
+	---@alias ParamConfigGenerator fun(names: string[], default: any): ParamConfig
 
 	function makeSpawnVolGenerator(radius)
 		radius = radius or 1500;
@@ -44,52 +44,28 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 		end
 	end
 
-	--- Constructs a `Ship[]` from the incoming _param values_:
-	---
-	--- - By default, return the _ currently selected_ ships
-	--- - If 'type' is set, return all ships of that type
-	--- - Else if 'family' is set, return all ships of that family
-	---
-	---@param params any
-	---@return Ship[]
 	function shipsFromParamValues(params)
 		local src = GLOBAL_SHIPS:all();
 
-		-- modkit.table.printTbl(params, "params");
-
-		if (params.player) then
-			src = modkit.table.filter(src, function (ship)
-				---@cast ship Ship
-				return ship.player.id == %params.player.id;
-			end);
-		end
-
 		if (params.type and params.family) then
-			consoleLog("ignoring family param (f=" .. params.family .. ") due to presence of type param (t=" .. params.type .. ")");
+			consoleLog("destroy: ignoring family param (f=" .. params.family .. ") due to presence of type param (t=" .. params.type .. ")");
 		end
 
 		if (params.type) then
 			src = modkit.table.filter(src, function (ship)
-				---@cast ship Ship
-				return strfind(ship.type_group, %params.type);
+				return ship.ship_type == %params.type;
 			end);
 		elseif (params.family) then
 			src = modkit.table.filter(src, function (ship)
-				---@cast ship Ship
-				return strfind(ship:attackFamily(), %params.family);
+				return ship:attackFamily() == %params.family;
 			end);
 		end
 
-		if (params.player == nil and params.type == nil and params.family == nil) then
+		if (params.player) then
 			src = modkit.table.filter(src, function (ship)
-				---@cast ship Ship
-				return ship:selected();
+				return ship.player.id == %params.player.id;
 			end);
 		end
-
-		-- modkit.table.printTbl(modkit.table.map(src, function (ship)
-		-- 	return { id = ship.id, group = ship.own_group, player = ship.player.id, type = ship.type_group }
-		-- end), "command selection");
 
 		return src;
 	end
@@ -172,7 +148,6 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 		end
 	end
 
-	---@class PARAMS : table<string, ParamConfigGenerator>
 	PARAMS = {
 		int = function (names, default)
 			names = names or { 'n', 'v', 'val', 'value' };
@@ -192,10 +167,9 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 				{
 					transform = function (value)
 						value = tonumber(value);
-						if (value) then
-							print("trying to fetch player id " .. value);
-							return GLOBAL_PLAYERS:get(value);
-						end
+						print("trying to fetch player id " .. value);
+						if (value == nil) then return; end
+						return GLOBAL_PLAYERS:get(value);
 					end
 				}
 			);
@@ -204,7 +178,7 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 			return {
 				names = names,
 				default = default,
-				pattern = "[%a%d_-%.]+"
+				pattern = "[%a%d_-]+"
 			};
 		end,
 		vec3 = function (names, default)

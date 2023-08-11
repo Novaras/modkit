@@ -6,11 +6,17 @@ if (modkit == nil) then
 
 	if (GLOBAL_SHIPS == nil) then
 		---@class ShipCollection : SheduledFilters, MemGroupInst
+		---@diagnostic disable-next-line: duplicate-doc-field
 		---@field _entities Ship[]
+		---@diagnostic disable-next-line: duplicate-doc-field
 		---@field get fun(self: ShipCollection, entity_id: number): Ship
+		---@diagnostic disable-next-line: duplicate-doc-field
 		---@field set fun(self: ShipCollection, entity_id: number, ship: Ship): Ship
+		---@diagnostic disable-next-line: duplicate-doc-field
 		---@field all fun(self: ShipCollection): Ship[]
+		---@diagnostic disable-next-line: duplicate-doc-field
 		---@field find fun(self: ShipCollection, predicate: ShipFilterPredicate): Ship | 'nil'
+		---@diagnostic disable-next-line: duplicate-doc-field
 		---@field filter fun(self: ShipCollection, predicate: ShipFilterPredicate): Ship[]
 		GLOBAL_SHIPS = modkit.MemGroup.Create("mg-ships-global");
 	end
@@ -52,8 +58,10 @@ function modkit_hoist_memgroups()
 			-- consoleLog("tg: \t" .. tostring(type_group));
 			-- consoleLog("pi: \t" .. tostring(player_index));
 			-- consoleLog("si: \t" .. tostring(ship_id));
-			local new_ship = register(type_group, player_index, ship_id);
-			new_ship.player = GLOBAL_PLAYERS:get(player_index);
+			if (type_group and player_index and ship_id) then
+				local new_ship = register(type_group, player_index, ship_id);
+				new_ship.player = GLOBAL_PLAYERS:get(player_index);
+			end
 		end
 		-- print("gs");
 		-- print(GLOBAL_SHIPS);

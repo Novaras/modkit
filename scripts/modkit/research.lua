@@ -106,11 +106,11 @@ if (modkit.research == nil) then
 	--- String names are matched case-insensitive.
 	---
 	---@param name_or_pred string|fun(item: ResearchItem): ResearchItem|nil
-	---@param race RacePrefix|RaceName
+	---@param race? RacePrefix|RaceName
 	---@return any
 	function research_proto:find(name_or_pred, race)
 		local src = {};
-		race_cfg = modkit.races:find(race);
+		race_cfg = modkit.races:find(race or '');
 		if (race_cfg) then
 			-- print("race: " .. race_cfg.name);
 			src = self:getRaceItems(race_cfg.name);

@@ -5,5 +5,13 @@
 	],
 	"editor.semanticHighlighting.enabled": true,
 	"Lua.runtime.plugin": ".vscode/lua/plugin.lua",
-	"Lua.color.mode": "Semantic"
+	"Lua.workspace.ignoreDir": [
+		"ui",
+		"scripts/races",
+		"leveldata/**/*.level",
+		"leveldata/campaign/ascension",
+		"*.miss",
+		"*.subs",
+		"ship"
+	],
 }
