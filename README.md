@@ -6,8 +6,8 @@ A new way to write custom code for HWRM.
 
 - A large and growing library of utility functions for working with ships and players
 - A new way to write code, which works with _ships_ instead of SobGroups
-- A builtin library for working more easily with tables
-- A math library
+- An ingame console window
+- Math, table, string and other utils
 - A state management system
 - Freedom to express your ideas in code much more intuitively, without the noise of `SobGroup_`, `Universe_` and `Player_` functions, and the string references associated with them.
 - Extremely flexible, can be used simply as a collection of utilities to bolster your own scripting style, or can provide a whole new way of approaching custom code
