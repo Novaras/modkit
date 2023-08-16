@@ -168,7 +168,7 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 					transform = function (value)
 						value = tonumber(value);
 						print("trying to fetch player id " .. value);
-						if (value == nil) then return; end
+						if (value == nil) then return nil; end
 						return GLOBAL_PLAYERS:get(value);
 					end
 				}
