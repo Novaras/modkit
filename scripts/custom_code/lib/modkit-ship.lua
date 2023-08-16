@@ -669,7 +669,10 @@ function modkit_ship:guarding(target)
 		SobGroup_GetCommandTargets(targets_group, self.own_group, COMMAND_Guard);
 		return SobGroup_GroupInGroup(target.own_group, targets_group) == 1;
 	else
-		return self:currentCommand() == COMMAND_Guard;
+		return modkit.table.any(GLOBAL_PLAYERS:alive(), function (player)
+			---@cast player Player
+			return SobGroup_IsGuardingSobGroup(%self.own_group, player:shipsGroup()) == 1;
+		end);
 	end
 end
 
