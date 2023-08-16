@@ -388,7 +388,7 @@ end
 ---@param new_stance? Stance
 ---@return Stance
 function modkit_ship:stance(new_stance)
-	if (new_stance) then
+	if (new_stance ~= nil) then
 		SobGroup_SetStance(self.own_group, new_stance);
 	end
 	return SobGroup_GetStance(self.own_group);
