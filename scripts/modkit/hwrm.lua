@@ -1,7 +1,29 @@
 -- Custom definitions file to allow sumneko.lua to provide completion/hover/etc. for HWRM globals.
 
--- Notice we never run this code, these defines are just used for IDE assistance.
+if (MK_EXTRA_DEFINES == nil) then
+	---@enum ROE
+	ROE = ROE or {
+		OffensiveROE = 0,
+		DefensiveROE = 1,
+		PassiveROE = 2
+	};
 
+	---@enum Stance
+	STANCE = {
+		AggressiveStance = 0,
+		NeutralStance = 1,
+		EvasiveStance = 2
+	};
+
+	---@enum ShipHold
+	SHIPHOLD = {
+		ShipHoldLaunch = 0,
+		ShipHoldStayDockedUpToLimit = 1,
+		ShipHoldStayDockedAlways = 2
+	};
+end
+
+-- Notice we never run this code, these defines are just used for IDE assistance.
 ---@diagnostic disable: missing-return
 if (nil) then
 
@@ -71,27 +93,6 @@ if (nil) then
 	VisFull = 2;
 
 	---@alias Visibility 'VisNone'|'VisSecondary'|'VisFull'
-
-	---@enum ROE
-	ROE = {
-		OffensiveROE = 0,
-		DefensiveROE = 1,
-		PassiveROE = 2
-	};
-
-	---@enum Stance
-	Stance = {
-		AggressiveStance = 0,
-		NeutralStance = 1,
-		EvasiveStance = 2
-	};
-
-	---@enum ShipHold
-	ShipHold = {
-		ShipHoldLaunch = 0,
-		ShipHoldStayDockedUpToLimit = 1,
-		ShipHoldStayDockedAlways = 2
-	};
 
 	---@alias AutoLaunchStatus 0|1|2
 
