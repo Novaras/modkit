@@ -11,8 +11,8 @@ if (MK_EXTRA_DEFINES == nil) then
 	---@enum Stance
 	STANCE = {
 		AggressiveStance = 0,
-		NeutralStance = 1,
-		EvasiveStance = 2
+		NeutralStance = 2,
+		EvasiveStance = 1
 	};
 
 	---@enum ShipHold
