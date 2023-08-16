@@ -662,7 +662,7 @@ end
 --- Returns all guard targets for this ship (or nil). If `target` is provided, returns whether or not this ship is guarding the `target`.
 ---
 ---@param target? Ship
----@return 'Ship[]'|bool
+---@return bool
 function modkit_ship:guarding(target)
 	if (target) then
 		local targets_group = SobGroup_Fresh("targets-group-" .. self.id .. "-" .. COMMAND_Guard);
