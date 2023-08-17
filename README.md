@@ -18,7 +18,9 @@ A new way to write custom code for HWRM.
 
 Install [degit](https://www.npmjs.com/package/degit):
 
-> Note: You need both Node and npm to use modkit this way. You can get Node (and npm with it) here: https://nodejs.org/en/
+> **💡 Note: You need git, Node, and npm to use modkit this way.**
+> - **You can get Node (and npm with it) here: https://nodejs.org/en/**
+> - **Git can be [installed in various ways](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)**
 
 ```bash
 npm install -g degit
