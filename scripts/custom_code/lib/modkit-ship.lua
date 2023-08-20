@@ -848,7 +848,8 @@ end
 ---
 ---@return bool
 function modkit_ship:isBeingCaptured()
-	local temp = SobGroup_GetSobGroupBeingCapturedGroup(self.own_group, DEFAULT_SOBGROUP);
+	local temp = SobGroup_Fresh();
+	SobGroup_GetSobGroupBeingCapturedGroup(self.own_group, temp);
 	return SobGroup_Count(temp) > 0;
 end
 
