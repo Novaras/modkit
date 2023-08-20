@@ -11,7 +11,7 @@
 ---@field _despawned_at_volume string
 ---@field _reposition_volume string
 ---@field _default_vol string
----@field _auto_launch '0'|'1'
+---@field _auto_launch 0|1
 ---@field _visibility table<Player, Visibility>
 ---@field _capturable_mod CapturableModifier
 ---@field _ghosted bool
@@ -278,6 +278,38 @@ function modkit_ship:attackPlayer(player)
 	return SobGroup_AttackPlayer(self.own_group, player.id);
 end
 
+--- Causes this ship to kamikazi into `targets`, which can be one or more ships.
+---
+---@param targets Ship | Ship[]
+function modkit_ship:kamikazi(targets)
+	if (targets.own_group) then -- need to turn into `Ship[]`
+		targets = {
+			[1] = targets
+		}
+	end
+	SobGroup_Kamikaze(self.own_group, SobGroup_FromShips(targets));
+end
+
+--- Returns the cloak state of this ship, optionally setting it.
+---
+---@param set? 0|1 -- if `nil`, the cloak is toggled, if 0, its turned off, if 1, turned on
+---@return bool
+function modkit_ship:cloak(set)
+	local current_status = self:isCloaked();
+	set = set or mod(current_status + 1, 2);
+
+	if (set ~= current_status) then
+		SobGroup_CloakToggle(self.own_group);
+	end
+	return self:isCloaked();
+end
+
+--- Returns whether or not this ship is cloaked
+---@return bool
+function modkit_ship:isCloaked()
+	return SobGroup_IsCloaked(self.own_group) == 1;
+end
+
 --- Causes this ship to begin capturing `targets`, which can be a single ship or a table of ships.
 ---
 ---@param targets Ship | Ship[]
@@ -308,10 +340,20 @@ function modkit_ship:stop()
 	SobGroup_Stop(self.player.id, self.own_group);
 end
 
+--- Moves this ship to `where`, which may be:
+--- - `string`: a volume name
+--- - `Ship`: a `Ship`
+--- - `Position`: a `Position`
+---
+---@param where string | Ship | Position | Vec3
 function modkit_ship:move(where)
 	if (type(where) == "string") then -- a volume
 		SobGroup_Move(self.player.id, self.own_group, where);
 	else -- a position
+		if (where.own_group) then
+			---@cast where Ship
+			where = where:position();
+		end
 		Volume_AddSphere(self._default_vol, where, 1);
 		SobGroup_MoveToPoint(self.player.id, self.own_group, where);
 		Volume_Delete(self._default_vol);
@@ -357,10 +399,10 @@ end
 ---
 ---@param to Position
 function modkit_ship:hyperspace(to)
-	SobGroup_HyperspaceTo(self.own_group, to);
+	SobGroup_HyperspaceTo(self.own_group, Volume_Fresh("-", to));
 end
 
---- Gets or optionally sets the ship's auto-launch behavior.
+--- Gets or optionally sets the ship's auto-launch behavior. `1` for auto-launch, `0` for stay-docked manual launching.
 ---
 ---@param auto_launch? AutoLaunchStatus
 ---@return AutoLaunchStatus
@@ -396,9 +438,10 @@ end
 
 --- Causes this ship to be 'ghosted', which is pretty much akin to no-clip (no collisions will affect this ship).
 ---
----@param enabled 0|1
+---@param enabled? 0|1
 ---@return bool
 function modkit_ship:ghost(enabled)
+	enabled = enabled or 1;
 	if (enabled == 0) then
 		self._ghosted = nil;
 	else
@@ -624,7 +667,7 @@ function modkit_ship:stunned(stunned)
 end
 
 --- Returns whether or not this ship is docked with anything. Optionally, checks if this ship is docked with a specific ship.
----@param with Ship
+---@param with? Ship
 ---@return bool
 function modkit_ship:docked(with)
 	if (with) then
@@ -692,7 +735,7 @@ end
 --- Returns `1` if this ship is under attack from any source, else `nil`. If `attacker` is provided, check instead if
 --- this ship is under attack by that attacker (instead of anything).
 ---
----@param attacker Ship
+---@param attacker? Ship
 ---@return bool
 function modkit_ship:underAttack(attacker)
 	if (attacker) then
@@ -703,7 +746,7 @@ end
 
 --- Returns the command targets of the
 ---@param command integer
----@param source table
+---@param source? table
 ---@return Ship[]
 function modkit_ship:commandTargets(command, source)
 	local targets_group = SobGroup_Fresh("targets-group-" .. self.id .. "-" .. command);
