@@ -68,7 +68,7 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 		---@field finish function
 
 		---@class RuleChain
-		---@field next fun(self: RuleChain, action: Rule|RuleFn): RuleChain
+		---@field next fun(self: RuleChain, action: Rule|RuleFn|string): RuleChain
 		---@field catch fun(self: RuleChain, action: function): nil
 
 		---@class Listener
@@ -179,17 +179,30 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 				Rule_AddInterval(self.api_name, self.interval);
 				self.status = "running";
 
-				---@param rule Rule|RuleFn
+				---@param rule Rule|RuleFn|string
 				---@return RuleChain
 				_makeChain = function (rule)
-
-					rule = toRule(rule);
+					if (type(rule) ~= "string" and type(rule.api_name) ~= "string") then
+						---@cast rule RuleFn
+						rule = toRule(rule);
+						---@cast rule Rule
+					end
+					---@diagnostic disable-next-line: cast-local-type
+					rule = rules:get(rule);
+					---@cast rule Rule
 
 					--- @class RuleChain
 					local chainable = {};
 
 					function chainable:next(action)
-						action = toRule(action);
+						if (type(action) == "function") then
+							---@cast action RuleFn
+							action = toRule(action);
+						end
+						---@diagnostic disable-next-line: cast-local-type
+						action = modkit.campaign.rules:get(action);
+						---@cast action Rule
+
 						local rule = %rule;
 						modkit.campaign.rules:on(rule.api_name, function ()
 							print("next listener for " .. %rule.api_name);
@@ -219,7 +232,7 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 				return _makeChain(self);
 			end
 
-			-- here we add a tag on the rule which lets you call the rule like a function: `myrule.begin();` equivalent to `myrule();`
+			-- here we add a tag on the rule which lets you call the rule like a function: `myrule:begin();` equivalent to `myrule();`
 			local rule_callable_tag = newtag();
 			settagmethod(rule_callable_tag, "function", function ()
 				return %rule:begin();
@@ -240,9 +253,13 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 		min_poll_interval = 0.1,
 	};
 
-	---@param name string The given name or API name
+	---@param name string|Rule The given name or API name
 	---@return Rule|nil
 	function rules:get(name)
+		if (name and type(name) ~= "string") then
+			return name;
+		end
+		---@cast name string
 		return GLOBAL_RULES:get(name) or GLOBAL_RULES:find(function (rule)
 			return rule.id == %name or rule.api_name == %name;
 		end);
@@ -265,9 +282,15 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 		return GLOBAL_RULES:add(name, rule_fn, interval, state or {});
 	end
 
-	---@param rule Rule
+	---@param rule Rule|string
 	---@return nil
 	function rules:begin(rule)
+		if (type(rule) == "string") then
+			---@diagnostic disable-next-line: cast-local-type
+			rule = modkit.campaign.rules:get(rule);
+			---@cast rule Rule
+		end
+
 		rule:begin();
 		return rule;
 	end
@@ -291,12 +314,12 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 		local exec = function ()
 			local rules = %self;
 			pattern_exec = "" .. %pattern;
+			-- temporarily replace these keywords with C-style tokens (to protect them from being included by other patterns)
 			pattern_exec = gsub(pattern_exec, " and ", " & ");
 			pattern_exec = gsub(pattern_exec, " or ", " | ");
 			-- here we are constructing a LUA logic expression which will tell us the truthiness of the supplied pattern
 			-- if a rule is running, we insert true (1), else false (nil)
 			-- (we construct something like: "return 1 and nil and nil or (1 and 1)")
-			local p = %pattern;
 			pattern_exec = gsub(pattern_exec, "([%w_]+)", function(matches)
 				local r = %rules:get(matches);
 				-- modkit.table.printTbl({
@@ -310,6 +333,7 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 				end
 				return "nil";
 			end);
+			-- now replace the tokens with the lua keywords again
 			pattern_exec = gsub(pattern_exec, " & ", " and ");
 			pattern_exec = gsub(pattern_exec, " | ", " or ");
 			pattern_exec = gsub(pattern_exec, "^%s*(.-)%s*$", "%1");
@@ -329,6 +353,34 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 			exec = exec,
 			callback = callback
 		};
+	end
+
+	---@class RuleDef
+	---@field name? string
+	---@field pattern? string
+	---@field interval? number
+	---@field immediate? bool
+	---@field fn RuleFn
+
+	--- Parses a table of rule definitions. The rules are registered, then, if they have no `pattern` to wait for, they're fired.
+	--- Otherwise the rule is fired when the pattern is satisfied using `rules:on`.
+	---@param rules_table table<string, RuleDef>
+	function rules:parse(rules_table)
+		modkit.table.forEach(rules_table, function (def, name)
+			---@cast def RuleDef
+
+			print("make w name " .. tostring(def.name or name));
+			local r = modkit.campaign.rules:make(def.fn, { interval = def.interval, name = tostring(def.name or name) });
+			if (def.pattern) then
+				modkit.campaign.rules:on(def.pattern, function ()
+					%r:begin();
+				end);
+			end
+
+			if (def.immediate) then
+				r:begin();
+			end
+		end, 1);
 	end
 
 	--- Sets `GLOBAL_RULES.__level_path`, and also populates `GLOBAL_MISSION_SHIPS`.

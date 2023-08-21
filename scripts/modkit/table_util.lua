@@ -387,6 +387,27 @@ if (modkit.table == nil) then
 		return out;
 	end
 
+	--- Calls `callback` for every key-value pair in `tbl`.
+	---
+	---@param tbl table
+	---@param callback fun(v: any, k: string|number, tbl: table)
+	---@param recursive? bool Whether or not to call recursively
+	---@param recursePredicate? fun(v: any, k: string|number, tbl: table) If `recursive`, this function decides which key-vals to recurse on. By default, recurse when value is a table type.
+	function table.forEach(tbl, callback, recursive, recursePredicate)
+		recursive = recursive or nil;
+		recursePredicate = recursePredicate or function (v)
+			return v and type(v) == "function";
+		end
+
+		for k, v in tbl do
+			if (recursePredicate(v, k, tbl)) then
+				modkit.table.forEach(v, callback, recursive, recursePredicate);
+			else
+				callback(v, k, tbl);
+			end
+		end
+	end
+
 	modkit.table = table;
 
 	print("table_util init");
