@@ -63,7 +63,7 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 		---@field core_state RuleCoreState
 		---@field result any[] Table of values from the previous `RuleResolve` call in the chain
 		---@field error? string Error message passed to a `RuleError` call in the chain
-		---@field begin function
+		---@field begin fun(self: Rule, previous_result: any): RuleChain
 		---@field run function
 		---@field finish function
 
@@ -74,7 +74,7 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 		---@class Listener
 		---@field pattern string
 		---@field exec function
-		---@field callback RuleFn
+		---@field callback function
 
 		---@class GLOBAL_RULES : MemGroupInst
 		---@field find fun(self: GLOBAL_RULES, predicate: fun(rule: Rule): bool): Rule|nil
@@ -282,7 +282,7 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 	--- Returns a LUA string to execute (we just leverage LUA's inbuilt language parsing).
 	---
 	---@param pattern string
-	---@param callback Rule|RuleFn
+	---@param callback function
 	---@return nil
 	function rules:on(pattern, callback)
 		-- 'A and (B or C)'
@@ -331,6 +331,9 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 		};
 	end
 
+	--- Sets `GLOBAL_RULES.__level_path`, and also populates `GLOBAL_MISSION_SHIPS`.
+	---
+	---@param level_path string
 	function rules:init(level_path)
 		GLOBAL_RULES.__level_path = level_path;
 
@@ -354,6 +357,7 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 	-- automatic rule, which checks for listener completion
 	function modkit_campaign_driver()
 		for _, listener in GLOBAL_RULES.__listeners do
+			---@cast listener Listener
 			-- print(listener.pattern .. ": " .. listener.exec());
 			if (dostring(listener.exec())) then
 				-- modkit.table.printTbl(listener);
