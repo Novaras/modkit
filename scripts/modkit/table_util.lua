@@ -60,6 +60,12 @@ if (modkit.table == nil) then
 			end
 			return out;
 		end,
+
+		---@generic T
+		---@generic U
+		---@param table T[]|{ [any]: T } 
+		---@param transform fun(val: T, idx: any, tbl: T[]|{ [any]: T }): U
+		---@return U[]|{ [any]: U }
 		map = function (table, transform)
 			local out = {};
 			for i, v in table do
@@ -67,6 +73,16 @@ if (modkit.table == nil) then
 			end
 			return out;
 		end,
+
+		--- Sometimes called 'fold', this operation begins with an initial value, then walks the supplied table,
+		--- invoking a supplied `accumulator` function on each step. This function's first paremeter is the return
+		--- value of the previous step.
+		---
+		---@generic T, U
+		---@param table T[]|{ [any]: T }
+		---@param accumulator fun(accumulated: U, val: T, idx: any, tbl: T[]|{ [any]: T }): U
+		---@param initial_value? U
+		---@return U
 		reduce = function (table, accumulator, initial_value)
 			local out = initial_value;
 			for i, v in table do
@@ -74,6 +90,11 @@ if (modkit.table == nil) then
 			end
 			return out;
 		end,
+
+		---@generic T
+		---@param table T[]
+		---@param value T
+		---@return bool
 		includesValue = function (table, value)
 			for i, v in table do
 				if v == value then
@@ -88,7 +109,11 @@ if (modkit.table == nil) then
 				end
 			end
 		end,
-		---@return any
+
+		---@generic T
+		---@param table T[]|{ [any]: T }
+		---@param predicate fun(val: T, idx: any, tbl: T[]): bool
+		---@return T|nil
 		find = function (table, predicate)
 			for i, v in table do
 				if (type(predicate) == "function") then

@@ -86,7 +86,7 @@ if (MK_CONSOLE == nil) then
 	consoleError = consoleError or function (...)
 		for k, val in arg do
 			if (k ~= "n") then
-				consoleLog("<c=ff4422>" .. tostring(val) .. "</c>");
+				consoleLog("<c=ff4422>[ERROR]: " .. tostring(val) .. "</c>");
 			end
 		end
 	end
