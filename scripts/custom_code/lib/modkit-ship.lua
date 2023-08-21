@@ -220,7 +220,7 @@ function modkit_ship:distanceTo(other)
 	local a = self:position();
 
 	if (other.own_group) then -- ship
-		return SobGroup_GetDistanceToSobGroup(self.own_group, other.own_group);
+		return SobGroup_GetDistanceToSobGroup(self.own_group, other.own_group) or -1;
 	end
 
 	---@type Position|Ship
@@ -1024,7 +1024,7 @@ function modkit_ship:print(verbose)
 				tick = self:age(),
 				health = self:HP()
 			},
-			"ship: " .. self.id
+			"ship: " .. (self.id or ('temporary_' .. (self.own_group)))
 		);
 	end
 end
