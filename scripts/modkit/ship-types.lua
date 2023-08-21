@@ -1,6 +1,7 @@
-if (MK_SHIP_TYPES == nil) then
+if (modkit.ship_types == nil) then
 
-	if ((modkit or modkit.table) == nil) then
+	modkit = modkit or {};
+	if (modkit.table == nil) then
 		dofilepath("data:scripts/modkit/table_util.lua");
 	end
 
@@ -370,6 +371,4 @@ if (MK_SHIP_TYPES == nil) then
 		[360] = 'vgr_weaponplatform_gun',
 		[361] = 'vgr_weaponplatform_missile',
 	};
-
-	MK_SHIP_TYPES = 1;
 end

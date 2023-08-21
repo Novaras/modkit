@@ -92,7 +92,7 @@ if (modkit.compose == nil) then
 				local result = {};
 				if (attribs) then
 					if (type(attribs) == "function") then
-						result = attribs(%sobgroup, %player_index, %id);
+						result = attribs(%sobgroup, %player_index, %id, %ship_type);
 					end
 				end
 

@@ -48,6 +48,12 @@ if (modkit.shipGroup == nil) then
 		end);
 	end
 
+	function lib:fitlerType(type)
+		return self:filter(function (ship)
+			return ship.type_group == %type;
+		end)
+	end
+
 	local _ships = function (ships)
 		ships = ships or GLOBAL_SHIPS._entities;
 		return %lib:shallowCopy(ships);

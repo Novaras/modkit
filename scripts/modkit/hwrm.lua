@@ -339,6 +339,13 @@ if (nil) then
 	function SobGroup_Count(source_group)
 	end
 
+	--- Returns whether or not this group is 'empty', which is equivalent to `SobGroup_Count(source_group) == 0`.
+	---
+	---@param source_group string
+	---@return 0|1
+	function SobGroup_Empty(source_group)
+	end
+
 	--- Returns the number of squadrons (usually 1-1 with the number of ships) within group `source_group` belonging to `player_index`.
 	---
 	---@param source_group string
@@ -561,6 +568,14 @@ if (nil) then
 	function SobGroup_GetStaticF(ship_type, attribute)
 	end
 
+	--- Returns the player who owns the given group.
+	---
+	--- _!!TODO!! Behaviour on mixed player groups is not tested._
+	---@param source_group string
+	---@return integer
+	function SobGroup_GetPlayerOwner(source_group)
+	end
+
 	--- Returns `1` if any member of `group` hosts the given subsystem, else `0`.
 	---
 	---@param group string
@@ -659,6 +674,26 @@ if (nil) then
 	---@param target_group string
 	---@return nil
 	function SobGroup_SobGroupAdd(source_group, target_group)
+	end
+
+	--- A group's ships have an internal 'index'.
+	---
+	--- Fills `target_group` with `count` ships from `source_group`, starting at `start_index`.
+	---
+	--- The 'index' is just a range index for this group; the ship's actual ID is not discoverable from here.
+	---@param target_group string
+	---@param source_group string
+	---@param start_index integer
+	---@param count integer
+	function SobGroup_FillShipsByIndexRange(target_group, source_group, start_index, count)
+	end
+
+	--- Fills `target_group` with ships from `source_group` if they are of the given `ship_type`.
+	---
+	---@param target_group string
+	---@param source_group string
+	---@param ship_type string
+	function SobGroup_FillShipsByType(target_group, source_group, ship_type)
 	end
 
 	--- Selection stuff (NEEDS TESTING, USED ONLY BY DEFENSE FIGHTER CUSTOM CODE):

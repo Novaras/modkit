@@ -10,6 +10,25 @@ function SobGroup_FromShips(ships, group_name)
 	return new_group;
 end
 
+--- For a given sobgroup `group`, returns a table containing all the ships in that group, as `Ship` objects.
+---
+---@param group string
+---@return Ship[]
+function SobGroup_ToShips(group)
+	---@type Ship[]
+	local out = {};
+	local subgroups = SobGroup_Split(group);
+
+	for index, group in subgroups do
+		---@type string?
+		local type = modkit.table.firstKey(SobGroup_ShipTypes(group));
+		-- print("got type " .. tostring(type));
+		local player = SobGroup_GetPlayerOwner(group);
+		out[index] = modkit.compose:instantiate(group, player, index, type);
+	end
+	return out;
+end
+
 --- Returns a collection of all ships _not_ belonging to `player`.
 ---
 ---@param player table

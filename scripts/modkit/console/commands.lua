@@ -148,6 +148,7 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 		end
 	end
 
+	---@type ParamConfigGenerator[]
 	PARAMS = {
 		int = function (names, default)
 			names = names or { 'n', 'v', 'val', 'value' };

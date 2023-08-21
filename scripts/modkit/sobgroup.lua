@@ -94,28 +94,22 @@ if (H_SOBGROUP ~= 1) then
 
 	--- Checks to see if any ship in `group` is being captured.
 	---@param group string The group to check
-	---@return string
+	---@return bool
 	function SobGroup_AnyBeingCaptured(group)
-		local group_being_captured = group .. "_being_captured"
-		SobGroup_Fresh(group_being_captured)
-		SobGroup_GetSobGroupBeingCapturedGroup(group, group_being_captured)
-		if (SobGroup_Count(group_being_captured) > 0) then
-			return 1
-		end
-		return 0
+		local group_being_captured = group .. "_being_captured";
+		SobGroup_Fresh(group_being_captured);
+		SobGroup_GetSobGroupBeingCapturedGroup(group, group_being_captured);
+		return SobGroup_Count(group_being_captured) > 0;
 	end
 
 	--- Checks to see if any ship in `group` has attack targets.
 	---@param group string The group to check
-	---@return string
+	---@return bool
 	function SobGroup_AnyAreAttacking(group)
-		local group_attacking = group .. "_attacking"
-		SobGroup_Fresh(group_attacking)
-		SobGroup_GetCommandTargets(group_attacking, group, COMMAND_Attack)
-		if (SobGroup_Count(group_attacking) > 0) then
-			return 1
-		end
-		return 0
+		local group_attacking = group .. "_attacking";
+		SobGroup_Fresh(group_attacking);
+		SobGroup_GetCommandTargets(group_attacking, group, COMMAND_Attack);
+		return SobGroup_Count(group_attacking) > 0;
 	end
 
 	--- Returns a group of all active ships for all players.
@@ -143,15 +137,15 @@ if (H_SOBGROUP ~= 1) then
 	---@return string
 	function SobGroup_AlterSpeedMult(target_group, mult)
 		if (mult == nil) then
-			mult = 1/2
+			mult = 1/2;
 		end
-		local speed_mult = SobGroup_GetSpeed(target_group) * mult
+		local speed_mult = SobGroup_GetSpeed(target_group) * mult;
 		if (speed_mult < 0.05) then
-			speed_mult = 0
+			speed_mult = 0;
 		end
-		SobGroup_SetSpeed(target_group, speed_mult)
+		SobGroup_SetSpeed(target_group, speed_mult);
 
-		return target_group
+		return target_group;
 	end
 
 	STUN_EFFECT_ABILITIES = {
@@ -203,7 +197,7 @@ if (H_SOBGROUP ~= 1) then
 	-- (Presumable) Credits to SunTzu: https://github.com/HWRM/KarosGraveyard/wiki/UserFunction;-SobGroup_GetDistanceToSobGroup
 	---@param group_a string A SobGroup in real space
 	---@param group_b string A SobGroup in real space
-	---@return number
+	---@return number?
 	function SobGroup_GetDistanceToSobGroup(group_a, group_b)
 		if SobGroup_Empty(group_a) == 0 and SobGroup_Empty(group_b) == 0 then
 			local t_position1 = SobGroup_GetPosition(group_a)
@@ -292,6 +286,57 @@ if (H_SOBGROUP ~= 1) then
 			"bigcapitalship",
 			"mothership"
 		});
+	end
+
+	--- _Splits_ a given `group` into a table of subgroups. The size of the subgroups is given by `granularity`.
+	---
+	---@param group string
+	---@param granularity? integer
+	---@return string[]
+	function SobGroup_Split(group, granularity)
+		granularity = granularity or 1;
+		if (modkit == nil or modkit.table == nil) then
+			dofilepath("data:scripts/modkit/table_util.lua");
+		end
+
+		---@type string[]
+		local out = {};
+
+		for i = 0, SobGroup_Count(group) do
+			local subgroup = SobGroup_Fresh();
+			SobGroup_FillShipsByIndexRange(subgroup, group, i, granularity);
+			out[i] = subgroup;
+		end
+
+		return out;
+	end
+
+	--- Returns a table of the different ship types found in `group`.
+	---
+	--- **THIS IS AN EXPENSIVE CALL!**
+	---
+	---@param group string
+	---@return table<string, integer>
+	function SobGroup_ShipTypes(group)
+		if (modkit.ship_types == nil) then
+			dofilepath("data:scripts/modkit/ship-types.lua");
+		end
+
+		local types = {};
+
+		for _, ship_type in modkit.ship_types do
+			---@cast ship_type string
+
+			local type_group = SobGroup_Fresh("_sg_shiptypes__" .. ship_type);
+			SobGroup_FillShipsByType(type_group, group, ship_type);
+
+			if (SobGroup_Count(type_group) > 0) then
+				local current = types[ship_type] or 0;
+				types[ship_type] = current + SobGroup_Count(type_group);
+			end
+		end
+
+		return types;
 	end
 
 	DEFAULT_SOBGROUP = SobGroup_Fresh("__")
