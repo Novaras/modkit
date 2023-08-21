@@ -57,7 +57,7 @@ if (H_SOBGROUP ~= 1) then
 
 	--- Creates a new SobGroup, named with `new_name`, or '<original-name>-clone', if a new name is not provided for the group.
 	---@param original string The original group
-	---@param new_name string The name of the new SobGroup created
+	---@param new_name string? The name of the new SobGroup created
 	---@return string
 	function SobGroup_Clone(original, new_name)
 		new_name = new_name or (original .. "-clone");
