@@ -13,7 +13,7 @@ if (modkit_player_proto == nil) then
 		if (GLOBAL_PLAYERS == nil) then
 			---@class GLOBAL_PLAYERS : MemGroupInst
 			---@field _entities Player[]
-			---@field get fun(self: GLOBAL_PLAYERS, id: integer): Player
+			---@field get fun(self: GLOBAL_PLAYERS, id: integer?): Player
 			GLOBAL_PLAYERS = modkit.MemGroup.Create("mg-players-global");
 
 			---comment
