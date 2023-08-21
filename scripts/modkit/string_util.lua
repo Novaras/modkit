@@ -46,15 +46,6 @@ function strsplit(str, delimeter, return_words_only)
 	return matches;
 end
 
-function strrepeat(str, repetitions)
-	local out_str = "";
-	for i = 0, repetitions do
-		out_str = out_str .. str;
-	end
-
-	return out_str;
-end
-
 function strcharset(str, index, replacement)
 	local pre = strsub(str, 1, index - 1);
 	local post = strsub(str, index + 1, strlen(str));
@@ -75,4 +66,8 @@ function strimplode(arr, delimeter)
 	end
 
 	return str;
+end
+
+function strtrim(str)
+	return gsub(str, '^%s*(.-)%s*$', '%1');
 end

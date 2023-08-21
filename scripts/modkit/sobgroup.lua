@@ -295,6 +295,12 @@ if (H_SOBGROUP ~= 1) then
 	---@return string[]
 	function SobGroup_Split(group, granularity)
 		granularity = granularity or 1;
+
+		if (SobGroup_Count(group) <= granularity) then
+			local subgroup = SobGroup_Clone(group);
+			return { [1] = subgroup };
+		end
+
 		if (modkit == nil or modkit.table == nil) then
 			dofilepath("data:scripts/modkit/table_util.lua");
 		end
@@ -305,34 +311,27 @@ if (H_SOBGROUP ~= 1) then
 		for i = 0, SobGroup_Count(group) do
 			local subgroup = SobGroup_Fresh();
 			SobGroup_FillShipsByIndexRange(subgroup, group, i, granularity);
-			out[i] = subgroup;
+			out[i + 1] = subgroup;
 		end
 
 		return out;
 	end
 
-	--- Returns a table of the different ship types found in `group`.
+	--- Returns a table who's keys are the ship types found, with values indicating the number of each type found.
 	---
 	--- **THIS IS AN EXPENSIVE CALL!**
 	---
 	---@param group string
 	---@return table<string, integer>
 	function SobGroup_ShipTypes(group)
-		if (modkit.ship_types == nil) then
-			dofilepath("data:scripts/modkit/ship-types.lua");
-		end
-
 		local types = {};
 
-		for _, ship_type in modkit.ship_types do
-			---@cast ship_type string
-
-			local type_group = SobGroup_Fresh("_sg_shiptypes__" .. ship_type);
-			SobGroup_FillShipsByType(type_group, group, ship_type);
-
-			if (SobGroup_Count(type_group) > 0) then
-				local current = types[ship_type] or 0;
-				types[ship_type] = current + SobGroup_Count(type_group);
+		for _, subgroup in SobGroup_Split(group) do
+			if (SobGroup_Count(subgroup) > 0) then
+				local type = strtrim(SobGroup_GetShipType(subgroup));
+				if (strlen(type) > 0) then
+					types[type] = (types[type] or 0) + 1;
+				end
 			end
 		end
 

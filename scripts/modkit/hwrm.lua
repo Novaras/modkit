@@ -144,6 +144,20 @@ if (nil) then
 	function strlower(str)
 	end
 
+	--- Returns the length of the given string.
+	---
+	---@param str string
+	---@return integer
+	function strlen(str)
+	end
+
+	-- Returns a string that is the concatenation of `n` copies of the string `str`.
+	---@param str string
+	---@param n integer
+	---@return string
+	function strrep(str, n)
+	end
+
 	--- Executes the given string as a Lua chunk.
 	---
 	---@param str string
@@ -448,6 +462,12 @@ if (nil) then
 	---@param type_list string
 	---@return integer
 	function SobGroup_AreAnyOfTheseTypes(group_name, type_list)
+	end
+
+	--- Gets the ship _type_, as a string.
+	---@param group string
+	---@return string
+	function SobGroup_GetShipType(group)
 	end
 
 	--- TODO: construction and behavior of `cloud_list` is not tested. Valid cloud names are _probably_ any valid clouds in `resources/dustclouds/`.
