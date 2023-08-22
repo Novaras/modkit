@@ -1,6 +1,6 @@
+modkit = modkit or {};
 if (modkit.ship_types == nil) then
 
-	modkit = modkit or {};
 	if (modkit.table == nil) then
 		dofilepath("data:scripts/modkit/table_util.lua");
 	end

@@ -7,6 +7,9 @@ COMMANDS.shiptypes = COMMANDS.shiptypes or {
     fn = function (_, words)
         local pattern = words[2];
 
+        if (modkit == nil or modkit.ship_types == nil) then
+            dofilepath("data:scripts/modkit/ship-types.lua");
+        end
         local src = modkit.ship_types;
         if (pattern) then
             src = modkit.table.filter(src, function (ship_type)
