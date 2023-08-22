@@ -11,7 +11,7 @@
 ---@field targets_group string
 
 ---@class drones_proto : Ship, DroneFrigAttribs
-local drone_frig_proto = {
+local drones_proto = {
 	drone_kill_distance = 950,
 	---@type Vec3[]
 	parade_positions = { -- note that the number of drones is set by the positions in this table, add more for more drones
@@ -42,7 +42,7 @@ local drone_frig_proto = {
 
 --- === helpers ===
 
-function drone_frig_proto:killDrones()
+function drones_proto:killDrones()
 	-- self:print("kill!");
 	for i, drone in self.live_drones do
 		drone:HP(0);
@@ -50,7 +50,7 @@ function drone_frig_proto:killDrones()
 	end
 end
 
-function drone_frig_proto:pruneDeadDrones()
+function drones_proto:pruneDeadDrones()
 	for i, drone in self.live_drones do
 		if (drone:alive() == nil) then
 			-- self:print("prune drone " .. drone.own_group);
@@ -62,22 +62,22 @@ end
 --- Returns `nil` if the frigate is not 'ready', meaning it is not capable of fighting with drones.
 ---
 ---@return bool
-function drone_frig_proto:frigateReady()
-	return self:allInRealSpace()
-		and not self:beingCaptured()
-		and not self:isDoingAnyAbilities({
+function drones_proto:frigateReady()
+	return self:allInRealSpace() == 1
+		and self:beingCaptured() == 0
+		and self:isDoingAnyAbilities({
 			AB_Hyperspace,
 			AB_HyperspaceViaGate,
 			AB_Dock,
 			AB_Retire
-		});
+		}) == 0;
 end
 
 --- Returns a drone's 'type index' (i.e drone0 -> 0, drone11 -> 11)
 ---
 ---@param drone Ship
 ---@return string
-function drone_frig_proto:droneTypeIndex(drone)
+function drones_proto:droneTypeIndex(drone)
 	return strsub(drone.type_group, 10);
 end
 
@@ -85,7 +85,7 @@ end
 ---
 ---@param drone Ship
 ---@return Position
-function drone_frig_proto:droneParadePos(drone)
+function drones_proto:droneParadePos(drone)
 	local parade_pos = {};
 	for i, value in self:position() do
 		parade_pos[i] = (value + self.parade_positions[tonumber(self:droneTypeIndex(drone)) + 1][i]); -- drone x, y, z pos is frigate pos + offsets in table
@@ -97,7 +97,7 @@ end
 
 --- If we don't have our full retinue of drones, repopulates them.
 --- Drone count is synced with the table of positions in `self.parade_positions`.
-function drone_frig_proto:produceMissingDrones()
+function drones_proto:produceMissingDrones()
 	-- modkit.table.printTbl(modkit.table.map(self.live_drones, function (drone)
 	-- 	return {
 	-- 		own_group = drone.own_group,
@@ -120,7 +120,7 @@ function drone_frig_proto:produceMissingDrones()
 end
 
 --- Adds any drones (produced by `self:produceMissingDrones`) to `self.live_drones`.
-function drone_frig_proto:addProducedDronesToList()
+function drones_proto:addProducedDronesToList()
 	-- print("[" .. Universe_GameTime() .. "] hi from drone collation run for " .. self.own_group);
 
 	-- self:print("new_drones? " .. modkit.table.length(self.new_drones));
@@ -150,7 +150,7 @@ function drone_frig_proto:addProducedDronesToList()
 end
 
 --- Launches any drones currently docked.
-function drone_frig_proto:launchDrones()
+function drones_proto:launchDrones()
 	for _, drone in self.live_drones do
 		self:launch(drone);
 	end
@@ -159,14 +159,14 @@ end
 --- Syncs the ROE of all alive drones to the frigate's ROE
 ---
 ---@param ROE? ROE
-function drone_frig_proto:syncDroneROEs(ROE)
+function drones_proto:syncDroneROEs(ROE)
 	for _, drone in self.live_drones do
 		drone:ROE(ROE or self:ROE());
 	end
 end
 
 --- Syncs the Stance of all alive drones to the frigate's Stance
-function drone_frig_proto:syncDroneStances()
+function drones_proto:syncDroneStances()
 	for _, drone in self.live_drones do
 		drone:stance(self:stance());
 	end
@@ -174,7 +174,7 @@ end
 
 --- If the frigate has an attack target (it was told to attack by its player), the drones will focus on these targets.
 --- Otherwise, drones are free to act according to the frigates ROE.
-function drone_frig_proto:manageDroneTargets()
+function drones_proto:manageDroneTargets()
 	if (self:attacking()) then -- if frig has targets, target them also
 		-- operations where we need to fetch a collection of ships from the global list are generally slow
 		-- in this case `manageDroneTargets` was producing a bottleneck, so we use direct sobgroups for performance here
@@ -187,16 +187,13 @@ function drone_frig_proto:manageDroneTargets()
 end
 
 --- Issues each drone a soft move command to its matching parade position. This allows the drones to move while firing.
-function drone_frig_proto:positionLaunchedDrones()
+function drones_proto:positionLaunchedDrones()
 	local position_index = 1;
 	for _, drone in self.live_drones do
 		if (drone:docked(self) == nil) then
-			drone:speed(1);
 			local pos = self:droneParadePos(drone);
 			if (drone:attacking()) then
 				if (drone:distanceTo(pos) > 100) then
-					-- print("MOVING DRONE " .. drone.own_group);
-					drone:speed(3);
 					drone:move(pos);
 				end
 			else
@@ -211,18 +208,15 @@ end
 
 -- === hooks ===
 
-function drone_frig_proto:update()
-	-- print(self.own_group ..  " update");
-
-	if (mod(self:tick(), 2) == 0) then
-		-- print("spawn missing drones");
-		self:produceMissingDrones();
+function drones_proto:update()
+	if (self:tick() > 1 and self:autoLaunch() == 0) then
+		-- self:print("autolaunching");
+		self:autoLaunch(ShipHoldStayDockedAlways);
 	end
-
 	if (self:tick() >= 3) then -- some time to undock
 		-- self:print("update tick, ready?: " .. (self:frigateReady() or "nil"));
 		if (self:frigateReady()) then
-			-- print("main run");
+			-- self:print("main run");
 			self:pruneDeadDrones();
 			self:addProducedDronesToList();
 			self:launchDrones();
@@ -232,19 +226,17 @@ function drone_frig_proto:update()
 			self:manageDroneTargets();
 			self:positionLaunchedDrones();
 
-			if (self:tick() > 1 and self:autoLaunch() ~= ShipHoldLaunch) then
-				-- print("autolaunch");
-				self:autoLaunch(ShipHoldLaunch);
+			if (mod(self:tick(), 2) == 0) then
+				self:produceMissingDrones();
 			end
 		else
 			-- self:print("kill run");
-			self:autoLaunch(ShipHoldStayDockedUpToLimit);
 			self:killDrones();
 		end
 	end
 end
 
-function drone_frig_proto:destroy()
+function drones_proto:destroy()
 	for _, drone in self.live_drones do
 		drone:HP(0);
 	end
@@ -260,7 +252,7 @@ end
 -- function drones_proto:finish()
 -- end
 
-modkit.compose:addShipProto("kus_dronefrigate", drone_frig_proto);
+modkit.compose:addShipProto("kus_dronefrigate", drones_proto);
 
 -- === drones themselves ===
 
@@ -289,7 +281,6 @@ function drone_proto:link(frigate)
 end
 
 function drone_proto:update()
-	-- print("!update from " .. self.own_group);
 	if (self:tick() > 6 and mod(self:tick(), 2) == 0) then
 		if (self.frigate == nil or self.frigate:alive() == nil) then
 			self:spawn(0);

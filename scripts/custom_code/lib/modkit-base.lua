@@ -24,10 +24,10 @@ modkit_base = {
 	---@param p integer
 	---@param s integer
 	---@return Attribs
-	attribs = function (g, p, s)
+	attribs = function (g, p, s, t)
 		return {
-			type_group = g,
-			ship_type = g,
+			type_group = t or g,
+			ship_type = t or g,
 			own_group = SobGroup_Clone(g, g .. "-" .. s),
 			player = GLOBAL_PLAYERS:get(p),
 			_tick = 0,
@@ -61,3 +61,7 @@ end
 function modkit_base:batchSize()
 	return SobGroup_GetStaticF(self.ship_type, "buildBatch");
 end
+
+modkit.compose:addBaseProto(modkit_base);
+
+print("go base!");

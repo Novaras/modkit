@@ -1,6 +1,6 @@
 ---@class ResShipAttribs
 ---@field next_to_build_index integer
----@field spinning '0'|'1'
+---@field spinning 0|1
 ---@field spin_start_event_id 'nil'|integer
 
 --- Proto for res ships for both tai and kus (only for res ship 0, which drives the others).
@@ -67,7 +67,7 @@ function res_ships_proto:restrictAll(ship_type, player)
 	if (ship_type) then -- still in load phase
 		race_prefix = strsub(ship_type, 0, 3);
 	else
-		race_prefix = self:racePrefix();
+		race_prefix = self:race();
 	end
 	player = player or self.player;
 	player:restrictBuildOption({
@@ -140,7 +140,7 @@ end
 --- Spins kushan research ships when they form a complete ring.
 function res_ships_proto:spinIfComplete()
 	-- if we have all the ships, aren't already spinning, are kushan, and aren't moving:
-	if (self:racePrefix() == "kus" and self.spinning == 0 and self:dockedAuxHubCount() == 5 and self:actualSpeedSq() == 0) then
+	if (self:race() == "kus" and self.spinning == 0 and self:dockedAuxHubCount() == 5 and self:actualSpeedSq() == 0) then
 		local res_ships = self:getOurResShips(); -- poll this on our normal tick rate, it won't change much nor does it need precision
 		-- schedule every 60 seconds, call `SobGroup_SetMadState()` on all ships with "NIS00":
 		self.spin_start_event_id = modkit.scheduler:every(60 / modkit.scheduler.seconds_per_tick, function ()

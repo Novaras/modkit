@@ -2,7 +2,7 @@
 ---@field speed_penalty_max number
 --- For all scouts
 scouts_proto = {
-	speed_penalty_max = 0.8
+	speed_penalty_max = 0.9
 };
 
 --- Returns the increment/decrement step size for mounting speed penalties.
@@ -18,8 +18,6 @@ end
 
 --- Update for **all** scouts
 function scouts_proto:update()
-	-- if being attacked, lose speed
-	-- else fix speed back to 1
 	if (self.last_hp and self.last_hp > self:HP()) then
 		self:speed(max(scouts_proto.speed_penalty_max, modkit.math.round(self:speed() - self:penaltyStep(), 2)));
 	else
@@ -69,7 +67,7 @@ end
 function hw1_scouts_proto:go()
 	if (mod(self:tick(), 1) == 0) then
 		if (self.current_speed > self.boost_range.min) then
-			self.current_speed = self:speed(max(self.current_speed - 1, self.boost_range.min));
+			self.current_speed = self:speed(max(self.current_speed - 0.5, self.boost_range.min));
 		end
 	end
 end
