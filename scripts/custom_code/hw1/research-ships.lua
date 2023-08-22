@@ -67,7 +67,7 @@ function res_ships_proto:restrictAll(ship_type, player)
 	if (ship_type) then -- still in load phase
 		race_prefix = strsub(ship_type, 0, 3);
 	else
-		race_prefix = self:race();
+		race_prefix = self:racePrefix();
 	end
 	player = player or self.player;
 	player:restrictBuildOption({
