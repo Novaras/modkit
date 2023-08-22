@@ -40,7 +40,7 @@ function base_prodship_proto:ensureSingleResShipQueued()
 		end
 		local our_builders = GLOBAL_SHIPS:filter(isOurBuilder); -- all our build capable ships
 		for i = 0, 5, 1 do
-			res_ship_name = self:race() .. "_researchship"; -- kus_researchship, tai_researchship
+			res_ship_name = self:racePrefix() .. "_researchship"; -- kus_researchship, tai_researchship
 			if (i > 0) then
 				res_ship_name = res_ship_name .. "_" .. i;
 			end
