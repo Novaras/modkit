@@ -63,14 +63,14 @@ end
 ---
 ---@return bool
 function drones_proto:frigateReady()
-	return self:allInRealSpace() == 1
-		and self:beingCaptured() == 0
-		and self:isDoingAnyAbilities({
+	return self:allInRealSpace()
+		and not self:beingCaptured()
+		and not self:isDoingAnyAbilities({
 			AB_Hyperspace,
 			AB_HyperspaceViaGate,
 			AB_Dock,
 			AB_Retire
-		}) == 0;
+		});
 end
 
 --- Returns a drone's 'type index' (i.e drone0 -> 0, drone11 -> 11)
@@ -129,6 +129,7 @@ function drones_proto:addProducedDronesToList()
 		local our_docked_drones = GLOBAL_SHIPS:allied(self, function (ship)
 			return ship:docked(%self);
 		end);
+		---@cast our_docked_drones drone_proto[]
 		-- print("begin assigning new drones...");
 		for i, drone_type_index in self.new_drones do
 			-- print("drone " .. i);
@@ -209,14 +210,19 @@ end
 -- === hooks ===
 
 function drones_proto:update()
+	print("hello from drone frigate .. " .. self.own_group);
+
+	print("tick = " .. self:tick());
+	print("autoLaunch(): " .. self:autoLaunch());
+
 	if (self:tick() > 1 and self:autoLaunch() == 0) then
-		-- self:print("autolaunching");
 		self:autoLaunch(ShipHoldStayDockedAlways);
 	end
+
 	if (self:tick() >= 3) then -- some time to undock
-		-- self:print("update tick, ready?: " .. (self:frigateReady() or "nil"));
+		print("update tick, ready?: " .. (self:frigateReady() or "nil"));
 		if (self:frigateReady()) then
-			-- self:print("main run");
+			print("main run");
 			self:pruneDeadDrones();
 			self:addProducedDronesToList();
 			self:launchDrones();
