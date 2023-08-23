@@ -52,10 +52,10 @@ function gravwell_proto:shipIsStunnable(ship)
 	return
 		ship:alive() 							-- alive, and:
 		and (
-			ship:isFighter() == 1 				-- either a fighter or
+			ship:isFighter() 				-- either a fighter or
 			or (								-- a corvette that isn't a salvager
-				ship:isCorvette() == 1
-				and ship:isSalvager() == nil
+				ship:isCorvette()
+				and ship:isSalvager()
 			)
 		)
 		and ship:distanceTo(self) < gravwell_proto.effect_range; -- and in range
@@ -154,6 +154,7 @@ function gravwell_proto:AIOnly()
 				end
 			};
 
+			---@type integer?
 			local none_passed = 1;
 			for name, condition in activation_conditions do
 				if (condition() ~= nil) then -- passed

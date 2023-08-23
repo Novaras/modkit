@@ -56,6 +56,7 @@ function res_ships_proto:manageSubsHP()
 	self:subsHP("Research Module", 0.5 + hp_to_add);
 end
 
+---@return ResShipProto[]
 function res_ships_proto:getOurResShips()
 	return GLOBAL_SHIPS:filter(function (ship)
 		return (ship.player.id == %self.player.id) and ship:isResearchShip() and ship:HP() > 0;
@@ -113,7 +114,8 @@ function res_ships_proto:dockedAuxHubCount()
 		modkit.table.filter(			-- ... the list of our res ships, filtered for only those which are docked
 			self:getOurResShips(),
 			function (res_ship)
-				return res_ship:docked() == 1;
+				---@cast res_ship ResShipProto
+				return res_ship:docked();
 			end
 		)
 	);

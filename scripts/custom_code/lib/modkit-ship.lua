@@ -836,12 +836,14 @@ function modkit_ship:isDoingAnyAbilities(abilities)
 	end);
 end
 
+---@return bool
 function modkit_ship:isDocking()
-	return self:isDoingAbility(AB_Dock);
+	return self:isDoingAbility(AB_Dock) == 1;
 end
 
+---@return bool
 function modkit_ship:isBuilding(ship_type)
-	return SobGroup_IsBuilding(self.own_group, ship_type);
+	return SobGroup_IsBuilding(self.own_group, ship_type) == 1;
 end
 
 --- Returns `1` if this ship is being captured.

@@ -4,7 +4,7 @@ local multibeam_frigate_proto = {};
 function multibeam_frigate_proto:update()
 	if (self.player.id ~= 0) then
 		-- Updated mission 8 uses the tactics to control attack.  If is in OffensiveROE (0) then attack.
-		if (self:ROE() == OffensiveROE) then
+		if (self:ROE() == ROE.OffensiveROE) then
 			self:attackPlayer(0);
 		end
 	end

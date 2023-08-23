@@ -19,7 +19,7 @@ function base_prodship_proto:showProductionSubsystems()
 		SuperCapitalShipDrive = "CapShipProduction"
 	};
 	for tech, subsystem in tech_subs do
-		if (self.player:hasResearch(tech) == 1) then
+		if (self.player:hasResearch(tech)) then
 			if (tech == "SuperCapitalShipDrive") then -- only add capship to motherships
 				if (self:isMothership()) then
 					SobGroup_CreateSubSystem(self.own_group, subsystem);
