@@ -11,7 +11,7 @@ COMMANDS.shiptypes = COMMANDS.shiptypes or {
             dofilepath("data:scripts/modkit/ship-types.lua");
         end
         local src = modkit.ship_types;
-        if (pattern) then
+        if (pattern and src) then
             src = modkit.table.filter(src, function (ship_type)
                 -- print("type: " .. ship_type);
                 -- print("pattern: " .. %pattern);
