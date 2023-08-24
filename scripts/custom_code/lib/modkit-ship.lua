@@ -76,7 +76,7 @@ function modkit_ship:speed(speed)
 	if (speed) then
 		SobGroup_SetSpeed(self.own_group, speed);
 	end
-	return SobGroup_GetSpeed(self.own_group);
+	return abs(SobGroup_GetSpeed(self.own_group));
 end
 
 --- Returns the ship's 'actual' speed, which is its current speed in this moment _squared_.
@@ -103,7 +103,7 @@ end
 ---
 --- Pass `0` to clear the current tumble.
 ---
----@param tumble Vec3
+---@param tumble? Vec3|number
 ---@return Vec3
 function modkit_ship:tumble(tumble)
 	if (tumble) then
@@ -836,12 +836,10 @@ function modkit_ship:isDoingAnyAbilities(abilities)
 	end);
 end
 
----@return bool
 function modkit_ship:isDocking()
-	return self:isDoingAbility(AB_Dock) == 1;
+	return self:isDoingAbility(AB_Dock);
 end
 
----@return bool
 function modkit_ship:isBuilding(ship_type)
 	return SobGroup_IsBuilding(self.own_group, ship_type) == 1;
 end
