@@ -89,7 +89,7 @@ if (modkit_player_proto == nil) then
 	---
 	---@return Ship[]
 	function modkit_player_proto:ships()
-		return GLOBAL_SHIPS:allied(self, function (ship)
+		return GLOBAL_SHIPS:filter(function (ship)
 			return ship.player.id == %self.id;
 		end);
 	end
@@ -127,7 +127,7 @@ if (modkit_player_proto == nil) then
 	function modkit_player_proto:canResearch(item)
 		local name = modkit.research:resolveName(item); -- item or item.name if table
 		if (name) then
-			-- print("can " .. self.id  .. " res " .. name .. "?: " .. (Player_CanResearch(self.id, name) or 'nil'));
+			print("can " .. self.id  .. " res " .. name .. "?: " .. (Player_CanResearch(self.id, name) or 'nil'));
 			return Player_CanResearch(self.id, name) == 1;
 		end
 	end
@@ -205,15 +205,43 @@ if (modkit_player_proto == nil) then
 		return Player_CancelResearch(self.id, name);
 	end
 
-	function modkit_player_proto:restrictResearchOption(item, restrict)
-		local name = modkit.research:resolveName(item);
-		if (restrict) then
+	--- Restricts or unrestricts the given option(s).
+	---
+	---@param options string|table
+	---@param restrict? 0|1
+	function modkit_player_proto:restrictResearchOption(options, restrict)
+		restrict = restrict or 1;
+		if (type(options) ~= "table") then
+			options = { options };
+		end
+
+		for _, item in options do
+			local name = modkit.research:resolveName(item);
 			if (restrict == 1) then
-				return Player_RestrictResearchOption(self.id, name);
+				print("restricting research " .. name);
+				Player_RestrictResearchOption(self.id, name);
 			else
-				return Player_UnrestrictResearchOption(self.id, name);
+				Player_UnrestrictResearchOption(self.id, name);
 			end
 		end
+	end
+
+	--- Restricts/unrestricts everything for this player.
+	---@param restrict? 0|1
+	function modkit_player_proto:restrictAllResearch(restrict)
+		restrict = restrict or 1;
+		---@type ResearchItem[]
+		research = {};
+
+		dofilepath("data:scripts/races/" .. self:race().name .. "/scripts/def_research.lua");
+
+		print("player " .. self.id .. " race is " .. self:race().name);
+		local research_names = modkit.table.map(research, function (research_item)
+			print(research_item.Name or research_item.name);
+			return research_item.Name;
+		end);
+
+		return self:restrictResearchOption(research_names, restrict);
 	end
 
 	function modkit_player_proto:researchCost(item, amount)
@@ -245,9 +273,10 @@ if (modkit_player_proto == nil) then
 		-- 		return 1;
 		-- 	end
 		-- end
-		return modkit.table.find(self:ships(), function (ship)
+		return modkit.table.find(SobGroup_ToShips("Player_Ships" .. self.id), function (ship)
+			-- print("check " .. ship.own_group .. "for research mod");
 			return ship:hasResearchModule();
-		end);
+		end) ~= nil;
 	end
 
 	-- === end of research stuff ===
@@ -319,7 +348,7 @@ if (modkit_player_proto == nil) then
 			print("ATTEMPT TO FIND " .. 'race' .. race_cfg.name);
 			local tech = modkit.research:find('race' .. race_cfg.name, race_cfg.name);
 			print("(check for " .. tostring(tech) .. ")");
-			return %self:hasResearch(tech);
+			return %self:hasResearch(tech) or %self:canResearch(tech);
 		end);
 
 		return self._race;
@@ -359,24 +388,49 @@ if (modkit_player_proto == nil) then
 		return Player_HasShipWithBuildQueue(self.id);
 	end
 
-	function modkit_player_proto:restrictBuildOption(option, restrict)
-		if (type(option) ~= "table") then
-			option = { option };
+	--- Restricts or unrestricts the given build option(s). Returns the changed options.
+	---
+	---@param options string|table
+	---@param restrict? 0|1
+	---@return table
+	function modkit_player_proto:restrictBuildOption(options, restrict)
+		restrict = restrict or 0;
+
+		if (type(options) ~= "table") then
+			options = { options };
 		end
 		local after = {};
-		for _, opt in option do
-			if (restrict) then
-				if (restrict == 0) then
-					Player_UnrestrictBuildOption(self.id, opt);
-					after[opt] = 0;
-				else
-					Player_RestrictBuildOption(self.id, opt);
-					after[opt] = 1;
-				end
+		for _, opt in options do
+			if (restrict == 0) then
+				Player_UnrestrictBuildOption(self.id, opt);
+				after[opt] = 0;
+			else
+				Player_RestrictBuildOption(self.id, opt);
+				after[opt] = 1;
 			end
 		end
 
 		return after;
+	end
+
+	---Restricts/unrestricts ALL buildables for this player (according to their race).
+	---
+	---@param restrict? 0|1
+	function modkit_player_proto:restrictAllBuild(restrict)
+		restrict = restrict or 1;
+		---@type table
+		build = nil;
+		dofilepath("data:scripts/races/" .. self:race().name .. "/scripts/def_build.lua");
+
+		---@type string[]
+		local build_names = modkit.table.map(build, function (build_item)
+			return build_item.ThingToBuild;
+		end);
+
+		-- modkit.table.printTbl(build or {}, "orig");
+		-- modkit.table.printTbl(build_names, "try to restrict these (" .. tostring(build_names) .. ")");
+
+		self:restrictBuildOption(build_names, restrict);
 	end
 
 	-- === stats getters (more to come pls)

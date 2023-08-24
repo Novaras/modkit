@@ -210,19 +210,19 @@ end
 -- === hooks ===
 
 function drones_proto:update()
-	print("hello from drone frigate .. " .. self.own_group);
+	-- print("hello from drone frigate .. " .. self.own_group);
 
-	print("tick = " .. self:tick());
-	print("autoLaunch(): " .. self:autoLaunch());
+	-- print("tick = " .. self:tick());
+	-- print("autoLaunch(): " .. self:autoLaunch());
 
 	if (self:tick() > 1 and self:autoLaunch() == 0) then
 		self:autoLaunch(ShipHoldStayDockedAlways);
 	end
 
 	if (self:tick() >= 3) then -- some time to undock
-		print("update tick, ready?: " .. (self:frigateReady() or "nil"));
+		-- print("update tick, ready?: " .. (self:frigateReady() or "nil"));
 		if (self:frigateReady()) then
-			print("main run");
+			-- print("main run");
 			self:pruneDeadDrones();
 			self:addProducedDronesToList();
 			self:launchDrones();

@@ -83,6 +83,7 @@ end
 ---@param trapped 0|1
 function gravwell_proto:setTrapped(ships, trapped)
 	for _, ship in ships do
+		---@cast ship Ship
 		ship:stunned(trapped);
 		if (trapped == 1) then
 			if (ship:tumble()[1] == 0) then -- isn't tumbling (we only want to tumble a ship once)

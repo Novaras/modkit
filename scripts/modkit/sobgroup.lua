@@ -149,7 +149,7 @@ if (H_SOBGROUP ~= 1) then
 	end
 
 	STUN_EFFECT_ABILITIES = {
-		AB_Cloak,
+		-- AB_Cloak,
 		-- AB_AcceptDocking,
 		-- AB_Builder,
 		AB_Hyperspace,
@@ -167,7 +167,7 @@ if (H_SOBGROUP ~= 1) then
 		AB_Dock,
 		AB_Parade,
 		AB_Retire,
-		AB_Repair
+		-- AB_Repair
 	}
 	STUN_EFFECT_EVENT = "PowerOff"
 
