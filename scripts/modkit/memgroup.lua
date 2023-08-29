@@ -84,7 +84,7 @@ if (modkit.MemGroup == nil) then
 			---@param predicate function
 			---@return any|nil
 			function new_group:find(predicate)
-				return modkit.table.find(self._entities, predicate);
+				return modkit.table.findVal(self._entities, predicate);
 			end
 
 			--- Filters the entities by the given predicate, returning a new (potentially empty) table.

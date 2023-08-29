@@ -67,7 +67,7 @@ if (modkit.compose == nil) then
 				self._base,
 				function (base)
 					local tg = %ship_type;
-					return base.filter == nil or modkit.table.find(base.filter, function (ship_type)
+					return base.filter == nil or modkit.table.findVal(base.filter, function (ship_type)
 						return ship_type == %tg;
 					end)
 				end
@@ -153,4 +153,5 @@ if (modkit.compose == nil) then
 	doscanpath("data:scripts/custom_code/lib", "*.lua");
 
 	doscanpath("data:scripts/custom_code/hw1", "*.lua");
+	doscanpath("data:scripts/custom_code/horde/ship_scripts", "*.lua");
 end

@@ -79,12 +79,15 @@ if (MK_RACES == nil or (modkit ~= nil and modkit.races == nil)) then
 	---@param name_or_prefix string
 	---@return RaceConfig
 	function races:find(name_or_prefix)
-		return modkit.table.find(self.racelist, function (race_config)
+		local race = modkit.table.findVal(self.racelist, function (race_config)
 			return (
 				race_config.name == %name_or_prefix or
 				race_config.prefix == %name_or_prefix
 			);
-		end)
+		end);
+		---@cast race RaceConfig
+
+		return race;
 	end
 
 	modkit.races = races;

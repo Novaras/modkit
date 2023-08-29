@@ -371,4 +371,8 @@ if (modkit.ship_types == nil) then
 		[360] = 'vgr_weaponplatform_gun',
 		[361] = 'vgr_weaponplatform_missile',
 	};
+
+	for _, type in { 'horde_manager', 'horde_shipyard' } do
+		modkit.table.push(modkit.ship_types, type);
+	end
 end

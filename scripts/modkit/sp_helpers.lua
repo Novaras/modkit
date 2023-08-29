@@ -51,15 +51,20 @@ if (H_SP_HELPERS == nil) then
 			dofilepath(level_path);
 		end
 		for id, ship in MODKIT_MISSION_SHIPS do
-			RegisterShip(
-				ship.type,
-				ship.player,
-				ship.position,
-				ship.rotation,
-				ship.in_hyperspace,
-				id,
-				ship.group_name_override
-			);
+			if (not ship.count) then
+				ship.count = 1;
+			end
+			for i = 1, ship.count do
+				RegisterShip(
+					ship.type,
+					ship.player,
+					ship.position,
+					ship.rotation,
+					ship.in_hyperspace,
+					id,
+					ship.group_name_override
+				);
+			end
 		end
 	end
 

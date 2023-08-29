@@ -39,7 +39,7 @@ if (modkit.shipGroup == nil) then
 			---@cast predicate_or_ship ShipFilterPredicate
 			predicate = predicate_or_ship;
 		end
-		return modkit.table.find(self._entities, predicate);
+		return modkit.table.findVal(self._entities, predicate);
 	end
 
 	function lib:findType(type)

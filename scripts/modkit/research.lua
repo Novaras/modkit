@@ -57,11 +57,11 @@ if (modkit.research == nil) then
 	---@param race RaceName|RaceConfig
 	---@return ResearchItem[]
 	function research_proto:getRaceItems(race)
-		---@type string
 		local name = race;
 		if (type(race) == "table") then
 			name = race.name;
 		end
+		---@cast name string
 		name = strlower(name);
 		-- print("finding race " .. name);
 		local cfg = modkit.races:find(name);
@@ -116,12 +116,12 @@ if (modkit.research == nil) then
 			src = self:getRaceItems(race_cfg.name);
 
 			if (type(name_or_pred) == "string") then
-				return modkit.table.find(src, function (item)
+				return modkit.table.findVal(src, function (item)
 					-- print("is " .. strlower(item.name) .. " == " .. strlower(%name_or_pred) .. "?");
 					return strlower(item.name) == strlower(%name_or_pred);
 				end);
 			else
-				return modkit.table.find(src, name_or_pred);
+				return modkit.table.findVal(src, name_or_pred);
 			end
 		else
 			local item = nil;

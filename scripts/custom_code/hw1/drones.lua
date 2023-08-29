@@ -133,7 +133,7 @@ function drones_proto:addProducedDronesToList()
 		-- print("begin assigning new drones...");
 		for i, drone_type_index in self.new_drones do
 			-- print("drone " .. i);
-			self.live_drones[drone_type_index] = modkit.table.find(our_docked_drones, function (drone)
+			self.live_drones[drone_type_index] = modkit.table.findVal(our_docked_drones, function (drone)
 				return %self:droneTypeIndex(drone) == %drone_type_index;
 			end) or self.live_drones[drone_type_index];
 

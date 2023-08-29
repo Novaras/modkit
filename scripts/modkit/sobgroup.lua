@@ -301,20 +301,32 @@ if (H_SOBGROUP ~= 1) then
 			return { [1] = subgroup };
 		end
 
-		if (modkit == nil or modkit.table == nil) then
-			dofilepath("data:scripts/modkit/table_util.lua");
-		end
-
 		---@type string[]
-		local out = {};
+		local subgroups = {};
 
-		for i = 0, SobGroup_Count(group) do
+		for i = 0, SobGroup_Count(group), granularity do
 			local subgroup = SobGroup_Fresh();
 			SobGroup_FillShipsByIndexRange(subgroup, group, i, granularity);
-			out[i + 1] = subgroup;
+			subgroups[i + 1] = subgroup;
 		end
 
-		return out;
+		return subgroups;
+	end
+
+	--- Returns whether or not the supplies groups are exactly equal.
+	---
+	---@param group_a string
+	---@param group_b string
+	---@return bool
+	function SobGroup_GroupsAreEqual(group_a, group_b)
+		if (SobGroup_Count(group_a) ~= SobGroup_Count(group_b)) then
+			return nil;
+		end
+
+		local difference = SobGroup_Fresh();
+		SobGroup_FillSubstract(difference, group_a, group_b);
+
+		return SobGroup_Count(difference) == 0;
 	end
 
 	--- Returns a table who's keys are the ship types found, with values indicating the number of each type found.

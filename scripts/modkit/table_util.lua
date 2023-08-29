@@ -1,5 +1,7 @@
 --Table utility functions.
 
+---@alias TableKey string|number
+
 --- Prints the given `table`, recursively if necessary. The output can be any function accepting varargs (i.e `print`, which is default).
 ---
 ---@param table table
@@ -110,11 +112,35 @@ if (modkit.table == nil) then
 			end
 		end,
 
+		--- Converts a table to its 'entries', meaning it's key-value pairs. I.e:
+		---
+		--- ```lua
+		--- { 'hello', x = 'world' }
+		--- ```
+		--- Becomes:
+		--- ```lua
+		--- { [0] = { [0] = 0, [1] = 'hello' }, [1] = { [0] = 'x', [1] = 'world' } }
+		--- ```
+		---
 		---@generic T
-		---@param table T[]|{ [any]: T }
-		---@param predicate fun(val: T, idx: any, tbl: T[]): bool
+		---@param tbl table<string|number, T>
+		---@return { [integer]: { [1]: string|number, [2]: T } }
+		entries = function (tbl)
+			local entries = {};
+			for k, v in tbl do
+				modkit.table.push(entries, { k, v });
+			end
+
+			return entries;
+		end,
+
+		--- Finds a value in the given table. The returned value is the first in the table which satisfies the supplied predicate.
+		---
+		---@generic T
+		---@param table table<TableKey, T>
+		---@param predicate fun(val: T, idx: TableKey, tbl: table<TableKey, T>): bool
 		---@return T|nil
-		find = function (table, predicate)
+		findVal = function (table, predicate)
 			for i, v in table do
 				if (type(predicate) == "function") then
 					if (predicate(v, i, table) ~= nil) then
@@ -127,6 +153,12 @@ if (modkit.table == nil) then
 				end
 			end
 		end,
+
+		--- Returns the first key of the first entry which matches the given predicate
+		findIndex = function (table, predicate)
+			return modkit.table.firstKey(modkit.table.findVal(table, predicate) or {});
+		end,
+
 		length = function (table)
 			local n = 0;
 			for k, v in table do
@@ -180,6 +212,8 @@ if (modkit.table == nil) then
 			end
 			return out;
 		end,
+		---@param tbl table
+		---@return TableKey|nil
 		firstKey = function (tbl)
 			for k, _ in tbl do
 				return k;
@@ -193,6 +227,7 @@ if (modkit.table == nil) then
 				end
 			end
 		end,
+		---@return bool
 		all = function (tbl, predicate)
 			for k, v in tbl do
 				if (predicate(v, k, tbl) == nil) then
@@ -223,7 +258,7 @@ if (modkit.table == nil) then
 		---@param tbl_b table
 		difference = function (tbl_a, tbl_b)
 			return modkit.table.filter(tbl_a, function (a_val)
-				return modkit.table.find(%tbl_b, a_val) == nil; -- elements in A, but not B
+				return modkit.table.findVal(%tbl_b, a_val) == nil; -- elements in A, but not B
 			end);
 		end,
 
@@ -406,6 +441,17 @@ if (modkit.table == nil) then
 				callback(v, k, tbl);
 			end
 		end
+	end
+
+	--- Returns whether or not the table has any keys (or values).
+	---
+	---@param tbl table
+	---@return bool
+	function table.isEmpty(tbl)
+		for _, _ in tbl do
+			return nil;
+		end
+		return 1;
 	end
 
 	modkit.table = table;

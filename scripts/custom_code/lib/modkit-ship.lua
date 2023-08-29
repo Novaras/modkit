@@ -724,12 +724,14 @@ end
 ---@param other Ship | Player
 ---@return bool
 function modkit_ship:alliedWith(other)
-	if (other.HP) then -- caller is a ship
-		return self.player:alliedWith(other.player);
-	else
-		---@cast other Player
-		return self.player:alliedWith(other);
+	local other_player = other;
+	if (other.HP) then
+		---@cast other Ship
+		other_player = other.player;
 	end
+	---@cast other_player Player
+
+	return self.player:alliedWith(other_player);
 end
 
 --- Returns `1` if this ship is under attack from any source, else `nil`. If `attacker` is provided, check instead if
@@ -841,7 +843,7 @@ function modkit_ship:isDocking()
 end
 
 function modkit_ship:isBuilding(ship_type)
-	return SobGroup_IsBuilding(self.own_group, ship_type) == 1;
+	return SobGroup_IsBuilding(self.own_group, ship_type);
 end
 
 --- Returns `1` if this ship is being captured.
@@ -886,6 +888,80 @@ function modkit_ship:selected(selected, add_to_current)
 	return SobGroup_Selected(self.own_group) == 1;
 end
 
+--- Returns whether or not the positions of this ship and `other` are the same.
+---
+--- For each axis, you can provie a 'leeway' to provide a range around the position of this ship for that axis. Otherwise,
+--- checks the value of each axis being exactly equal.
+---
+---@param other Ship|Position
+---@param leeways? { x: number?, y:  number?, z: number? } | number
+function modkit_ship:positionEq(other, leeways)
+	leeways = leeways or {};
+	local p1 = self:position();
+	local p2 = other;
+	if (p2.position) then
+		---@cast p2 Ship
+		p2 = p2:position();
+	end
+	---@cast p2 Position
+
+	return modkit.table.all(p1, function (val, axis)
+		local leeway = %leeways;
+		if (type(leeway) == "table") then
+			leeway = %leeways[axis];
+		end
+
+		if (leeway and leeway > 0) then
+			return abs(val - %p2[axis]) <= leeway;
+		end
+
+		return %p2[axis] == val;
+	end);
+end
+
+--- Gets all ships within the radius of this ship, with possible filters:
+---
+--- - A `ship_types` list, only selecting ships of those types.
+--- - A `players` list, only selecting for those players.
+---
+---@param radius number
+---@param ship_types? ShipType[]
+---@param players? Player[]
+---@return Ship[]
+function modkit_ship:getShipsInRadius(radius, ship_types, players)
+	players = players or GLOBAL_PLAYERS:all();
+	local in_radius_group = SobGroup_Fresh();
+	for _, player in players do
+		local player_in_radius_group = SobGroup_Fresh();
+		-- `player_in_radius_group` is ALL ships in radius
+		Player_FillProximitySobGroup(player_in_radius_group, player.id, self.own_group, radius);
+		if (ship_types) then -- unless a types filter list is provided
+			local correct_types_group = SobGroup_Fresh();
+			for _, ship_type in ship_types do -- in that case, for each type, grab the ships of that type and add them to `correct_types_group`
+				local type_group = SobGroup_Fresh();
+				SobGroup_FillShipsByType(type_group, player_in_radius_group, ship_type);
+				SobGroup_SobGroupAdd(correct_types_group, type_group);
+			end
+
+			SobGroup_SobGroupAdd(in_radius_group, correct_types_group); -- then add the filtered ships to the `player_in_radius_group`
+		else
+			SobGroup_SobGroupAdd(in_radius_group, player_in_radius_group); -- otherwise it's just the original fillproximity selection
+		end
+	end
+
+	local in_radius_ships = SobGroup_ToShips(in_radius_group); -- split to `Ship`s, but they have no id or anything...
+	-- we can get the actual entries by matching type & pos
+	-- expensive in theory, but we will rarely call this function with a huge radius, so in_radius_ships is a small group usually
+	in_radius_ships = GLOBAL_SHIPS:filter(function (ship)
+		-- filter `GLOBAL_SHIPS` for any ship which can be found in `in_radius_ships` by type & pos:
+		return modkit.table.findVal(%in_radius_ships, function (other)
+			return %ship.type_group == other.type_group and %ship:positionEq(other);
+		end) ~= nil;
+	end);
+
+	return in_radius_ships;
+end
+
 -- === Command stuff ===
 
 --- Returns the current command (order) of this ship. Returns any valid `COMMAND_` value.
@@ -926,7 +1002,7 @@ end
 --- - `visibility` is an integer in the range `0 - 2`, aliased by the global varaibels `VisNone`, `VisSecondary`, and `VisFull`.
 ---
 ---@param visibility Visibility
----@param specific_player string|integer
+---@param specific_player? string|integer
 ---@return Visibility
 function modkit_ship:visibility(visibility, specific_player)
 	specific_player = specific_player or "default";
@@ -980,7 +1056,7 @@ end
 ---@return string
 function modkit_ship:spawnShip(ship_type, position, player_index, spawn_group)
 	position = position or self:position();
-	spawn_group = spawn_group or SobGroup_Fresh("spawner-group-" .. self.id);
+	spawn_group = spawn_group or SobGroup_Fresh("spawner-group-" .. self.id .. "_" .. SobGroup_Fresh());
 	player_index = player_index or self.player.id;
 	local volume_name = Volume_Fresh("spawner-vol-" .. self.id, position);
 	SobGroup_SpawnNewShipInSobGroup(player_index, ship_type, "-", spawn_group, volume_name);

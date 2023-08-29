@@ -44,7 +44,7 @@ if (modkit_player_proto == nil) then
 				modkit_player_proto,
 				{
 					id = -1,
-					race = modkit.table.find(modkit.races.racelist, function (race_conf)
+					race = modkit.table.findVal(modkit.races.racelist, function (race_conf)
 						return race_conf.name == 'hiigaran';
 					end);
 				}
@@ -230,7 +230,7 @@ if (modkit_player_proto == nil) then
 	---@param restrict? 0|1
 	function modkit_player_proto:restrictAllResearch(restrict)
 		restrict = restrict or 1;
-		---@type ResearchItem[]
+
 		research = {};
 
 		dofilepath("data:scripts/races/" .. self:race().name .. "/scripts/def_research.lua");
@@ -273,8 +273,8 @@ if (modkit_player_proto == nil) then
 		-- 		return 1;
 		-- 	end
 		-- end
-		return modkit.table.find(SobGroup_ToShips("Player_Ships" .. self.id), function (ship)
-			-- print("check " .. ship.own_group .. "for research mod");
+		return modkit.table.findVal(SobGroup_ToShips("Player_Ships" .. self.id), function (ship)
+			print("check " .. ship.own_group .. "for research mod");
 			return ship:hasResearchModule();
 		end) ~= nil;
 	end
@@ -344,7 +344,7 @@ if (modkit_player_proto == nil) then
 	---
 	---@return RaceConfig|nil
 	function modkit_player_proto:race()
-		self._race = self._race or modkit.table.find(modkit.races.racelist, function (race_cfg)
+		self._race = self._race or modkit.table.findVal(modkit.races.racelist, function (race_cfg)
 			print("ATTEMPT TO FIND " .. 'race' .. race_cfg.name);
 			local tech = modkit.research:find('race' .. race_cfg.name, race_cfg.name);
 			print("(check for " .. tostring(tech) .. ")");

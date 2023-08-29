@@ -21,6 +21,13 @@ if (MK_EXTRA_DEFINES == nil) then
 		ShipHoldStayDockedUpToLimit = 1,
 		ShipHoldStayDockedAlways = 2
 	};
+
+	---@enum Visibility
+	VISIBILITY = {
+		VisNone = 0,
+		VisSecondary = 1,
+		VisFull = 2
+	};
 end
 
 -- Notice we never run this code, these defines are just used for IDE assistance.
@@ -87,12 +94,6 @@ if (nil) then
 	eTransition = 1;
 
 	---@alias ScreenTransition 0|1 | 'ePopup' | 'eTransition'
-
-	VisNone = 0;
-	VisSecondary = 1;
-	VisFull = 2;
-
-	---@alias Visibility 'VisNone'|'VisSecondary'|'VisFull'
 
 	---@alias AutoLaunchStatus 0|1|2
 
@@ -562,12 +563,21 @@ if (nil) then
 	function SobGroup_SalvageSobGroup(group_name, target_group)
 	end
 
+	--- Version of `SobGroup_Subtract` which works most anywhere (more scopes).
+	---
+	--- @see Sobgroup_FillSubtract
+	function SobGroup_FillSubstract(target_group, source_group, subtract_group)
+		return Sobgroup_FillSubtract(target_group, source_group, subtract_group);
+	end
+
 	--- Fills `target_group` with the remainder after subtracting ships in `subtract_group` from `source_group`.
+	---
+	--- Only usable in GameRule scope.
 	---
 	---@param target_group string
 	---@param source_group string
 	---@param subtract_group string
-	function SobGroup_FillSubstract(target_group, source_group, subtract_group)
+	function Sobgroup_FillSubtract(target_group, source_group, subtract_group)
 	end
 
 	--- Returns the average health of all ships in `target_group` (as a fraction between 0 and 1).
@@ -609,6 +619,20 @@ if (nil) then
 	---@param group string
 	---@param position Position
 	function SobGroup_HyperSpaceTo(group, position)
+	end
+
+	--- Returns the position of the centerpoint of the group, as a table (`{ [1] = x, [2] = y, [3] = z }`)
+	---
+	---@param group string
+	---@return Position
+	function SobGroup_GetPosition(group)
+	end
+
+	--- Sets the position of all the ships in the group (overlapping them if there is more than one ship). The ships are moved instantly.
+	---
+	---@param group string
+	---@param position Position
+	function SobGroup_SetPosition(group, position)
 	end
 
 	---comment
@@ -690,15 +714,17 @@ if (nil) then
 
 	--- Adds all the ships in source_group to target_group. Both groups must exist before being passed to this function.
 	---
-	---@param source_group string
 	---@param target_group string
+	---@param source_group string
 	---@return nil
-	function SobGroup_SobGroupAdd(source_group, target_group)
+	function SobGroup_SobGroupAdd(target_group, source_group)
 	end
 
 	--- A group's ships have an internal 'index'.
 	---
 	--- Fills `target_group` with `count` ships from `source_group`, starting at `start_index`.
+	---
+	--- **Note that the ships are _moved_ from `source_group` to `target_group`, shrinking `source_group`.**
 	---
 	--- The 'index' is just a range index for this group; the ship's actual ID is not discoverable from here.
 	---@param target_group string

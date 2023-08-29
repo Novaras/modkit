@@ -129,6 +129,7 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 
 				self.status = status;
 
+				---@diagnostic disable-next-line: inject-field
 				args.n = nil;
 				self.result = args;
 
@@ -259,6 +260,12 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 		if (name and type(name) ~= "string") then
 			return name;
 		end
+		---@cast name Rule
+
+		-- print("hi");
+		-- modkit.table.printTbl(name, "rule to access");
+		-- modkit.table.printTbl(GLOBAL_RULES._entities, "GR _entities:")
+
 		---@cast name string
 		return GLOBAL_RULES:get(name) or GLOBAL_RULES:find(function (rule)
 			return rule.id == %name or rule.api_name == %name;
