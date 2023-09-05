@@ -7,8 +7,8 @@ if (H_SP_HELPERS == nil) then
 	--- In the context of a .lua script, creates `Ship` definitions from this information instead, stored in `GLOBAL_MISSION_SHIPS`
 	---@param type string
 	---@param player? integer
-	---@param position? Vec3
-	---@param rotation? Vec3
+	---@param position? Arr3
+	---@param rotation? Arr3
 	---@param in_hyperspace? 0|1
 	---@param id_override? string|number
 	---@param group_name_override? string

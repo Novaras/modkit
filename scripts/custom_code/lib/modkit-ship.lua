@@ -7,7 +7,7 @@
 ---@field _stunned number
 ---@field _ab_targets table
 ---@field _current_dmg_mult number
----@field _current_tumble Vec3
+---@field _current_tumble Arr3
 ---@field _despawned_at_volume string
 ---@field _reposition_volume string
 ---@field _default_vol string
@@ -103,8 +103,8 @@ end
 ---
 --- Pass `0` to clear the current tumble.
 ---
----@param tumble? Vec3|number
----@return Vec3
+---@param tumble? Arr3|number
+---@return Arr3
 function modkit_ship:tumble(tumble)
 	if (tumble) then
 		if (type(tumble) == "table") then
@@ -345,7 +345,7 @@ end
 --- - `Ship`: a `Ship`
 --- - `Position`: a `Position`
 ---
----@param where string | Ship | Position | Vec3
+---@param where string | Ship | Position | Arr3
 function modkit_ship:move(where)
 	if (type(where) == "string") then -- a volume
 		SobGroup_Move(self.player.id, self.own_group, where);

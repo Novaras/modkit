@@ -13,7 +13,7 @@
 ---@class drones_proto : Ship, DroneFrigAttribs
 local drones_proto = {
 	drone_kill_distance = 950,
-	---@type Vec3[]
+	---@type Arr3[]
 	parade_positions = { -- note that the number of drones is set by the positions in this table, add more for more drones
 		{210, 0, 0+10},
 		{-210, 0, 0+10},

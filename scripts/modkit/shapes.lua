@@ -6,7 +6,7 @@ if (H_SHAPES == nil) then
 
 	--- Returns the vertices of a regular unit icosahedron.
 	---
-	---@return table<integer, Vec3>
+	---@return table<integer, Arr3>
 	function shapes:icosahedron()
 		return { -- an icosahedron
 			{
