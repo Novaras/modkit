@@ -13,15 +13,6 @@
 -- so you can concat your vectors for printing etc.
 -- ========================================================================
 
--- util function checking if the given table has the given key
-function includesKey(table, value)
-	for i, v in table do
-		if i == value then
-			return 1;
-		end
-	end
-end
-
 ---@class Vec3
 ---@field [1] number
 ---@field [2] number
@@ -58,7 +49,7 @@ function Vec3:isVec3(t)
 	if (type(t) ~= "table") then return nil; end
 
 	for k, _ in t do
-		local is_valid = includesKey(Vec3._key_mappings, k);
+		local is_valid = modkit.table.includesKey(Vec3._key_mappings, k);
 		if (not is_valid) then return nil; end
 	end
 
