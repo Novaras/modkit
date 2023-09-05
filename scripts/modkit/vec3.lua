@@ -13,6 +13,7 @@
 -- so you can concat your vectors for printing etc.
 -- ========================================================================
 
+
 ---@class Vec3
 ---@field [1] number
 ---@field [2] number
@@ -49,7 +50,7 @@ function Vec3:isVec3(t)
 	if (type(t) ~= "table") then return nil; end
 
 	for k, _ in t do
-		local is_valid = modkit.table.includesKey(Vec3._key_mappings, k);
+		local is_valid = includesKey(Vec3._key_mappings, k);
 		if (not is_valid) then return nil; end
 	end
 
@@ -84,9 +85,6 @@ function Vec3:create(init)
 	settagmethod(vector_tag, "unm", unm_hook);
 
 	local add_hook = function (lh, rh, o)
-		print("lh = " .. tostring(lh));
-		print("rh = " .. tostring(rh));
-		print("o = " .. tostring(o));
 		lh = Vec3(lh);
 		rh = Vec3(rh);
 
@@ -206,7 +204,7 @@ end
 ---@param vec3 Vec3Like
 ---@return number
 function Vec3:unit(vec3)
-	vec3 = Vec(vec3);
+	vec3 = Vec3(vec3);
 	return vec3 / Vec3:mag(vec3);
 end
 
@@ -231,7 +229,7 @@ function Vec3:magnitude(vec3)
 	vec3 = Vec3(vec3);
 	local mag = 0;
 	for _, v in vec3 do
-		mag = mag + pow(v, 2);
+		mag = mag + (v ^ 2);
 	end
 	return sqrt(mag);
 end
