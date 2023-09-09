@@ -50,7 +50,7 @@ function Vec3:isVec3(t)
 	if (type(t) ~= "table") then return nil; end
 
 	for k, _ in t do
-		local is_valid = includesKey(Vec3._key_mappings, k);
+		local is_valid = modkit.table.includesKey(Vec3._key_mappings, k);
 		if (not is_valid) then return nil; end
 	end
 
