@@ -20,7 +20,6 @@ function SobGroup_ToShips(group)
 	local subgroups = SobGroup_Split(group);
 
 	for index, group in subgroups do
-		---@type string?
 		local type = modkit.table.firstKey(SobGroup_ShipTypes(group));
 		-- print("got type " .. tostring(type));
 		local player = SobGroup_GetPlayerOwner(group);

@@ -13,11 +13,11 @@
 -- so you can concat your vectors for printing etc.
 -- ========================================================================
 
+if (modkit == nil or modkit.table == nil) then
+	dofilepath("data:scripts/modkit/table_util.lua");
+end
 
----@class Vec3
----@field [1] number
----@field [2] number
----@field [3] number
+---@class Vec3 : Arr3
 ---@field x number
 ---@field y number
 ---@field z number
@@ -28,7 +28,7 @@
 ---@operator div(Vec3): Vec3
 ---@operator pow: Vec3
 
----@alias Vec3Like Vec3 | Arr3
+---@alias Vec3Like Vec3 | Arr3 | table
 
 ---@class Vec3Static
 ---@operator call(Vec3Like): Vec3
@@ -43,6 +43,21 @@ Vec3._key_mappings['x'] = 1;
 Vec3._key_mappings['y'] = 2;
 Vec3._key_mappings['z'] = 3;
 
+--- Returns whether or not the given variable is like a `Vec3`, meaning it has number values on the 1, 2 and 3 keys.
+---
+---@param t any
+---@return bool
+function Vec3:isVec3Like(t)
+	if (not t) then return nil; end
+	if (type(t) ~= "table") then return nil; end
+
+	for i = 1, 3 do
+		if (t[i] == nil or type(t[i]) ~= "number") then return nil; end
+	end
+
+	return 1;
+end
+
 ---@param t any
 ---@return bool
 function Vec3:isVec3(t)
@@ -50,8 +65,13 @@ function Vec3:isVec3(t)
 	if (type(t) ~= "table") then return nil; end
 
 	for k, _ in t do
-		local is_valid = modkit.table.includesKey(Vec3._key_mappings, k);
-		if (not is_valid) then return nil; end
+		---@cast k any
+		local idx = modkit.table.findIndex(Vec3._key_mappings, k);
+		if (idx) then
+			if (not type(t[idx]) == "number") then return nil; end
+		else
+			return nil;
+		end
 	end
 
 	return 1;

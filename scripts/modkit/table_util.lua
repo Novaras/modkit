@@ -212,8 +212,9 @@ if (modkit.table == nil) then
 			end
 			return out;
 		end,
-		---@param tbl table
-		---@return TableKey|nil
+		---@generic K, V
+		---@param tbl table<K, V>
+		---@return K|nil
 		firstKey = function (tbl)
 			for k, _ in tbl do
 				return k;
@@ -295,6 +296,9 @@ if (modkit.table == nil) then
 		return tbl[%table.firstKey(tbl)];
 	end
 
+	---@generic K, V
+	---@param tbl table<K, V>
+	---@return V|nil
 	function table.first(tbl)
 		return tbl[%table.firstKey(tbl)];
 	end

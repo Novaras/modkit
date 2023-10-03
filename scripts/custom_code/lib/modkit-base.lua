@@ -1,3 +1,4 @@
+dofilepath("data:scripts/modkit/vec3.lua");
 dofilepath("data:scripts/modkit/player.lua"); -- stuff for players like GLOBAL_PLAYERS
 dofilepath("data:scripts/modkit/research.lua"); -- research...
 
@@ -6,7 +7,7 @@ dofilepath("data:scripts/modkit/research.lua"); -- research...
 ---@field [2] number
 ---@field [3] number
 
----@class Position : Arr3
+---@alias Position Vec3
 
 ---@class Attribs
 ---@field id integer

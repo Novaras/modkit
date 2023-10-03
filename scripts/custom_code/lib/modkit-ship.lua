@@ -96,7 +96,7 @@ function modkit_ship:position(pos)
 	if (pos) then
 		SobGroup_SetPosition(self.own_group, pos);
 	end
-	return SobGroup_GetPosition(self.own_group);
+	return Vec3(SobGroup_GetPosition(self.own_group));
 end
 
 --- Gets or optionally sets / clears the ship's tumble. In modkit, this vector is tracked.
@@ -225,10 +225,11 @@ function modkit_ship:distanceTo(other)
 
 	---@type Position|Ship
 	local b = a;
-	if (other[1] and type(other[1]) == "number") then
+	if (Vec3:isVec3Like(other)) then
+		---@cast other Position
 		b = other;
 	else
-		b = SobGroup_GetPosition(SobGroup_FromShips(other));
+		b = Vec3(SobGroup_GetPosition(SobGroup_FromShips(other)));
 	end
 
 	return sqrt(

@@ -624,7 +624,7 @@ if (nil) then
 	--- Returns the position of the centerpoint of the group, as a table (`{ [1] = x, [2] = y, [3] = z }`)
 	---
 	---@param group string
-	---@return Position
+	---@return Arr3
 	function SobGroup_GetPosition(group)
 	end
 

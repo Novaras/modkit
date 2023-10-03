@@ -16,7 +16,7 @@ if (modkit.shipGroup == nil) then
 		-- print(modkit.table.length(self._entities));
 		-- print("so..");
 		local group = SobGroup_FromShips(ships or self._entities, DEFAULT_SOBGROUP);
-		return SobGroup_GetPosition(group);
+		return Vec3(SobGroup_GetPosition(group));
 	end
 
 	--- Finds a ship and returns it.
