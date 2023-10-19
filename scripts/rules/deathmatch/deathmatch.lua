@@ -129,10 +129,6 @@ function timer_updating()
 	  end
 end
 
-function foo()
-	print("FOO CALL!");
-end
-
 Events = {}
 Events.endGame  =
 {
