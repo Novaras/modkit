@@ -2,7 +2,7 @@
 
 if (MK_EXTRA_DEFINES == nil) then
 	---@enum ROE
-	ROE = ROE or {
+	ROE = {
 		OffensiveROE = 0,
 		DefensiveROE = 1,
 		PassiveROE = 2
