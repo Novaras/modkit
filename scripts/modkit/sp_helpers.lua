@@ -32,7 +32,8 @@ if (H_SP_HELPERS == nil) then
 			---@class GLOBAL_MISSION_SHIPS : MemGroupInst
 			---@field _entities Ship[]
 			---@field all fun(): Ship[]
-			---@field get fun(id: string): Ship
+			---@field get fun(self: GLOBAL_MISSION_SHIPS, id: string): Ship
+			---@field set fun(self: GLOBAL_MISSION_SHIPS, id: string, ship: Ship)
 			GLOBAL_MISSION_SHIPS = modkit.MemGroup.Create("mg-global-mission-ships");
 		end
 	end
@@ -44,7 +45,7 @@ if (H_SP_HELPERS == nil) then
 	---@param position? Vec3
 	---@param rotation? Vec3
 	---@param in_hyperspace? 0|1
-	---@param id? integer
+	---@param id? integer|string
 	---@param group_name? string
 	function registerShip(type, player, position, rotation, in_hyperspace, id, group_name)
 		local group_name = group_name or ("_registergroup_" .. SHIP_NEXT_ID);
@@ -60,16 +61,16 @@ if (H_SP_HELPERS == nil) then
 		SHIP_NEXT_ID = SHIP_NEXT_ID + 1;
 
 		if (addSquadron ~= nil and createSOBGroup ~= nil) then -- defined only during .level load by engine
-			print("LEVEL CONTEXT");
+			-- print("LEVEL CONTEXT");
 			local squad_name = group_name .. "_squad";
 			addSquadron(squad_name, type, position,	player, rotation, 1, in_hyperspace);
 			createSOBGroup(group_name); -- group is accessible in the script
 			addToSOBGroup(squad_name, group_name); -- this fn assigns the squad to the sob
 		else
-			print("GAMETIME CONTEXT");
+			-- print("GAMETIME CONTEXT");
 			initGlobalMissionShips();
-			id = id or modkit.table.length(GLOBAL_MISSION_SHIPS._entities);
-			GLOBAL_MISSION_SHIPS:set(id, modkit.compose:instantiate(group_name, player, id, type));
+
+			GLOBAL_MISSION_SHIPS:set(tostring(id), modkit.compose:instantiate(group_name, player, id, type));
 		end
 	end
 
@@ -80,7 +81,6 @@ if (H_SP_HELPERS == nil) then
 	---@field rotation? Vec3
 	---@field in_hyperspace? 0|1
 	---@field group_name? string
-	---@field no_squad? bool
 
 	--- Called in the .level to place squads and assign them to groups
 	--- Called in the .lua gametime to register Ship objects for these defined ships
@@ -92,16 +92,23 @@ if (H_SP_HELPERS == nil) then
 			dofilepath(level_path);
 		end
 
-		for _, ship in MISSION_SHIPS do
+		MISSION_SHIPS = MISSION_SHIPS or {};
+
+		for ship_id, ship in MISSION_SHIPS do
 			local count = ship.count or 1;
-			for _ = 1, count, 1 do
+			for i = 1, count, 1 do
+				local count_id = ship.id or ship_id;
+				if (count > 1) then
+					count_id =  count_id .. "_" .. i;
+				end
+
 				registerShip(
 					ship.type,
 					ship.player,
 					ship.position,
 					ship.rotation,
 					ship.in_hyperspace,
-					ship.id,
+					count_id,
 					ship.group_name
 				);
 			end

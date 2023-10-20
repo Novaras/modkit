@@ -57,6 +57,10 @@ if (nil) then
 	COMMAND_Retire = 16;
 	-- ...todo
 
+	NISHandle_Invalid = 1;
+
+	---@alias NISHandle integer|'NISHandle_Invalid'
+
 	-- used by UI_ShowScreen
 	ePopup = 0;
 	eTransition = 1;
@@ -547,7 +551,7 @@ if (nil) then
 	--- `SobGroup_Count` to get the value of just ONE of this ship type.
 	---
 	---@param ship_type string
-	---@param attribute "\"buildCost\"" | "\"buildTime\""
+	---@param attribute "\"buildCost\"" | "\"buildTime\"" | "\"buildBatch\""
 	---@return integer
 	function SobGroup_GetStaticF(ship_type, attribute)
 	end

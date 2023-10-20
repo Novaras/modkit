@@ -16,24 +16,54 @@ modkit.campaign.makeMission = function (level_dir_path)
 	};
 
 	function mission:start()
-		local keyname = '__MK_MISSION_ENGINE_WRAPPER';
-		if (Rule_Exists(keyname) ~= 1) then
-			local wrapper = function ()
-				for id, _ in %self.flow:nodes() do
-					%self.flow:doNode(id);
-				end
-				%self.tick = %self.tick + 1;
-			end;
-			rawset(globals(), keyname, wrapper);
-			Rule_AddInterval(keyname, 1);
+		ensureMissionHooks(self);
+
+		self.flow:start();
+	end
+
+	--- Ensure `init` and `startOrLoad` are set at least to the default `_init` and `_startOrLoad`.
+	---
+	---@param mission Mission
+	ensureMissionHooks = ensureMissionHooks or function (mission)
+		for _, hook in { 'init', 'startOrLoad' } do
+			mission[hook] = mission[hook] or globals()["_" .. hook];
 		end
+	end
+
+	function _startOrLoad(mission)
+		print("OSOL RUN");
+	end;
+	function _init(mission)
+		print("INIT RUN");
+		dofilepath("data:scripts/modkit.lua");
+		loadModkit();
+
+		-- these are not redefinitions; the mission context and customcode context both need these defined
+		initPlayers();
+		initShips();
 
 		dofilepath("data:leveldata/multiplayer/lib/modkit-scheduler.lua");
 		modkit_scheduler_spawn();
 
+		dofilepath("data:scripts/modkit/keybinds.lua");
+		modkitBindKeys();
+
+		local path_parts = strsplit(%level_dir_path, "/", 1);
+		local last = path_parts[modkit.table.length(path_parts)];
+		local full_path = %level_dir_path .. "/" .. last .. ".level";
 		dofilepath("data:scripts/modkit/sp_helpers.lua");
-		Rule_AddInterval("syncGlobalShips", 2);
-	end
+		registerShips(full_path);
+
+		local waitForFlowEnd = function ()
+			 --print("main flow status:\t" .. %mission.flow._status);
+			if (%mission.flow._status == FLOW_STATUS.exited) then
+				print("-===<<[ MAIN FLOW EXITED!! PASS TO NEXT MISSION, ADIOS FROM " .. %mission.root .. "! ]>>===-");
+				setGameOver(); -- actually ends the mission
+			end
+		end
+		rawset(globals(), "waitForFlowEnd", waitForFlowEnd);
+		Rule_AddInterval("waitForFlowEnd", 1);
+	end;
 
 	-- ===============
 	-- Here we set a tag on the mission object with a tag method (hook) on 'settable'.
@@ -51,55 +81,16 @@ modkit.campaign.makeMission = function (level_dir_path)
 		};
 
 		if (key and keymap[key]) then
-			rawset(globals(), keymap[key], value);
+			rawset(globals(), keymap[key], function ()
+				%value(%mission); -- here we pass mission as 'self'
+				globals()["_" .. %key](%mission); -- here we call _init or _startOrLoad
+			end);
 		end
 
 		rawset(mission, key, value);
 	end
 	settagmethod(mission_tag, "settable", mission_settable_lifetime_hook);
 	settag(mission, mission_tag);
-
-	mission.startOrLoad = function ()
-		print("OSOL RUN");
-	end;
-	mission.init = function ()
-		print("INIT RUN");
-		dofilepath("data:scripts/modkit.lua");
-		loadModkit();
-
-		-- these are not redefinitions; the mission context and customcode context both need these defined
-		initPlayers();
-		initShips();
-
-		dofilepath("data:scripts/modkit/keybinds.lua");
-		modkitBindKeys();
-
-		local path_parts = strsplit(%level_dir_path, "/", 1);
-		local last = path_parts[modkit.table.length(path_parts)];
-		local full_path = %level_dir_path .. "/" .. last .. ".level";
-		dofilepath("data:scripts/modkit/sp_helpers.lua");
-		registerShips(full_path);
-
-		-- GLOBAL_SHIPS._entities = modkit.table:merge(
-		-- 	GLOBAL_SHIPS._entities,
-		-- 	GLOBAL_MISSION_SHIPS._entities
-		-- );
-
-		-- print("just merged into GS (id: " .. tostring(GLOBAL_SHIPS));
-		-- print("entities count?: " .. tostring(modkit.table.length(GLOBAL_SHIPS._entities)));
-
-		-- local stateHnd = makeStateHandle();
-		-- local superglobal_ships = stateHnd().GLOBAL_SHIPS or {};
-		-- for id, ship in GLOBAL_SHIPS:all() do
-		-- 	print("now adding " .. ship.own_group .. " to the superglobal state");
-		-- 	superglobal_ships[id] = superglobal_ships[id] or ship.own_group;
-		-- end
-		-- stateHnd({
-		-- 	GLOBAL_SHIPS = superglobal_ships
-		-- });
-
-		-- modkit.table.printTbl(stateHnd().GLOBAL_SHIPS, "SUPERGLOBAL SHIPS");
-	end;
 
 	return mission;
 end

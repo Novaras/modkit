@@ -23,15 +23,16 @@ modkit_base = {
 	---@param g string
 	---@param p integer
 	---@param s integer
+	---@param t string
 	---@return Attribs
-	attribs = function (g, p, s)
+	attribs = function (g, p, s, t)
 		return {
-			type_group = g,
+			type_group = t,
 			own_group = SobGroup_Clone(g, g .. "-" .. s),
 			player = GLOBAL_PLAYERS:get(p),
 			_tick = 0,
 			created_at = Universe_GameTime(),
-			ship_type = g,
+			ship_type = t,
 		};
 	end
 };
