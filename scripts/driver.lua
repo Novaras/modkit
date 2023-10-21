@@ -23,7 +23,7 @@ if (H_DRIVER == nil) then
 		dofilepath("data:scripts/modkit.lua");
 	end
 
-	---@class ShipCollection : SheduledFilters, MemGroupInst
+	---@class ShipCollection : MemGroupInst
 	---@diagnostic disable-next-line: duplicate-doc-field
 	---@field _entities Ship[]
 	---@diagnostic disable-next-line: duplicate-doc-field
@@ -94,7 +94,7 @@ if (H_DRIVER == nil) then
 	register = register or function (type_group, player_index, ship_id)
 		type_group = strlower(type_group); -- immediately make this lowercase
 		local caller = GLOBAL_SHIPS:get(ship_id);
-		if (caller ~= nil) then -- fast return if already exists
+		if (caller and caller.own_group and SobGroup_Count(caller.own_group) > 0) then -- fast return if already exists
 			return caller;
 		end
 
@@ -103,6 +103,8 @@ if (H_DRIVER == nil) then
 			ship_id,
 			modkit.compose:instantiate(type_group, player_index, ship_id)
 		);
+
+		---@cast caller DriverShip
 
 		local l = {};
 		local f = function (...)
@@ -179,7 +181,7 @@ if (H_DRIVER == nil) then
 	---@return DriverShip
 	update = update or function(g, p, i)
 		local caller = GLOBAL_SHIPS:get(i);
-		if (caller == nil or caller.own_group == nil) then -- can happen when loading a save etc.
+		if (caller == nil or caller.own_group == nil or SobGroup_Count(caller.own_group) == 0) then -- can happen when loading a save etc.
 			caller = create(g, p, i);
 		end
 		---@cast caller DriverShip

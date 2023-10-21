@@ -5,7 +5,7 @@ if (modkit == nil) then
 	dofilepath("data:scripts/modkit.lua");
 
 	if (GLOBAL_SHIPS == nil) then
-		---@class ShipCollection : SheduledFilters, MemGroupInst
+		---@class ShipCollection : MemGroupInst
 		---@diagnostic disable-next-line: duplicate-doc-field
 		---@field _entities Ship[]
 		---@diagnostic disable-next-line: duplicate-doc-field

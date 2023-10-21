@@ -24,9 +24,9 @@ if (MK_EXTRA_DEFINES == nil) then
 
 	---@enum Visibility
 	VISIBILITY = {
-		VisNone = 0,
-		VisSecondary = 1,
-		VisFull = 2
+		VisNone = VisNone,
+		VisSecondary = VisSecondary,
+		VisFull = VisFull
 	};
 end
 
@@ -740,6 +740,20 @@ if (nil) then
 	---@param source_group string
 	---@param ship_type string
 	function SobGroup_FillShipsByType(target_group, source_group, ship_type)
+	end
+
+	--- Sets the selectability of the ships in `group`, for all players.
+	---
+	---@param group string
+	---@param set_selectable 0|1
+	function SobGroup_MakeSelectable(group, set_selectable)
+	end
+
+	--- Returns whether or not any ships in `group` are selectable.
+	---
+	---@param group string
+	---@return 0|1
+	function SobGroup_IsSelectable(group)
 	end
 
 	--- Selection stuff (NEEDS TESTING, USED ONLY BY DEFENSE FIGHTER CUSTOM CODE):

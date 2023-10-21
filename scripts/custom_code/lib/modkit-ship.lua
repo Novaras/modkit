@@ -16,6 +16,7 @@
 ---@field _capturable_mod CapturableModifier
 ---@field _ghosted bool
 ---@field _invulnerable bool
+---@field _hidden bool
 
 ---@class Ship : Base, ShipAttribs
 modkit_ship = {
@@ -36,7 +37,8 @@ modkit_ship = {
 			_visibility = {
 				default = VisNone
 			},
-			_capturable_mod = 1
+			_capturable_mod = 1,
+			_hidden = nil,
 		};
 	end,
 };
@@ -889,6 +891,18 @@ function modkit_ship:selected(selected, add_to_current)
 	return SobGroup_Selected(self.own_group) == 1;
 end
 
+--- Gets or optionally sets the selectability of this ship.
+---
+---@param set_selectable? 0|1
+---@return bool
+function modkit_ship:selectable(set_selectable)
+	if (set_selectable) then
+		SobGroup_MakeSelectable(self.own_group, set_selectable);
+	end
+
+	return SobGroup_IsSelectable(self.own_group) == 1;
+end
+
 --- Returns whether or not the positions of this ship and `other` are the same.
 ---
 --- For each axis, you can provie a 'leeway' to provide a range around the position of this ship for that axis. Otherwise,
@@ -1019,6 +1033,20 @@ function modkit_ship:visibility(visibility, specific_player)
 	end
 
 	return self._visibility[specific_player];
+end
+
+--- Gets or optionally sets the 'hidden' status of this ship. As opposed to visibility rules, a 'hidden' ship is just
+--- totally invisible.
+---
+---@param set_hidden 0|1|nil
+---@return bool
+function modkit_ship:hidden(set_hidden)
+	if (set_hidden) then
+		SobGroup_SetHidden(self.own_group, set_hidden);
+		self._hidden = set_hidden == 1;
+	end
+
+	return self._hidden;
 end
 
 -- === Spawning ===

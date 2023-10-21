@@ -1,119 +1,94 @@
+-- =====[[ modkit_scheduler ship update, which runs the whole system for modkit.scheduler's api ]]=====
 
----@class SchedulerAttribs
----@field init 'nil'|'1'
+if (not modkit or not modkit.scheduler or not makeStateHandle) then
+	dofilepath("data:scripts/modkit/modkit_scheduler.lua");
+	dofilepath("data:scripts/modkit/scope_state.lua");
+end
 
----@class modkit_scheduler_proto : Ship, SchedulerAttribs
-modkit_scheduler_proto = {
-	update_globals_interval = 5, -- .5 seconds
 
-	---@alias ShipFilterPredicate fun(ship: Ship): bool
-	---@alias FilterFn fun(predicate: ShipFilterPredicate): Ship[]
+---@class MKScheduler: Ship
+scheduler = {};
 
-	---@class SheduledFilters
-	---@field corvettes FilterFn
-	---@field drones FilterFn
-	---@field strike FilterFn
-	---@field builders FilterFn
+function scheduler:update()
 
-	filters = {
-		builders = function (ship)
-			return ship:canBuild();
-		end,
-		fighters = function (ship)
-			return ship:isFighter();
-		end,
-		corvettes = function (ship)
-			return ship:isCorvette();
-		end,
-		frigates = function (ship)
-			return ship:isFrigate();
-		end,
-		capitals = function (ship)
-			return ship:isCapital();
-		end,
-		drones = function (ship)
-			return ship:isDrone();
-		end,
-		strike = function (ship)
-			return ship:isFighter() or ship:isCorvette();
-		end
-	}
-};
+	local running_events = modkit.scheduler:filter(function (event)
+		return event.status == EVENT_STATUS.RUNNING;
+	end);
 
-function modkit_scheduler_proto:collectShips()
-	-- print("[" .. Universe_GameTime() .."]: update global lists (refresh is: " .. modkit_scheduler_proto.update_globals_interval .. ")");
-	-- loop just once to collect all these
-	for _, ship in GLOBAL_SHIPS.cache.newly_created do
-		for collection, predicate in modkit_scheduler_proto.filters do
-			if (predicate(ship)) then
-				GLOBAL_SHIPS.cache[collection][ship.id] = ship;
+	-- if (mod(self:tick(), 20) == 0) then
+	-- 	modkit.table.printTbl(modkit.scheduler:all(), "scheduler events");
+	-- end
+
+
+	-- for each running event
+	-- 1. set up the core state and merge it with the previous state
+	-- 2. run the callback, set 'previous' as the return value
+	-- 3. if the callback invoked one of the resolver functions, we update the status of the event
+	for _, event in running_events do
+		---@cast event Event
+
+		---@type EventCoreState
+		local core_state = {
+			_tick = event.tick,
+			_remaining_iterations = event.remaining_iterations,
+			_started_gametime = event.started_gametime
+		};
+
+		-- if there is a previous value, we copy it to the core state
+		-- in the case of a table, we should do a clone
+		if (event.previous_return) then
+			local prev = event.previous_return;
+			if (type(prev) == "table") then
+				core_state._previous = modkit.table.clone(prev);
+			else
+				core_state._previous = prev;
 			end
 		end
-	end
-	GLOBAL_SHIPS.cache.newly_created = {};
-end
 
-function modkit_scheduler_proto:beginGlobalLists()
-	if (GLOBAL_SHIPS.cache == nil) then
-		GLOBAL_SHIPS.cache = {};
-	end
+		--- incoming `state` is overwritten on the core keys
+		---@type EventState
+		local parsed_state = modkit.table:merge(
+			event.state,
+			core_state
+		);
 
-	for collection, _ in modkit_scheduler_proto.filters do
-		GLOBAL_SHIPS.cache[collection] = {};
-		-- present the collection fn on GLOBAL_SHIPS i.e :corvettes() to get all vettes, allow for a filter pred to be passed:
-		GLOBAL_SHIPS[collection] = function (self, filter_predicate)
-			-- print("cached " .. %collection .. ": " .. modkit.table.length(self.cache[%collection]));
-			local out = {};
-			for id, ship in self.cache[%collection] do
-				self.cache[%collection][id] = GLOBAL_SHIPS:get(ship.id); -- during fetches, we also sync the cache
+		-- update prev to the callback return
+		local fn_ret = event.fn(_schedulerResolver(event), _schedulerResolver(event), parsed_state);
+		event.previous_return = fn_ret;
 
-				if (filter_predicate) then
-					if (filter_predicate(ship)) then
-						out[id] = ship;
-					end
-				else
-					out[id] = ship;
-				end
+		local status = event.status; -- if resolver or rejecter were invoked, we'll have that status, otherwise `RUNNING`
+		if (status == EVENT_STATUS.RUNNING) then -- do bookkeeping like tick update if running
+			event.tick = event.tick + 1;
+			if (event.remaining_iterations) then
+				event.remaining_iterations = event.remaining_iterations - 1;
 			end
-			return out;
+		end
+
+		if (event.remaining_iterations == 0) then
+			print("event " .. event.name .. " remaining_iterations is 0: " .. event.remaining_iterations);
+			event.status = EVENT_STATUS.RESOLVED;
+			event.value = event.previous_return;
 		end
 	end
 
-	-- controls the poll rate for ship collection event
-	modkit_scheduler_proto.init_event = modkit_scheduler_proto.init_event or modkit.scheduler:every(
-		50,
-		function ()
-			local global_count = SobGroup_Count(Universe_GetAllActiveShips());
-			local new_interval = min(10, ceil(2 + 2 * (global_count / 125))); -- every 125 ships, increase delay by 0.2s, max 1s
-			if (new_interval ~= modkit_scheduler_proto.update_globals_interval) then
-				modkit_scheduler_proto.update_globals_interval = new_interval;
-				if (modkit_scheduler_proto.collect_event) then
-					modkit.scheduler:clear(modkit_scheduler_proto.collect_event);
-				end
-				modkit_scheduler_proto.collect_event = modkit.scheduler:every(
-					modkit_scheduler_proto.update_globals_interval,
-					modkit_scheduler_proto.collectShips
-				);
+	--- for each listener
+	--- 1. if the listener's awaited events all have the 'pass' statuses ('passed' returns non-nil), fire the listener's event
+	--- 2. clear the listener
+	for pattern, listener in GLOBAL_SCHEDULE_EVENTS._listeners do
+		---@cast listener EventListener
+		-- print(listener.pattern .. ": " .. listener.exec());
+		if (_schedulerListenerPasses(listener)) then
+			-- modkit.table.printTbl(listener);
+			print(listener.pattern .." passed conditions!");
+			if (listener.options.computeNextEventsInitialPreviousValue) then
+				listener.event_to_trigger.previous_return = listener.options.computeNextEventsInitialPreviousValue();
+				print("first previous val for event " .. listener.event_to_trigger.name .. " set as " .. tostring(listener.event_to_trigger.previous_return));
 			end
+			modkit.scheduler:begin(listener.event_to_trigger);
+
+			GLOBAL_SCHEDULE_EVENTS._listeners[pattern] = nil; -- remove this listener
 		end
-	);
-
-end
-
-function modkit_scheduler_proto:init()
-	if (self._init == nil) then
-		self:spawn(0); -- hide the scheduler
-
-		self:beginGlobalLists();
-
-		self._init = 1;
 	end
 end
 
--- Called every 0.1 seconds, events subscribed to `modkit.scheduler` can use this to run code faster than their native update rate
-function modkit_scheduler_proto:update()
-	self:init();
-	modkit.scheduler:update();
-end
-
-modkit.compose:addShipProto("modkit_scheduler", modkit_scheduler_proto);
+modkit.compose:addShipProto("modkit_scheduler", scheduler);

@@ -68,3 +68,64 @@ function UI_ForceBindKeyEvent(key, fn_name)
 		UI_BindKeyEvent(key, fn_name);
 	end
 end
+
+--- Returns a new `Rule`, which resolves when all the ships in the `spawn_group` are found in the global register, resolving with those ships.
+---
+--- In the case that `timeout` is exceeded, instead rejects.
+---
+---@param spawn_group string
+---@param timeout? integer Default `12`s
+function awaitShips(spawn_group, timeout)
+	timeout = timeout or 12;
+
+	local subgroups = SobGroup_Split(spawn_group);
+
+	-- modkit.table.printTbl(subgroups, "subgroups");
+
+	if (Rule_AddInterval) then
+		-- print("returns a rule")
+		return modkit.campaign.rules:make(function (res, rej, state)
+			local found_ships = modkit.table.map(%subgroups, function (group)
+				return modkit.ships():find(function (ship)
+					return SobGroup_GroupsAreEqual(ship.own_group, %group);
+				end);
+			end);
+			-- all are registered if every subgroup was matched to a registered ship (arr lengths are eq.)
+			local all_registered = modkit.table.length(found_ships) == modkit.table.length(%subgroups);
+
+			if (all_registered) then
+				res(found_ships);
+			end
+
+			if (Universe_GameTime() >= state._started_gametime + %timeout) then
+				rej("awaitShips timed out (timeout: " .. tostring(%timeout) .. ")");
+			end
+		end);
+	else
+		-- print("returns an event")
+		return modkit.scheduler:make({
+			interval = 5,
+			fn = function (res, rej, state)
+				-- print("call from awaitShips event");
+				local found_ships = modkit.table.map(%subgroups, function (group)
+					return modkit.ships():find(function (ship)
+						return SobGroup_GroupsAreEqual(ship.own_group, %group);
+					end);
+				end);
+				-- all are registered if every subgroup was matched to a registered ship (arr lengths are eq.)
+				local all_registered = modkit.table.length(found_ships) == modkit.table.length(%subgroups);
+
+				-- modkit.table.printTbl(found_ships, "found ships");
+
+				if (all_registered) then
+					-- modkit.table.printTbl(found_ships);
+					res(found_ships);
+				end
+
+				if (Universe_GameTime() >= state._started_gametime + %timeout) then
+					rej("awaitShips timed out (timeout: " .. tostring(%timeout) .. ")");
+				end
+			end
+		});
+	end
+end

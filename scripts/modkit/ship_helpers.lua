@@ -2,6 +2,9 @@ if (modkit == nil) then
 	modkit = {};
 end
 
+---@alias ShipFilterPredicate fun(ship: Ship): bool
+---@alias FilterFn fun(predicate: ShipFilterPredicate): Ship[]
+
 if (modkit.shipGroup == nil) then
 	---@class ShipCollectionExt : ShipCollection
 	local lib = modkit.table.clone(GLOBAL_SHIPS);
