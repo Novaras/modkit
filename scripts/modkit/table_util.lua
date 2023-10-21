@@ -138,25 +138,28 @@ if (modkit.table == nil) then
 		---
 		---@generic T
 		---@param table table<TableKey, T>
-		---@param predicate fun(val: T, idx: TableKey, tbl: table<TableKey, T>): bool
+		---@param predicate T|fun(val: T, idx: TableKey, tbl: table<TableKey, T>): bool
 		---@return T|nil
 		findVal = function (table, predicate)
 			for i, v in table do
-				if (type(predicate) == "function") then
-					if (predicate(v, i, table) ~= nil) then
-						return v;
-					end
-				else
-					if (v == predicate) then
-						return v;
-					end
+				if (type(predicate) == "function" and predicate(v, i, table)) then
+					return v;
+				elseif (v == predicate) then
+					return v;
 				end
 			end
 		end,
 
 		--- Returns the first key of the first entry which matches the given predicate
-		findIndex = function (table, predicate)
-			return modkit.table.firstKey(modkit.table.findVal(table, predicate) or {});
+		---@return any|nil
+		findIndex = function (table, predicate_or_value)
+			for k, v in table do
+				if (type(predicate_or_value) == "function" and predicate_or_value(v, k, table)) then
+					return k;
+				elseif (v == predicate_or_value) then
+					return k;
+				end
+			end
 		end,
 
 		length = function (table)
