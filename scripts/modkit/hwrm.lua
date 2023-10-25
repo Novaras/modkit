@@ -2,7 +2,7 @@
 
 if (MK_EXTRA_DEFINES == nil) then
 	---@enum ROE
-	ROE = {
+	ROE = ROE or {
 		OffensiveROE = 0,
 		DefensiveROE = 1,
 		PassiveROE = 2
@@ -21,6 +21,10 @@ if (MK_EXTRA_DEFINES == nil) then
 		ShipHoldStayDockedUpToLimit = 1,
 		ShipHoldStayDockedAlways = 2
 	};
+
+	VisNone = 0;
+	VisSecondary = 1;
+	VisFull = 2;
 
 	---@enum Visibility
 	VISIBILITY = {
@@ -619,6 +623,20 @@ if (nil) then
 	---@param group string
 	---@param position Position
 	function SobGroup_HyperSpaceTo(group, position)
+	end
+
+	--- Causes ships in `group` to attempt to form a hyperspace gate link with ships in `target_group`.
+	---
+	---@param group string
+	---@param target_group string
+	function SobGroup_FormHyperspaceGate(group, target_group)
+	end
+
+	--- Causes ships in `group` to use the closest gate in `gate_group`.
+	---
+	---@param group string
+	---@param gate_group string
+	function SobGroup_UseHyperspaceGate(group, gate_group)
 	end
 
 	--- Returns the position of the centerpoint of the group, as a table (`{ [1] = x, [2] = y, [3] = z }`)
