@@ -55,7 +55,7 @@ EVENT_STATUS = {
 
 ---@class EventListenerOptions
 ---@field pass_statuses? EventStatus[]
----@field computeNextEventsInitialPreviousValue? fun(): any
+---@field computeNextChainEventsInitialPreviousValue? fun(): any
 
 ---@class EventListener
 ---@field pattern string

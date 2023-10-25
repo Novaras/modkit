@@ -80,8 +80,8 @@ function scheduler:update()
 		if (_schedulerListenerPasses(listener)) then
 			-- modkit.table.printTbl(listener);
 			print(listener.pattern .." passed conditions!");
-			if (listener.options.computeNextEventsInitialPreviousValue) then
-				listener.event_to_trigger.previous_return = listener.options.computeNextEventsInitialPreviousValue();
+			if (listener.options.computeNextChainEventsInitialPreviousValue) then
+				listener.event_to_trigger.previous_return = listener.options.computeNextChainEventsInitialPreviousValue();
 				print("first previous val for event " .. listener.event_to_trigger.name .. " set as " .. tostring(listener.event_to_trigger.previous_return));
 			end
 			modkit.scheduler:begin(listener.event_to_trigger);
