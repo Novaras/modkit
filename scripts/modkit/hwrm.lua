@@ -639,6 +639,13 @@ if (nil) then
 	function SobGroup_UseHyperspaceGate(group, gate_group)
 	end
 
+	--- Returns whether or not the ships in `gate_group` are all 'deployed', meaning the gate is linked and usable.
+	---
+	---@param gate_group string
+	---@return bool
+	function SobGroup_IsGateDeployed(gate_group)
+	end
+
 	--- Returns the position of the centerpoint of the group, as a table (`{ [1] = x, [2] = y, [3] = z }`)
 	---
 	---@param group string
