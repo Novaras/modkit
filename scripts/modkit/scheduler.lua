@@ -6,13 +6,13 @@ end
 
 -- events repeat by default, optionally can specify the amount with `iterations`
 
----@class EventCoreState
+---@class EventCoreState: table
 ---@field _tick integer
 ---@field _started_gametime number
 ---@field _previous? any
 ---@field _remaining_iterations? integer
 
----@class EventState: EventCoreState, table
+---@class EventState: table, EventCoreState
 
 ---@enum EventStatus
 EVENT_STATUS = {
@@ -55,16 +55,16 @@ EVENT_STATUS = {
 
 ---@class EventListenerOptions
 ---@field pass_statuses? EventStatus[]
----@field computeNextChainEventsInitialPreviousValue? fun(): any
+---@field computeNextEventsInitialPreviousValue? fun(): any
 
 ---@class EventListener
 ---@field pattern string
 ---@field options EventListenerOptions
 ---@field event_to_trigger Event
 
----@alias EventResolve fun(...: any)
+---@alias EventResolve fun(value?: any)
 ---@alias EventReject fun(message: string)
----@alias EventFn fun(resolveCallback: EventResolve, rejectCallback: EventReject, state: EventState): any
+---@alias EventFn fun(previous_return: any|nil, resolveCallback: EventResolve, rejectCallback: EventReject, state: EventState): any
 
 if (modkit.scheduler == nil) then
 	---@class GlobalScheduleEvents: MemGroupInst
@@ -89,12 +89,10 @@ if (modkit.scheduler == nil) then
 
 	---@return EventResolve
 	_schedulerResolver = function (event)
-		return function (...)
+		return function (value)
 			print("RESOLVING EVENT " .. %event.name .. "!");
 			%event.status = EVENT_STATUS.RESOLVED;
-			---@diagnostic disable-next-line
-			arg.n = nil;
-			%event.value = arg;
+			%event.value = value;
 		end;
 	end
 
@@ -168,7 +166,7 @@ if (modkit.scheduler == nil) then
 
 			modkit.scheduler:on(event.name, next_event, {
 				computeNextEventsInitialPreviousValue = function ()
-					return %event.value[1][1];
+					return %event.value;
 				end
 			});
 			return _makeEventChain(next_event);
