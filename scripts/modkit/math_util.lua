@@ -4,16 +4,19 @@ if (modkit == nil) then modkit = {}; end
 
 if (modkit.math == nil) then
 	modkit.math = {
-		--- Rounds `num` to the nearest N, depending on `numDecimalPlaces`.
-		---
-		--- By default, rounds to the nearest integer.
+		--- Rounds `num` to the nearest factor of `to_nearest`. Fractional values are accepted.
 		---
 		---@param num number
-		---@param numDecimalPlaces? integer
+		---@param nearest_n? number Quantity to round 'to', default `1`
 		---@return number
-		round = function (num, numDecimalPlaces)
-			local mult = 10^(numDecimalPlaces or 0)
-			return floor(num * mult + 0.5) / mult
+		round = function (num, nearest_n)
+			nearest_n = nearest_n or 1;
+
+			if (nearest_n == 1) then
+				return floor(num + 0.5);
+			end
+
+			return modkit.math.round(num / nearest_n) * nearest_n;
 		end,
 		modulo = function (n, m)
 			return n - floor(n / m) * m
