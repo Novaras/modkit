@@ -105,7 +105,7 @@ function awaitShips(spawn_group, timeout)
 		-- print("returns an event")
 		return modkit.scheduler:make({
 			interval = 5,
-			fn = function (res, rej, state)
+			fn = function (_, res, rej, state)
 				-- print("call from awaitShips event");
 				local found_ships = modkit.table.map(%subgroups, function (group)
 					return modkit.ships():find(function (ship)
