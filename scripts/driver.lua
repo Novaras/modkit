@@ -33,7 +33,7 @@ if (H_DRIVER == nil) then
 	---@diagnostic disable-next-line: duplicate-doc-field
 	---@field all fun(self: ShipCollection): Ship[]
 	---@diagnostic disable-next-line: duplicate-doc-field
-	---@field find fun(self: ShipCollection, predicate: ShipFilterPredicate): Ship | 'nil'
+	---@field find fun(self: ShipCollection, predicate: ShipFilterPredicate): Ship|nil
 	---@diagnostic disable-next-line: duplicate-doc-field
 	---@field filter fun(self: ShipCollection, predicate: ShipFilterPredicate): Ship[]
 	GLOBAL_SHIPS = modkit.MemGroup.Create("mg-ships-global");
@@ -105,7 +105,6 @@ if (H_DRIVER == nil) then
 		);
 
 		---@cast caller DriverShip
-
 		local l = {};
 		local f = function (...)
 			local line = "";

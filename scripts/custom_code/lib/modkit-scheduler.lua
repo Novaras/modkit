@@ -12,7 +12,9 @@ scheduler = {};
 function scheduler:update()
 
 	local running_events = modkit.scheduler:filter(function (event)
-		return event.status == EVENT_STATUS.RUNNING;
+		---@cast event Event
+		-- print("ev " .. event.name .. " interval = " .. event.interval .. ", mod(tick, interval) = " .. mod(%self:tick(), event.interval));
+		return event.status == EVENT_STATUS.RUNNING and mod(%self:tick(), event.interval) == 0;
 	end);
 
 	-- if (mod(self:tick(), 20) == 0) then
@@ -53,7 +55,7 @@ function scheduler:update()
 		);
 
 		-- update prev to the callback return
-		local fn_ret = event.fn(_schedulerResolver(event), _schedulerResolver(event), parsed_state);
+		local fn_ret = event.fn(event.previous_return, _schedulerResolver(event), _schedulerResolver(event), parsed_state);
 		event.previous_return = fn_ret;
 
 		local status = event.status; -- if resolver or rejecter were invoked, we'll have that status, otherwise `RUNNING`
@@ -80,8 +82,8 @@ function scheduler:update()
 		if (_schedulerListenerPasses(listener)) then
 			-- modkit.table.printTbl(listener);
 			print(listener.pattern .." passed conditions!");
-			if (listener.options.computeNextChainEventsInitialPreviousValue) then
-				listener.event_to_trigger.previous_return = listener.options.computeNextChainEventsInitialPreviousValue();
+			if (listener.options.computeNextEventsInitialPreviousValue) then
+				listener.event_to_trigger.previous_return = listener.options.computeNextEventsInitialPreviousValue();
 				print("first previous val for event " .. listener.event_to_trigger.name .. " set as " .. tostring(listener.event_to_trigger.previous_return));
 			end
 			modkit.scheduler:begin(listener.event_to_trigger);

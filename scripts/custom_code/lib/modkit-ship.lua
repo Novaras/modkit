@@ -61,7 +61,7 @@ end
 
 ---@return bool
 function modkit_ship:alive()
-	return self:count() > 0 and self:HP() > 0;
+	return self:HP() > 0;
 end
 
 function modkit_ship:die()
@@ -403,6 +403,13 @@ end
 ---@param to Position
 function modkit_ship:hyperspace(to)
 	SobGroup_HyperspaceTo(self.own_group, Volume_Fresh("-", to));
+end
+
+--- Causes this ship to use the specified `HyperspaceGate`, if possible.
+---
+---@param gate HyperspaceGate
+function modkit_ship:useHyperspaceGate(gate)
+	SobGroup_UseHyperspaceGate(self.own_group, gate.own_group);
 end
 
 --- Gets or optionally sets the ship's auto-launch behavior. `1` for auto-launch, `0` for stay-docked manual launching.
@@ -1051,12 +1058,13 @@ end
 
 -- === Spawning ===
 
---- Causes this previously despawned ship to respawn at the last place it despawned, unless a new volume is given.
---- You can pass a position instead of a volume, in which case a new volume is created at that position.
---- Returns the name of the despawn volume 
+--- If this Ship was previously despawned, returns the name of the Volume where this occurred.
+---
+--- If `spawn` is given, causes this Ship to spawn/despawn. When spawning, may optionally accept a Volume or
+--- a `Position` to spawn into.
 ---
 ---@param spawn integer
----@param volume? string | table
+---@param volume? string | Position
 ---@return string
 function modkit_ship:spawn(spawn, volume)
 	volume = volume or self._despawned_at_volume;
@@ -1073,23 +1081,28 @@ function modkit_ship:spawn(spawn, volume)
 	return self._despawned_at_volume;
 end
 
---- Spawns a new ship of `type` at `position` for `player_index`. This new ship is placed in `spawn_group`, or a fresh group if `spawn_group` is not supplied.
+--- Spawns a new ship of `type` at `where` for `player_index`. This new ship is placed in `spawn_group`, or a fresh group if `spawn_group` is not supplied.
 ---
 --- **Note: The temporary group returned should be functionally equivalent to `own_group` of a more typically
 --- available ship, but is _not_ the same group (it should only contain the same ships).**
 ---
----@param ship_type any
----@param position? any
+---@param ship_type ShipType
+---@param where? Position|string
 ---@param player_index? integer
 ---@param spawn_group? string
 ---@return string
-function modkit_ship:spawnShip(ship_type, position, player_index, spawn_group)
-	position = position or self:position();
+function modkit_ship:spawnShip(ship_type, where, player_index, spawn_group)
+	where = where or self:position();
+
+	if (type(where) == "table") then
+		where = Volume_Fresh("_spawn-vol-ship-" .. self.id, where);
+	end
+	---@cast where string
+
 	spawn_group = spawn_group or SobGroup_Fresh("spawner-group-" .. self.id .. "_" .. SobGroup_Fresh());
 	player_index = player_index or self.player.id;
-	local volume_name = Volume_Fresh("spawner-vol-" .. self.id, position);
-	SobGroup_SpawnNewShipInSobGroup(player_index, ship_type, "-", spawn_group, volume_name);
-	Volume_Delete(volume_name);
+	SobGroup_SpawnNewShipInSobGroup(player_index, ship_type, "-", spawn_group, where);
+	Volume_Delete(where);
 	return spawn_group;
 end
 
