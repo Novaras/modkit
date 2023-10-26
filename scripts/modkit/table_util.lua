@@ -136,10 +136,9 @@ if (modkit.table == nil) then
 
 		--- Finds a value in the given table. The returned value is the first in the table which satisfies the supplied predicate.
 		---
-		---@generic T
-		---@param table table<TableKey, T>
-		---@param predicate T|fun(val: T, idx: TableKey, tbl: table<TableKey, T>): bool
-		---@return T|nil
+		---@param table table
+		---@param predicate fun(val: any, idx: TableKey, tbl: table<TableKey, any>): bool
+		---@return any|nil
 		findVal = function (table, predicate)
 			for i, v in table do
 				if (type(predicate) == "function" and predicate(v, i, table)) then
@@ -240,21 +239,26 @@ if (modkit.table == nil) then
 			end
 			return 1;
 		end,
+		--- Returns a random entry from the given `tbl`. An _entry_ is a key-value pair.
+		---
+		---@generic T
+		---@param tbl table<TableKey, T>
+		---@return { [1]: TableKey, [2]: T }
 		randomEntry = function(tbl)
-			local arr = {};
+			local entries = {};
 			for k, v in tbl do
-				arr[modkit.table.length(arr) + 1] = {
+				entries[modkit.table.length(entries) + 1] = {
 					[1] = k,
 					[2] = v
 				};
 			end
 			local index;
-			if (modkit.table.length(arr) < 2) then
+			if (modkit.table.length(entries) < 2) then
 				index = 1;
 			else
-				index = random(1, modkit.table.length(arr)); -- they made it so if you call `random(1, 1)`, it counts as an error...
+				index = random(1, modkit.table.length(entries)); -- they made it so if you call `random(1, 1)`, it counts as an error...
 			end
-			return arr[index];
+			return entries[index];
 		end,
 		--- Difference: Any elements in `tbl_a`, which are not found in `tbl_b`.
 		---
