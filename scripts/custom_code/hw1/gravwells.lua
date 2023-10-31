@@ -10,7 +10,7 @@
 ---@field previous_tick_trapped Ship[]
 
 --- Stuff for gw generators (hw1)
----@class GravwellProto : Ship, GravwellAttribs
+---@class GravwellGenerator : Ship, GravwellAttribs
 gravwell_proto = {
 	effect_range = 2900,
 	own_effect = "PowerUp",

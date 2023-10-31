@@ -4,7 +4,7 @@
 ---@field spin_start_event_id 'nil'|integer
 
 --- Proto for res ships for both tai and kus (only for res ship 0, which drives the others).
----@class ResShipProto : Ship, AIParader
+---@class ResShip : Ship, AIParader
 res_ships_proto = {
 	attribs = function ()
 		return {
@@ -56,7 +56,7 @@ function res_ships_proto:manageSubsHP()
 	self:subsHP("Research Module", 0.5 + hp_to_add);
 end
 
----@return ResShipProto[]
+---@return ResShip[]
 function res_ships_proto:getOurResShips()
 	return GLOBAL_SHIPS:filter(function (ship)
 		return (ship.player.id == %self.player.id) and ship:isResearchShip() and ship:HP() > 0;
@@ -114,7 +114,7 @@ function res_ships_proto:dockedAuxHubCount()
 		modkit.table.filter(			-- ... the list of our res ships, filtered for only those which are docked
 			self:getOurResShips(),
 			function (res_ship)
-				---@cast res_ship ResShipProto
+				---@cast res_ship ResShip
 				return res_ship:docked();
 			end
 		)

@@ -12,7 +12,7 @@ end
 -- seems to be custom made for this script: `Selection_GetMissiles`
 -- this means we can't really rely on modkit
 
----@class DefenseFighterProto : Ship
+---@class DefenseFighter : Ship
 defense_fighter_proto = {
 	nearby_radius = 4500,
 	-- guard_sphere_positions = modkit.shapes:icosahedron(),

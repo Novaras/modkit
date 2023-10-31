@@ -1,4 +1,4 @@
----@class MultiBeamProto : Ship
+---@class MultiBeam : Ship
 local multibeam_frigate_proto = {};
 
 function multibeam_frigate_proto:update()

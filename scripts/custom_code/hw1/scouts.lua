@@ -1,4 +1,4 @@
----@class ScoutProto: Ship
+---@class HW1Scout: Ship
 ---@field speed_penalty_max number
 --- For all scouts
 scouts_proto = {
@@ -19,10 +19,12 @@ end
 --- Update for **all** scouts
 function scouts_proto:update()
 	if (self.last_hp and self.last_hp > self:HP()) then
-		self:speed(max(scouts_proto.speed_penalty_max, modkit.math.round(self:speed() - self:penaltyStep(), 2)));
+		-- speed = larger of (min speed) or (current - penalty)
+		self:speed(max(scouts_proto.speed_penalty_max, self:speed() - self:penaltyStep()));
 	else
+		-- speed = smaller of 1 or (current + recovery)
 		if (self:speed() < 1) then -- avoid messing with hw1 scout script
-			self:speed(min(1, modkit.math.round(self:speed() + self:recoveryStep(), 2)));
+			self:speed(min(1, self:speed() + self:recoveryStep()));
 		end
 	end
 	self.last_hp = self:HP();
@@ -38,7 +40,7 @@ modkit.compose:addShipProto("vgr_scout", scouts_proto);
 ---@field decay_event_id integer
 ---@field last_hp number
 
----@class scouts_proto : Ship, ScoutProto, ScoutAttribs
+---@class scouts_proto : Ship, HW1Scout, ScoutAttribs
 --- Specifically for hw1 scouts
 hw1_scouts_proto = {
 	boost_range = {

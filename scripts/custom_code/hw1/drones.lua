@@ -10,7 +10,7 @@
 ---@field new_drones drone_proto[]
 ---@field targets_group string
 
----@class drones_proto : Ship, DroneFrigAttribs
+---@class DroneFrigate : Ship, DroneFrigAttribs
 local drones_proto = {
 	drone_kill_distance = 950,
 	---@type Arr3[]
@@ -278,7 +278,7 @@ drone_proto = {
 
 --- Links this drone with a frigate.
 ---
----@param frigate drones_proto
+---@param frigate DroneFrigate
 function drone_proto:link(frigate)
 	if (frigate) then
 		-- self:print("link with " .. frigate.own_group);

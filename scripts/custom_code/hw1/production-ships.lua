@@ -1,5 +1,5 @@
 --- Production ships generic stuff for both ms and carriers
----@class ProductionBaseProto : Ship
+---@class ProductionBase : Ship
 ---@field single_ship_queue_event_id nil|integer
 local base_prodship_proto = {
 
@@ -62,7 +62,7 @@ end
 -- ===
 
 --- MS only stuff
----@class MothershipProto : ProductionBaseProto
+---@class MothershipProto : ProductionBase
 local motherships_proto = {};
 for k, v in base_prodship_proto do
 	motherships_proto[k] = v;
@@ -102,7 +102,7 @@ modkit.compose:addShipProto("tai_mothership", motherships_proto);
 -- ===
 
 --- Carrier only stuff
----@class CarrierProto : ProductionBaseProto
+---@class CarrierProto : ProductionBase
 local carriers_proto = {};
 for k, v in base_prodship_proto do
 	carriers_proto[k] = v;
