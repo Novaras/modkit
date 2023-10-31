@@ -21,15 +21,16 @@ makeStateHandle = makeStateHandle or function (screen_name, dropdown_host_el)
 		if (new_state) then
 			UI_ClearDropDownListbox(%screen_name, %dropdown_host_el);
 
-			if (overwrite) then
+			if (overwrite) then -- if overwrite flag set, we just overwrite the whole state
 				current_state = new_state;
-			else
+			else -- otherwise, we do a regular table merge onto it
 				current_state = modkit.table.clone(
 					modkit.table:merge(current_state, new_state),
 					custom_key_behaviors
 				);
 			end
 
+			-- to store the table, we need to turn into into a string representation first, then we can write that string to the UI
 			local asStr = function (v, tblParser)
 				if (type(v) == "table") then
 					local out = "{";
