@@ -182,7 +182,7 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 
 				---@param rule Rule|RuleFn|string
 				---@return RuleChain
-				_makeChain = function (rule)
+				_makeRuleChain = function (rule)
 					if (type(rule) ~= "string" and type(rule.api_name) ~= "string") then
 						---@cast rule RuleFn
 						rule = toRule(rule);
@@ -216,7 +216,7 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 							end
 						end); -- when current rule is done, call `action:begin()`
 
-						return _makeChain(action); -- another action can be appended
+						return _makeRuleChain(action); -- another action can be appended
 					end
 
 					function chainable:catch(handler)
@@ -230,7 +230,7 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 					return chainable;
 				end
 
-				return _makeChain(self);
+				return _makeRuleChain(self);
 			end
 
 			-- here we add a tag on the rule which lets you call the rule like a function: `myrule:begin();` equivalent to `myrule();`
