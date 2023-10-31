@@ -223,13 +223,17 @@ if (H_SOBGROUP ~= 1) then
 	--- Returns the supplied `name`.
 	---
 	---@param name any
-	---@param position? table
+	---@param position? Vec3Like
 	---@param radius? integer
 	---@param vol_type? string
 	---@return string
 	function Volume_Fresh(name, position, radius, vol_type)
 		name = name or ("_Volume_Fresh_" .. %freshGroupIndex());
-		position = position or { 0, 0, 0 };
+		position = position or Vec3({ 0, 0, 0 });
+		if (not Vec3:isVec3(position)) then
+			position = Vec3(position);
+		end
+
 		radius = radius or 10;
 		vol_type = vol_type or "sphere";
 		Volume_Delete(name);
@@ -288,7 +292,7 @@ if (H_SOBGROUP ~= 1) then
 		});
 	end
 
-	--- _Splits_ a given `group` into a table of subgroups. The size of the subgroups is given by `granularity`.
+	--- _Splits_ a given `group` into a table of subgroups. The size of the subgroups is given by `granularity`, default `1`.
 	---
 	---@param group string
 	---@param granularity? integer
