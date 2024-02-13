@@ -53,6 +53,16 @@ scripts/
 
 You can name these files however you like.
 
+Finally, I usually initialise the project's current state as a new git repo:
+
+```bash
+git init
+git add -A
+git commit -m "post-setup initial state"
+```
+
+This is optional, although I strongly recommend using a version manager like git or something similar!
+
 ## Example
 
 An example script, which heals Taiidan Field Frigates by 1/20 of their HP every `update` call (1s by default):
