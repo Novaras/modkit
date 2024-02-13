@@ -2,4 +2,3 @@ modkit-tools/node_modules
 ship
 dev/
 **/custom_code/testing.lua
-scripts/modkit/ship-types.lua
