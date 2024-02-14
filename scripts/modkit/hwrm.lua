@@ -45,6 +45,26 @@ if (MK_EXTRA_DEFINES == nil) then
 		VisFull = VisFull
 	};
 
+	OS_Off = OS_Off or 0;
+	OS_Incomplete = OS_Incomplete or 1;
+	OS_Complete = OS_Complete or 2;
+	OS_Failed = OS_Failed or 3;
+
+	OBJECTIVE_STATE = {
+		OS_Off = OS_Off,
+		OS_Incomplete = OS_Incomplete,
+		OS_Complete = OS_Complete,
+		OS_Failed = OS_Failed
+	};
+
+	OT_Primary = 0;
+	OT_Secondary = 1;
+
+	OBJECTIVE_TYPE = {
+		OT_Primary = OT_Primary,
+		OT_Secondary = OT_Secondary
+	};
+
 	MK_EXTRA_DEFINES = 1;
 end
 
