@@ -1,30 +1,42 @@
 -- Custom definitions file to allow sumneko.lua to provide completion/hover/etc. for HWRM globals.
 
 if (MK_EXTRA_DEFINES == nil) then
+	OffensiveROE = OffensiveROE or 0;
+	DefensiveROE = DefensiveROE or 1;
+	PassiveROE = PassiveROE or 2;
+
 	---@enum ROE
 	ROE = ROE or {
-		OffensiveROE = 0,
-		DefensiveROE = 1,
-		PassiveROE = 2
+		OffensiveROE = OffensiveROE,
+		DefensiveROE = DefensiveROE,
+		PassiveROE = PassiveROE
 	};
+
+	AggressiveStance = AggressiveStance or 0;
+	EvasiveStance = EvasiveStance or 1;
+	NeutralStance = NeutralStance or 2;
 
 	---@enum Stance
 	STANCE = {
-		AggressiveStance = 0,
-		NeutralStance = 2,
-		EvasiveStance = 1
+		AggressiveStance = AggressiveStance,
+		EvasiveStance = EvasiveStance,
+		NeutralStance = NeutralStance,
 	};
+
+	ShipHoldLaunch = ShipHoldLaunch or 0;
+	ShipHoldStayDockedUpToLimit = ShipHoldStayDockedUpToLimit or 1;
+	ShipHoldStayDockedAlways = ShipHoldStayDockedAlways or 2;
 
 	---@enum ShipHold
 	SHIPHOLD = {
-		ShipHoldLaunch = 0,
-		ShipHoldStayDockedUpToLimit = 1,
-		ShipHoldStayDockedAlways = 2
+		ShipHoldLaunch = ShipHoldLaunch,
+		ShipHoldStayDockedUpToLimit = ShipHoldStayDockedUpToLimit,
+		ShipHoldStayDockedAlways = ShipHoldStayDockedAlways
 	};
 
-	VisNone = 0;
-	VisSecondary = 1;
-	VisFull = 2;
+	VisNone = VisNone or 0;
+	VisSecondary = VisSecondary or 1;
+	VisFull = VisFull or 2;
 
 	---@enum Visibility
 	VISIBILITY = {
@@ -32,6 +44,8 @@ if (MK_EXTRA_DEFINES == nil) then
 		VisSecondary = VisSecondary,
 		VisFull = VisFull
 	};
+
+	MK_EXTRA_DEFINES = 1;
 end
 
 -- Notice we never run this code, these defines are just used for IDE assistance.
