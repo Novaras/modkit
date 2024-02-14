@@ -57,8 +57,8 @@ if (MK_EXTRA_DEFINES == nil) then
 		OS_Failed = OS_Failed
 	};
 
-	OT_Primary = 0;
-	OT_Secondary = 1;
+	OT_Primary = OT_Primary or 0;
+	OT_Secondary = OT_Secondary or 1;
 
 	OBJECTIVE_TYPE = {
 		OT_Primary = OT_Primary,
