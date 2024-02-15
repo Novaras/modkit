@@ -50,6 +50,7 @@ if (MK_EXTRA_DEFINES == nil) then
 	OS_Complete = OS_Complete or 2;
 	OS_Failed = OS_Failed or 3;
 
+	---@enum ObjectiveState
 	OBJECTIVE_STATE = {
 		OS_Off = OS_Off,
 		OS_Incomplete = OS_Incomplete,
@@ -60,6 +61,7 @@ if (MK_EXTRA_DEFINES == nil) then
 	OT_Primary = OT_Primary or 0;
 	OT_Secondary = OT_Secondary or 1;
 
+	---@enum ObjectiveType
 	OBJECTIVE_TYPE = {
 		OT_Primary = OT_Primary,
 		OT_Secondary = OT_Secondary
@@ -927,5 +929,98 @@ if (nil) then
 	--- Returns the current gametime.
 	---@return number
 	function Universe_GameTime()
+	end
+
+	--- ==== OBJECTIVE STUFF ====
+
+	--- Creates a new objective with the given name and type.
+	---
+	--- The name appears to be unused after this, and the returned objective's ID will
+	--- instead be important for future API calls.
+	---
+	--- Note that the objective begins in the `OS_Incomplete` state which will display it in
+	--- the objectives panel; use `Objective_SetState` to set it to `OS_Off` if you want it
+	--- hidden.
+	---
+	--- Returns the ID of the newly created objective.
+	---
+	---@param name string
+	---@param type ObjectiveType
+	---@return integer
+	function Objective_Add(name, type)
+	end
+
+	--- Same as `Objective_Add`, but `name` here is a wchar string from somewhere.
+	---
+	---@see Objective_Add
+	---@param name userdata
+	---@param type ObjectiveType
+	---@return integer
+	function Objective_Addw(name, type)
+	end
+
+	--- Same as `Objective_Add`, but also accepts a predetermined ID.
+	---
+	--- `id` should be a `number` (int), but a `string` which is simply convertable to an int is also accepted i.e
+	--- `'123'` is ok, but `'one_two_three'` is not.
+	---
+	---@see Objective_Add
+	---@param id integer|string
+	---@param name string
+	---@param type ObjectiveType
+	function Objective_AddPresetID(id, name, type)
+	end
+
+	--- Appends to the existing description of the given objective.
+	---
+	--- Two newlines are first appended if there is existing text.
+	---
+	---@param id integer
+	---@param description string
+	function Objective_AddDescription(id, description)
+	end
+
+	--- Same as `Objective_AddDescription`, but here `description` is wchar string.
+	---
+	---@see Objective_AddDescription
+	---@param id integer
+	---@param description userdata
+	function Objective_AddDescriptionw(id, description)
+	end
+
+	--- Sets the description for the given objective.
+	---
+	---@param id integer
+	---@param description string
+	function Objective_SetDescription(id, description)
+	end
+
+	--- Same as `Objective_SetDescription`, but here `description` is a wchar string.
+	---
+	---@param id integer
+	---@param description string
+	function Objective_SetDescriptionw(id, description)
+	end
+
+	--- Returns the current `ObjectiveState` of the given objective.
+	---
+	---@param id integer
+	---@return string
+	function Objective_GetState(id)
+	end
+
+	--- Sets the state of the given objective to the given `ObjectiveState`.
+	---
+	---@param id integer
+	---@param state ObjectiveState
+	function Objective_SetState(id, state)
+	end
+
+	--- Selects the given objective in the 'OBJECTIVES' UI panel.
+	---
+	--- The effect is to highlight it on the left, and to display its description on the right.
+	---
+	---@param id integer
+	function Objective_Select(id)
 	end
 end
