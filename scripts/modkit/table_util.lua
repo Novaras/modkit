@@ -50,8 +50,9 @@ if (modkit.table == nil) then
 	local table = {
 		--- Returns a new table comprised of elements in `table` which pass the given `predicate` function (any non-`nil` return is considered a 'pass').
 		---
-		---@param table table
-		---@param predicate fun(val: any, index: any, tbl: table): bool
+		---@generic T
+		---@param table T[]
+		---@param predicate fun(val: T, index: number|string, tbl: T[]): bool
 		---@return table
 		filter = function (table, predicate)
 			local out = {};
@@ -435,10 +436,11 @@ if (modkit.table == nil) then
 
 	--- Calls `callback` for every key-value pair in `tbl`.
 	---
-	---@param tbl table
-	---@param callback fun(v: any, k: string|number, tbl: table)
+	---@generic T
+	---@param tbl T[]
+	---@param callback fun(v: T, k: string|number, tbl: T[])
 	---@param recursive? bool Whether or not to call recursively
-	---@param recursePredicate? fun(v: any, k: string|number, tbl: table) If `recursive`, this function decides which key-vals to recurse on. By default, recurse when value is a table type.
+	---@param recursePredicate? fun(v: any, k: string|number, tbl: T[]) If `recursive`, this function decides which key-vals to recurse on. By default, recurse when value is a table type.
 	function table.forEach(tbl, callback, recursive, recursePredicate)
 		recursive = recursive or nil;
 		recursePredicate = recursePredicate or function (v)
