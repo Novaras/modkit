@@ -40,9 +40,9 @@ if (MK_EXTRA_DEFINES == nil) then
 
 	---@enum Visibility
 	VISIBILITY = {
-		VisNone = VisNone,
-		VisSecondary = VisSecondary,
-		VisFull = VisFull
+		VisNone = 0,
+		VisSecondary = 1,
+		VisFull = 2
 	};
 
 	OS_Off = OS_Off or 0;
@@ -52,10 +52,10 @@ if (MK_EXTRA_DEFINES == nil) then
 
 	---@enum ObjectiveState
 	OBJECTIVE_STATE = {
-		OS_Off = OS_Off,
-		OS_Incomplete = OS_Incomplete,
-		OS_Complete = OS_Complete,
-		OS_Failed = OS_Failed
+		OS_Off = 0,
+		OS_Incomplete = 1,
+		OS_Complete = 2,
+		OS_Failed = 3
 	};
 
 	OT_Primary = OT_Primary or 0;
@@ -63,8 +63,8 @@ if (MK_EXTRA_DEFINES == nil) then
 
 	---@enum ObjectiveType
 	OBJECTIVE_TYPE = {
-		OT_Primary = OT_Primary,
-		OT_Secondary = OT_Secondary
+		OT_Primary = 0,
+		OT_Secondary = 1
 	};
 
 	MK_EXTRA_DEFINES = 1;
@@ -1005,7 +1005,7 @@ if (nil) then
 	--- Returns the current `ObjectiveState` of the given objective.
 	---
 	---@param id integer
-	---@return string
+	---@return ObjectiveState
 	function Objective_GetState(id)
 	end
 
