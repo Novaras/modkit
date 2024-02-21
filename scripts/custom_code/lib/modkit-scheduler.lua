@@ -9,7 +9,23 @@ end
 ---@class MKScheduler: Ship
 scheduler = {};
 
+function scheduler:pruneOthers()
+	for _, ship in GLOBAL_SHIPS:all() do
+		---@cast ship Ship
+		if (ship.ship_type == "modkit_scheduler" and ship.id > self.id) then
+			ship:die();
+		end
+	end
+end
+
 function scheduler:update()
+	if (self:tick() == 1) then
+		self:spawn(0);
+	end
+
+	if (mod(self:tick(), 10)) then
+		self:pruneOthers();
+	end
 
 	local running_events = modkit.scheduler:filter(function (event)
 		---@cast event Event
