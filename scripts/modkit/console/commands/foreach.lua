@@ -53,8 +53,6 @@ If you pass a lua string with 'lua=', you can include replacement tokens in your
             parsed = gsub(parsed, "$g", "'" .. SobGroup_FromShips(src) .. "'");
             parsed = gsub(parsed, "$s", 'modkit.table.map(makeStateHandle()().foreach_src, function(ship_def) return register(ship_def.type, ship_def.player_id, ship_def.id); end)');
 
-            -- consoleLog("EXEC: " .. parsed);
-
             parsed = "dofilepath('data:scripts/modkit/scope_state.lua'); " ..
                 "dofilepath('data:scripts/modkit/driver.lua'); " ..
                 parsed;
@@ -62,6 +60,7 @@ If you pass a lua string with 'lua=', you can include replacement tokens in your
             print("foreach >> " .. parsed);
             dostring(parsed);
 
+            consoleLog("\t<c=44FF44>" .. modkit.table.length(src) .. " ships effected</c>");
         elseif (param_vals.command) then
             local cmd = param_vals.command;
 

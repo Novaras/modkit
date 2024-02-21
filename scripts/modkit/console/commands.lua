@@ -48,16 +48,16 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 		local src = GLOBAL_SHIPS:all();
 
 		if (params.type and params.family) then
-			consoleLog("destroy: ignoring family param (f=" .. params.family .. ") due to presence of type param (t=" .. params.type .. ")");
+			consoleLog("warning: ignoring family param (f=" .. params.family .. ") due to presence of type param (t=" .. params.type .. ")");
 		end
 
 		if (params.type) then
 			src = modkit.table.filter(src, function (ship)
-				return ship.ship_type == %params.type;
+				return strfind(ship.ship_type, %params.type, 1, 1);
 			end);
 		elseif (params.family) then
 			src = modkit.table.filter(src, function (ship)
-				return ship:attackFamily() == %params.family;
+				return strfind(ship:attackFamily(), %params.family, 1, 1);
 			end);
 		end
 
