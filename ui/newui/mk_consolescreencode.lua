@@ -1,4 +1,4 @@
-dofilepath('data:scripts/modkit/scope_state.lua');
+dofilepath('data:scripts/modkit/hypertable.lua');
 dofilepath('data:scripts/modkit/console.lua');
 
 SCREEN_NAME = "MK_ConsoleScreen";
@@ -18,7 +18,7 @@ end
 function onHide()
 	print("HIDE CONSOLE SCREEN");
 
-	local hnd = makeStateHandle();
+	local hnd = hyperTableHandle();
 
 	local ui_exec = hnd().ui_scope_exec;
 	if (ui_exec) then

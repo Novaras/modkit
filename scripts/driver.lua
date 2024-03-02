@@ -119,14 +119,48 @@ if (H_DRIVER == nil) then
 			end
 			modkit.table.push(%l, line);
 		end
-		modkit.table.printTbl({ type_group = type_group, player_index = player_index, ship_id = ship_id }, "caller?", nil, f, 1);
-		local stateHnd = makeStateHandle();
+		-- modkit.table.printTbl({ type_group = type_group, player_index = player_index, ship_id = ship_id }, "caller?", nil, f, 1);
 
-		local str_representation = type_group .. "," .. player_index .. "," .. ship_id;
+		local hypertable_handle = hyperTableHandle();
+		if (not hypertable_handle().GLOBAL_SHIPS) then -- check vs possible race condition
+			hypertable_handle({
+				GLOBAL_SHIPS = hypertable_handle().GLOBAL_SHIPS or {},
+			});
+		end
 
-		stateHnd({
-			GLOBAL_SHIPS = modkit.table.push(stateHnd().GLOBAL_SHIPS or {}, str_representation);
-		});
+		-- guard to ensure no duplicates
+		local already_hoisted = nil;
+		for id, _ in hypertable_handle().GLOBAL_SHIPS do
+
+			local existing = GLOBAL_SHIPS:find(function (ship)
+				return ship.id == %id;
+			end);
+
+			-- if this id matches no ship, it probably died, so we need to wipe the data
+			if (not existing) then
+				local state = hypertable_handle().GLOBAL_SHIPS;
+				state[id] = nil;
+				hypertable_handle({
+					GLOBAL_SHIPS = state
+				});
+			end
+
+			if (not already_hoisted) then -- if already found, dont update the val
+				-- print("check if ship " .. ship_id .. " was alreay hoisted");
+				already_hoisted = ship_id == existing_id;
+			end
+		end
+
+		if (not already_hoisted) then
+			print("no ship matched, hoisting ship " .. ship_id);
+			local data = type_group .. "," .. player_index;
+
+			local new_state = hypertable_handle().GLOBAL_SHIPS;
+			new_state[ship_id] = data;
+			hypertable_handle({
+				GLOBAL_SHIPS = new_state
+			});
+		end
 
 		-- ensure non-nil when calling these:
 		for i, v in {
@@ -164,7 +198,8 @@ if (H_DRIVER == nil) then
 	---@param i integer The ship's unique id
 	---@return DriverShip
 	create = create or function(g, p, i)
-		local caller = register(g, p, i);
+		local caller = modkit.compose:instantiate(g, p, i); -- avoid registering the ship on this hook, let the first update tick do it
+		---@cast caller DriverShip
 
 		caller:create(); -- run the caller's custom create hook
 
@@ -181,7 +216,7 @@ if (H_DRIVER == nil) then
 	update = update or function(g, p, i)
 		local caller = GLOBAL_SHIPS:get(i);
 		if (caller == nil or caller.own_group == nil or SobGroup_Count(caller.own_group) == 0) then -- can happen when loading a save etc.
-			caller = create(g, p, i);
+			caller = register(g, p, i);
 		end
 		---@cast caller DriverShip
 

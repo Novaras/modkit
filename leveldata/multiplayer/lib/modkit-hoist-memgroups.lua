@@ -1,5 +1,5 @@
 -- GLOBAL_SHIPS etc. are not visible in the rules scope, so we need to share key
--- info via scope_state.lua, and try to produce a clone of that data in this scope
+-- info via hypertable.lua, and try to produce a clone of that data in this scope
 
 if (modkit == nil) then
 	dofilepath("data:scripts/modkit.lua");
@@ -39,20 +39,23 @@ function modkit_hoist_memgroups()
 		dofilepath("data:scripts/modkit.lua");
 	end
 
-	print("HOISTING GROUPS...");
-	local incoming = makeStateHandle()().GLOBAL_SHIPS;
+	print("[" .. Universe_GameTime() .. "] HOISTING GROUPS...");
+	local incoming = hyperTableHandle()().GLOBAL_SHIPS;
 	-- modkit.table.printTbl(incoming, "incoming");
-	if (incoming) then
+	if (incoming and modkit.table.length(incoming) > 0) then
 		if (GLOBAL_PLAYERS == nil) then
 			dofilepath("data:scripts/modkit/player.lua");
 		end
-		GLOBAL_SHIPS = modkit.MemGroup.Create("mg-ships-global");
-		for _, line in incoming do
-			local words = strsplit(line, ",", 1);
+
+		if (not GLOBAL_SHIPS) then
+			GLOBAL_SHIPS = modkit.MemGroup.Create("mg-ships-global");
+		end
+		
+		for ship_id, line in incoming do
+			local data_str = strsplit(line, ",", 1);
+			local type_group = data_str[1];
+			local player_index = tonumber(data_str[2]);
 			-- modkit.table.printTbl(words, "words");
-			local type_group = words[1];
-			local player_index = tonumber(words[2]);
-			local ship_id = tonumber(words[3]);
 
 			-- consoleLog("trying with " .. line);
 			-- consoleLog("tg: \t" .. tostring(type_group));
@@ -60,11 +63,35 @@ function modkit_hoist_memgroups()
 			-- consoleLog("si: \t" .. tostring(ship_id));
 			if (type_group and player_index and ship_id) then
 				local new_ship = register(type_group, player_index, ship_id);
+
 				new_ship.player = GLOBAL_PLAYERS:get(player_index);
 			end
 		end
 		-- print("gs");
 		-- print(GLOBAL_SHIPS);
-		-- modkit.table.printTbl(GLOBAL_SHIPS);
+		modkit.table.printTbl(modkit.table.map(GLOBAL_SHIPS:all(), function (ship)
+			---@cast ship Ship
+			return {
+				id = ship.id,
+				type = ship.type_group,
+				group = ship.own_group,
+				player = ship.player.id,
+			};
+		end));
+
+		-- clear the stream data, effectively consuming it
+		hyperTableHandle()({
+			GLOBAL_SHIPS = {}
+		}, nil, 1);
+
+		-- modkit.table.printTbl(hyperTableHandle()().GLOBAL_SHIPS, "STREAM BUFFER");
 	end
+
+	for id, ship in GLOBAL_SHIPS:all() do
+		---@cast ship Ship
+		if (type(ship.HP) == "function" and ship:HP() <= 0 or ship:count() <= 0) then
+			GLOBAL_SHIPS:delete(id);
+		end
+	end
+	-- consoleLog("in the rules scope, the global ships table now reports " .. modkit.table.length(GLOBAL_SHIPS:all()) .. " ships");
 end

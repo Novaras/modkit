@@ -4,7 +4,7 @@ if (MODKIT_CONSOLE == nil) then
 	if (modkit == nil) then
 		modkit = {};
 	end
-	dofilepath("data:scripts/modkit/scope_state.lua");
+	dofilepath("data:scripts/modkit/hypertable.lua");
 	doscanpath("data:scripts/modkit/console", "*.lua");
 
 	if (consoleLog) then

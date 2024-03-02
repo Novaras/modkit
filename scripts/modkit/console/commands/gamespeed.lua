@@ -5,14 +5,14 @@ COMMANDS.gamespeed = COMMANDS.gamespeed or {
     syntax = "gamespeed [speed-multiplier]",
     example = "gamespeed 0.5",
     fn = function (_, words)
-        local stateHnd = makeStateHandle();
+        local hypertable_handle = hyperTableHandle();
         local speed = words[2];
 
         if (speed) then
             speed = tonumber(speed);
             if (speed > 0) then
-                local existing_stack = stateHnd().ui_scope_exec;
-                stateHnd({
+                local existing_stack = hypertable_handle().ui_scope_exec;
+                hypertable_handle({
                     ui_scope_exec = modkit.table.push(existing_stack or {}, 'SetTurboSpeed(1); SetTurboSpeed(' .. speed .. ")");
                 });
             else

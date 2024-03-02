@@ -2,10 +2,10 @@
 -- By: Fear (Novaras)
 
 if (H_SOBGROUP ~= 1) then
-	if (makeStateHandle == nil) then
-		dofilepath("data:scripts/modkit/scope_state.lua");
+	if (hyperTableHandle == nil) then
+		dofilepath("data:scripts/modkit/hypertable.lua");
 	end
-	local state = makeStateHandle();
+	local state = hyperTableHandle();
 	local freshGroupIndex = function ()
 		local current = %state().__group_fresh_index or 1;
 		%state({
