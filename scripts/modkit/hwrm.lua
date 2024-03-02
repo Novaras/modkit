@@ -76,6 +76,11 @@ if (nil) then
 
 	arg = {};
 
+	---@class Arr3
+	---@field [1] number
+	---@field [2] number
+	---@field [3] number
+
 	---@alias bool '1'|nil|true|false|1
 
 	AB_None = 0;
@@ -657,7 +662,7 @@ if (nil) then
 	--- Causes ships in `group` to hyperspace to the given position.
 	---
 	---@param group string
-	---@param position Position
+	---@param position Arr3
 	function SobGroup_HyperSpaceTo(group, position)
 	end
 
@@ -692,7 +697,7 @@ if (nil) then
 	--- Sets the position of all the ships in the group (overlapping them if there is more than one ship). The ships are moved instantly.
 	---
 	---@param group string
-	---@param position Position
+	---@param position Arr3
 	function SobGroup_SetPosition(group, position)
 	end
 
