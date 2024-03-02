@@ -526,7 +526,7 @@ GameScreens = {
 		type = "InGameModScreen",  -- Type of menu (default is UIScreen)
 	},
 
-	-- modkit superscope state uses this screen for storage (`modkit/scope_state.lua`)
+	-- modkit hypertable state uses this screen for storage (`modkit/hypertable.lua`)
 	{
 		name = "DefaultStateScreen",
 		filename = "DATA:\\UI\\NewUI\\DefaultStateScreen.lua",

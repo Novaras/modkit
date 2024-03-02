@@ -106,7 +106,7 @@ if (modkit.scheduler == nil) then
 
 	--- Returns whether or not the given listener passes its conditions.
 	---
-	--- We can't attach this as a method to the listener itself since functions cant survive in the superscope.
+	--- We can't attach this as a method to the listener itself since functions cant survive in the hypertable.
 	---
 	---@param listener EventListener
 	---@return bool

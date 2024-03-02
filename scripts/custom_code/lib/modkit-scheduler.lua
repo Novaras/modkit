@@ -1,8 +1,8 @@
 -- =====[[ modkit_scheduler ship update, which runs the whole system for modkit.scheduler's api ]]=====
 
-if (not modkit or not modkit.scheduler or not makeStateHandle) then
+if (not modkit or not modkit.scheduler or not hyperTableHandle) then
 	dofilepath("data:scripts/modkit/modkit_scheduler.lua");
-	dofilepath("data:scripts/modkit/scope_state.lua");
+	dofilepath("data:scripts/modkit/hypertable.lua");
 end
 
 

@@ -1,19 +1,17 @@
 if (MK_CONSOLE == nil) then
-	dofilepath("data:scripts/modkit/scope_state.lua");
+	dofilepath("data:scripts/modkit/hypertable.lua");
 	dofilepath("data:scripts/modkit/table_util.lua");
 
 	MK_CONSOLE_SCREEN_NAME = "MK_ConsoleScreen";
 	MK_CONSOLE_LINE_LENGTH = 150;
 	MK_CONSOLE_MAX_LINES = 24;
 
-	s = makeStateHandle();
-
 	--- Initialises state for the console code to interact with the UI window. If already initialised, does nothing unless `force` is set.
 	---
 	---@param force? bool
 	function consoleInit(force)
 		if (force or MK_CONSOLE_INIT == nil) then
-			s({
+			hyperTableHandle()({
 				MK_CONSOLE_SCREEN_NAME = MK_CONSOLE_SCREEN_NAME,
 				MK_CONSOLE_LINES = {},
 				MK_CONSOLE_LINE_LENGTH = MK_CONSOLE_LINE_LENGTH,
@@ -59,6 +57,8 @@ if (MK_CONSOLE == nil) then
 	consoleLog = consoleLog or function (...)
 		consoleInit();
 
+		local hyper_handle = hyperTableHandle();
+
 		local raw = "";
 		for k, v in arg do
 			if k ~= "n" then
@@ -68,11 +68,11 @@ if (MK_CONSOLE == nil) then
 		raw = gsub(raw, "\t", "    ");
 
 		local new_lines = strToConsoleLines(raw);
-		local lines = s().MK_CONSOLE_LINES or {}; -- tbl ref
+		local lines = hyper_handle().MK_CONSOLE_LINES or {}; -- tbl ref
 		for _, line in new_lines do
 			print(line);
 			-- a bit extraneous, should probably only write to the handle once
-			s({
+			hyper_handle({
 				MK_CONSOLE_LINES = modkit.table.push(lines, line)
 			});
 			if (modkit.table.length(lines) > MK_CONSOLE_MAX_LINES) then
@@ -80,7 +80,7 @@ if (MK_CONSOLE == nil) then
 			end
 		end
 
-		printConsoleLines(s().MK_CONSOLE_LINES);
+		printConsoleLines(hyper_handle().MK_CONSOLE_LINES);
 	end
 
 	consoleError = consoleError or function (...)

@@ -5,22 +5,22 @@ See the [main readme](https://github.com/Novaras/modkit/blob/console-update/Cons
 - The functionality defined in `modkit/console/*.lua`
 - The UI screen, `mk_consolescreen.lua`
 
-The screen is a window with a black background which hosts several text inputs; these are the console lines and are filled from the superscope table `MK_CONSOLE_LINES` (see `consoleInit`). Calls to `consoleLog` and (most of) its sister functions push lines to that state.
+The screen is a window with a black background which hosts several text inputs; these are the console lines and are filled from the hypertable `MK_CONSOLE_LINES` (see `consoleInit`). Calls to `consoleLog` and (most of) its sister functions push lines to that state.
 
 The flow is as follows:
 
 1. On game start, the console functions are loaded into scope, including `consoleLog` etc.
-1. Also, `keybinds.lua` is executed, which binds the `P` key to a function which displays the console window
-1. The function bound to the `P` key also calls `textCaptureMode`, which takes over most of the keybinds
-1. Keystrokes then push their asscociated char to a string buffer
+2. Also, `keybinds.lua` is executed, which binds the `P` key to a function which displays the console window
+3. The function bound to the `P` key also calls `textCaptureMode`, which takes over most of the keybinds
+4. Keystrokes then push their asscociated char to a string buffer
     - On update, the buffer is re-printed to the 'input' on the console window (although it is not really an input).
-1. On `ENTER` press, the buffer is flushed
+5. On `ENTER` press, the buffer is flushed
     - `consoleLog` is given this input
     - The input is also interpreted and one of three things can happen:
         - If prepended with the word `do`, we execute the remaining input as Lua
         - If `run`, we assume the rest is a file path, so we try to load a file at that path
         - Otherwise, assume it's a **command**.
-1. On `ESC` press, close the console window and call `textCaptureMode(1)` to unbind everything
+6. On `ESC` press, close the console window and call `textCaptureMode(1)` to unbind everything
 
 ## Command Anatomy
 
