@@ -14,9 +14,11 @@ COMMANDS.attack = COMMANDS.attack or {
         ---@type Player
         local target = param_vals.target;
 
-        if (target) then
+        if (attacker and target) then
             consoleLog(attacker.id .. " attacking player " .. target.id);
             attacker:attack(target);
+        elseif (param_vals.target) then
+            consoleLog("attack: error parsing target player");
         else
             consoleLog("attack: missing required param 'target={player id}' i.e 'target=1'");
         end

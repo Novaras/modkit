@@ -6,7 +6,7 @@ COMMANDS.ru = COMMANDS.ru or {
     example = "ru set p=0 amount=12345678",
     params = {
         player = PARAMS.intToPlayer({ 'p', 'player' }, 0),
-        amount = PARAMS.int({ 'n', 'v', 'val', 'value' })
+        amount = PARAMS.int({ 'n', 'v', 'val', 'value', 'amount' })
     },
     fn = function (param_vals, words)
         local verb = words[2] or 'grant';
