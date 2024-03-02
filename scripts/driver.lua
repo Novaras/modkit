@@ -201,7 +201,9 @@ if (H_DRIVER == nil) then
 		local caller = modkit.compose:instantiate(g, p, i); -- avoid registering the ship on this hook, let the first update tick do it
 		---@cast caller DriverShip
 
-		caller:create(); -- run the caller's custom create hook
+		if (caller.create) then
+			caller:create(); -- run the caller's custom create hook
+		end
 
 		return caller;
 	end
@@ -216,6 +218,7 @@ if (H_DRIVER == nil) then
 	update = update or function(g, p, i)
 		local caller = GLOBAL_SHIPS:get(i);
 		if (caller == nil or caller.own_group == nil or SobGroup_Count(caller.own_group) == 0) then -- can happen when loading a save etc.
+			-- print("UPDATE CALL AND P = " .. p);
 			caller = register(g, p, i);
 		end
 		---@cast caller DriverShip
