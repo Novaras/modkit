@@ -50,34 +50,35 @@ function modkit_hoist_memgroups()
 		if (not GLOBAL_SHIPS) then
 			GLOBAL_SHIPS = modkit.MemGroup.Create("mg-ships-global");
 		end
-		
+
 		for ship_id, line in incoming do
 			local data_str = strsplit(line, ",", 1);
-			local type_group = data_str[1];
+			local own_group = data_str[1];
 			local player_index = tonumber(data_str[2]);
 			-- modkit.table.printTbl(words, "words");
 
 			-- consoleLog("trying with " .. line);
-			-- consoleLog("tg: \t" .. tostring(type_group));
+			-- consoleLog("tg: \t" .. tostring(own_group));
 			-- consoleLog("pi: \t" .. tostring(player_index));
 			-- consoleLog("si: \t" .. tostring(ship_id));
-			if (type_group and player_index and ship_id) then
-				local new_ship = register(type_group, player_index, ship_id);
+			if (own_group and player_index and ship_id) then
+				local new_ship = register(own_group, player_index, ship_id);
 
 				new_ship.player = GLOBAL_PLAYERS:get(player_index);
 			end
 		end
+
 		-- print("gs");
 		-- print(GLOBAL_SHIPS);
-		modkit.table.printTbl(modkit.table.map(GLOBAL_SHIPS:all(), function (ship)
-			---@cast ship Ship
-			return {
-				id = ship.id,
-				type = ship.type_group,
-				group = ship.own_group,
-				player = ship.player.id,
-			};
-		end));
+		-- modkit.table.printTbl(modkit.table.map(GLOBAL_SHIPS:all(), function (ship)
+		-- 	---@cast ship Ship
+		-- 	return {
+		-- 		id = ship.id,
+		-- 		type = ship.type_group,
+		-- 		group = ship.own_group,
+		-- 		player = ship.player.id,
+		-- 	};
+		-- end));
 
 		-- clear the stream data, effectively consuming it
 		hyperTableHandle()({

@@ -51,7 +51,7 @@ If you pass a lua string with 'lua=', you can include replacement tokens in your
             parsed = gsub(parsed, "$f", family or '');
             parsed = gsub(parsed, "$p", pid or '');
             parsed = gsub(parsed, "$g", "'" .. SobGroup_FromShips(src) .. "'");
-            parsed = gsub(parsed, "$s", 'modkit.table.map(hyperTableHandle()().foreach_src, function(ship_def) return register(ship_def.type, ship_def.player_id, ship_def.id); end)');
+            parsed = gsub(parsed, "$s", 'modkit.table.map(hyperTableHandle()().foreach_src, function(ship_def) return register(ship_def.type, ship_def.player_id, ship_def.id, 1); end)');
 
             parsed = "dofilepath('data:scripts/modkit/hypertable.lua'); " ..
                 "dofilepath('data:scripts/modkit/driver.lua'); " ..

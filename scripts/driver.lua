@@ -87,12 +87,13 @@ if (H_DRIVER == nil) then
 
 	--- Registers the incoming sobgroup, player index, and ship id into a Ship table within the global registry.
 	-- The Ship is a rich representation of the actual ingame ship as a proper workable table.
-	---@param type_group string
+	---@param own_group string
 	---@param player_index integer
 	---@param ship_id integer
+	---@param sync_to_hypertable? bool
 	---@return Ship
-	register = register or function (type_group, player_index, ship_id)
-		type_group = strlower(type_group); -- immediately make this lowercase
+	register = register or function (own_group, player_index, ship_id, sync_to_hypertable)
+		own_group = strlower(own_group); -- immediately make this lowercase
 		local caller = GLOBAL_SHIPS:get(ship_id);
 		if (caller and caller.own_group and SobGroup_Count(caller.own_group) > 0) then -- fast return if already exists
 			return caller;
@@ -101,7 +102,7 @@ if (H_DRIVER == nil) then
 		---@type Ship
 		caller = GLOBAL_SHIPS:set(
 			ship_id,
-			modkit.compose:instantiate(type_group, player_index, ship_id)
+			modkit.compose:instantiate(own_group, player_index, ship_id)
 		);
 
 		---@cast caller DriverShip
@@ -121,45 +122,47 @@ if (H_DRIVER == nil) then
 		end
 		-- modkit.table.printTbl({ type_group = type_group, player_index = player_index, ship_id = ship_id }, "caller?", nil, f, 1);
 
-		local hypertable_handle = hyperTableHandle();
-		if (not hypertable_handle().GLOBAL_SHIPS) then -- check vs possible race condition
-			hypertable_handle({
-				GLOBAL_SHIPS = hypertable_handle().GLOBAL_SHIPS or {},
-			});
-		end
-
-		-- guard to ensure no duplicates
-		local already_hoisted = nil;
-		for id, _ in hypertable_handle().GLOBAL_SHIPS do
-
-			local existing = GLOBAL_SHIPS:find(function (ship)
-				return ship.id == %id;
-			end);
-
-			-- if this id matches no ship, it probably died, so we need to wipe the data
-			if (not existing) then
-				local state = hypertable_handle().GLOBAL_SHIPS;
-				state[id] = nil;
+		if (sync_to_hypertable) then
+			local hypertable_handle = hyperTableHandle();
+			if (not hypertable_handle().GLOBAL_SHIPS) then -- check vs possible race condition
 				hypertable_handle({
-					GLOBAL_SHIPS = state
+					GLOBAL_SHIPS = hypertable_handle().GLOBAL_SHIPS or {},
 				});
 			end
 
-			if (not already_hoisted) then -- if already found, dont update the val
-				-- print("check if ship " .. ship_id .. " was alreay hoisted");
-				already_hoisted = ship_id == existing_id;
+			-- guard to ensure no duplicates
+			local already_hoisted = nil;
+			for id, _ in hypertable_handle().GLOBAL_SHIPS do
+
+				local existing = GLOBAL_SHIPS:find(function (ship)
+					return ship.id == %id;
+				end);
+
+				-- if this id matches no ship, it probably died, so we need to wipe the data
+				if (not existing) then
+					local state = hypertable_handle().GLOBAL_SHIPS;
+					state[id] = nil;
+					hypertable_handle({
+						GLOBAL_SHIPS = state
+					});
+				end
+
+				if (not already_hoisted) then -- if already found, dont update the val
+					-- print("check if ship " .. ship_id .. " was alreay hoisted");
+					already_hoisted = ship_id == existing_id;
+				end
 			end
-		end
 
-		if (not already_hoisted) then
-			print("no ship matched, hoisting ship " .. ship_id);
-			local data = type_group .. "," .. player_index;
+			if (not already_hoisted) then
+				print("no ship matched, hoisting ship " .. ship_id);
+				local data = own_group .. "," .. player_index;
 
-			local new_state = hypertable_handle().GLOBAL_SHIPS;
-			new_state[ship_id] = data;
-			hypertable_handle({
-				GLOBAL_SHIPS = new_state
-			});
+				local new_state = hypertable_handle().GLOBAL_SHIPS;
+				new_state[ship_id] = data;
+				hypertable_handle({
+					GLOBAL_SHIPS = new_state
+				});
+			end
 		end
 
 		-- ensure non-nil when calling these:
@@ -211,6 +214,7 @@ if (H_DRIVER == nil) then
 	--- The global `update` hook called by all ships correctly linked to modkit.
 	---
 	--- Called **periodically**, with an interval defined in the `addCustomCode` call.
+	---
 	---@param g string The sobgroup containing the callee's squad
 	---@param p integer The player index (id)
 	---@param i integer The ship's unique id
@@ -218,8 +222,7 @@ if (H_DRIVER == nil) then
 	update = update or function(g, p, i)
 		local caller = GLOBAL_SHIPS:get(i);
 		if (caller == nil or caller.own_group == nil or SobGroup_Count(caller.own_group) == 0) then -- can happen when loading a save etc.
-			-- print("UPDATE CALL AND P = " .. p);
-			caller = register(g, p, i);
+			caller = register(g, p, i, 1);
 		end
 		---@cast caller DriverShip
 
@@ -233,7 +236,11 @@ if (H_DRIVER == nil) then
 			caller.player = GLOBAL_PLAYERS:get(engine_player_index);
 		end
 
-		SobGroup_SobGroupAdd(caller.own_group, g); -- ensure own group is filled on update
+		-- ensure own group is filled on update
+		if (SobGroup_Count(caller.own_group) <= 0) then
+			SobGroup_Overwrite(caller.own_group, g);
+		end
+
 		caller:tick(caller:tick() + 1);
 
 		caller:update(); -- run the caller's custom update hook
@@ -264,7 +271,7 @@ if (H_DRIVER == nil) then
 		caller:destroy(); -- run the caller's custom destroy hook
 
 		GLOBAL_SHIPS:delete(i);
-		
+
 		return caller;
 	end
 
