@@ -40,6 +40,7 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 		---@field _started_gametime number
 		---@field _tick integer
 		---@field _value any
+		---@field _previous_return any
 
 		---@class RuleState : RuleCoreState, any[]
 
@@ -175,7 +176,7 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 				dostring(self.api_name .. " = GLOBAL_RULES.__runner"); -- my word...
 				print(globals()[self.api_name]);
 				-- set the initial value (important for chaining)
-				self.core_state._value = initial_value;
+				self.core_state._previous_return = initial_value;
 				-- and we then invoke it every `self.interval` ticks
 				Rule_AddInterval(self.api_name, self.interval);
 				self.status = "running";
