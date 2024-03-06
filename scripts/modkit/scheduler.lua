@@ -67,6 +67,10 @@ EVENT_STATUS = {
 ---@alias EventFn fun(previous_return: any|nil, resolveCallback: EventResolve, rejectCallback: EventReject, state: EventState): any
 
 if (modkit.scheduler == nil) then
+	if (modkit.MemGroup == nil) then
+		dofilepath("data:scripts/modkit/memgroup.lua");
+	end
+
 	---@class GlobalScheduleEvents: MemGroupInst
 	---@field _entities Event[]
 	---@field _listeners EventListener[]
@@ -106,7 +110,7 @@ if (modkit.scheduler == nil) then
 
 	--- Returns whether or not the given listener passes its conditions.
 	---
-	--- We can't attach this as a method to the listener itself since functions cant survive in the hypertable.
+	--- We can't attach this as a method to the listener itself since functions cant survive in the superscope.
 	---
 	---@param listener EventListener
 	---@return bool
