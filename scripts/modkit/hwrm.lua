@@ -594,7 +594,7 @@ if (nil) then
 
 	--- Causes the first valid ship in `group_name` to instantly build the given subsystem.
 	---
-	--- The second param can also be the _type_ of subs, i.e `FighterProduction`, `AdvancedResearch`, etc.
+	--- The second param can also be the _type_ of subs, i.e `PlatformProduction`, `AdvancedResearch`, etc.
 	---
 	---@param group_name string
 	---@param subs_name_or_type string
