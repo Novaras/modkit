@@ -37,6 +37,10 @@ if (not MK_hypertable) then
 			UI_SelectDropDownListboxItemIndex(%screen_name, %dropdown_host_el, 0);
 			local ui_str = UI_GetDropdownListBoxSelectedCustomDataString(%screen_name, %dropdown_host_el);
 
+			-- remove newlines from parsed lines, otherwise it breaks the `doline` parse
+			ui_str = gsub(ui_str, "%\n?%\r?", "");
+
+			-- convert the state held as a string into an actual table by executing it as a Lua string and returning it
 			local current_state = dostring("return " .. (ui_str or "{}"));
 
 			if (new_state) then
