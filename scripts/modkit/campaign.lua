@@ -190,7 +190,7 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 						---@cast rule Rule
 					end
 					---@diagnostic disable-next-line: cast-local-type
-					rule = rules:get(rule);
+					rule = modkit.campaign.rules:get(rule);
 					---@cast rule Rule
 
 					--- @class RuleChain
