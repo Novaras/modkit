@@ -50,6 +50,10 @@ if (H_SP_HELPERS == nil) then
 		if (MODKIT_MISSION_SHIPS == nil) then
 			dofilepath(level_path);
 		end
+
+		-- in case the level has no ships at all
+		MODKIT_MISSION_SHIPS = MODKIT_MISSION_SHIPS or {};
+
 		for id, ship in MODKIT_MISSION_SHIPS do
 			if (not ship.count) then
 				ship.count = 1;
