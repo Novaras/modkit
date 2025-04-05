@@ -35,7 +35,7 @@ if (not MK_hypertable) then
 
 		return function(new_state, custom_key_behaviors, overwrite)
 			UI_SelectDropDownListboxItemIndex(%screen_name, %dropdown_host_el, 0);
-			local ui_str = UI_GetDropdownListBoxSelectedCustomDataString(%screen_name, %dropdown_host_el);
+			local ui_str = UI_GetDropdownListBoxSelectedCustomDataString(%screen_name, %dropdown_host_el) or "";
 
 			-- remove newlines from parsed lines, otherwise it breaks the `doline` parse
 			ui_str = gsub(ui_str, "%\n?%\r?", "");
