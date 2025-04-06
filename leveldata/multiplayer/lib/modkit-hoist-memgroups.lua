@@ -83,7 +83,7 @@ function modkit_hoist_memgroups()
 		-- clear the stream data, effectively consuming it
 		hyperTableHandle()({
 			GLOBAL_SHIPS = {}
-		}, nil, 1);
+		});
 
 		-- modkit.table.printTbl(hyperTableHandle()().GLOBAL_SHIPS, "STREAM BUFFER");
 	end
