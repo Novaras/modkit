@@ -81,8 +81,8 @@ function modkit_hoist_memgroups()
 		-- end));
 
 		-- clear the stream data, effectively consuming it
-		hyperTableHandle()({
-			GLOBAL_SHIPS = {}
+		hyperTableHandle()({}, {
+			override = { GLOBAL_SHIPS = {} }
 		});
 
 		-- modkit.table.printTbl(hyperTableHandle()().GLOBAL_SHIPS, "STREAM BUFFER");
