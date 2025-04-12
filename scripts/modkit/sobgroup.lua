@@ -308,7 +308,7 @@ if (H_SOBGROUP ~= 1) then
 		---@type string[]
 		local subgroups = {};
 
-		for i = 0, SobGroup_Count(group), granularity do
+		for i = 0, SobGroup_Count(group) - granularity, granularity do
 			local subgroup = SobGroup_Fresh();
 			SobGroup_FillShipsByIndexRange(subgroup, group, i, granularity);
 			subgroups[i + 1] = subgroup;

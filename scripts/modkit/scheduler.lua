@@ -9,7 +9,8 @@ end
 ---@class EventCoreState: table
 ---@field _tick integer
 ---@field _started_gametime number
----@field _previous? any
+---@field _value? any -- running value, set by the callback's return each execution
+---@field _previous_resolve? any -- resolve value of the previous event, if any
 ---@field _remaining_iterations? integer
 
 ---@class EventState: table, EventCoreState
@@ -35,15 +36,12 @@ EVENT_STATUS = {
 ---@field state EventState
 ---@field status EventStatus
 ---@field result? any[]
----@field tick? integer
----@field started_gametime number
 ---@field fn EventFn
----@field previous_return? any -- Previous return value from `fn`, if exists
 ---@field interval integer
 ---@field remaining_iterations? integer
----@field value? any -- only exists after resolving
 ---@field error? string -- only exists after rejecting
----@field begin fun(event: EventLike): EventChain
+---@field begin fun(self: Event): EventChain
+---@field finish fun(self: Event, state: EventStatus, args: any): nil
 ---@field __is_event bool
 
 ---@alias EventLike Event|EventConfig|EventFn
@@ -55,16 +53,16 @@ EVENT_STATUS = {
 
 ---@class EventListenerOptions
 ---@field pass_statuses? EventStatus[]
----@field computeNextEventsInitialPreviousValue? fun(): any
+---@field computePreviousResolve? fun(): any We might want to produce a 'previous' result for an event which is not part of a chain; for that we just invoke a given callback
 
 ---@class EventListener
 ---@field pattern string
 ---@field options EventListenerOptions
 ---@field event_to_trigger Event
 
----@alias EventResolve fun(value?: any)
----@alias EventReject fun(message: string)
----@alias EventFn fun(previous_return: any|nil, resolveCallback: EventResolve, rejectCallback: EventReject, state: EventState): any
+---@alias EventResolve fun(...: any): nil
+---@alias EventReject fun(message: string): nil
+---@alias EventFn fun(resolveCallback: EventResolve, rejectCallback: EventReject, state: EventState): any
 
 if (modkit.scheduler == nil) then
 	if (modkit.MemGroup == nil) then
@@ -93,10 +91,10 @@ if (modkit.scheduler == nil) then
 
 	---@return EventResolve
 	_schedulerResolver = function (event)
-		return function (value)
+		return function (...)
 			print("RESOLVING EVENT " .. %event.name .. "!");
 			%event.status = EVENT_STATUS.RESOLVED;
-			%event.value = value;
+			%event.result = args;
 		end;
 	end
 
@@ -160,19 +158,35 @@ if (modkit.scheduler == nil) then
 	function _makeEventChain(event)
 		local chain = {};
 		---@cast chain EventChain
+		
+		if (type(event) == "function" or not event.__is_event) then
+			---@cast event EventConfig
+			event = modkit.scheduler:make(event);
+		end
+		---@cast event Event
 
 		function chain:next(next_event)
 			local event = %event;
 
 			if (type(next_event) == "function") then
+				---@cast next_event EventFn
+				next_event = modkit.scheduler:make({
+					name = event.name .. "_next",
+					fn = next_event,
+				});
+			end
+			if (not next_event.__is_event) then
+				---@cast next_event EventConfig
+				next_event = modkit.scheduler:make(next_event);
+			end
+			---@cast next_event Event
+
+			if (type(next_event) == "function") then
 				next_event = modkit.scheduler:make(next_event);
 			end
 
-			modkit.scheduler:on(event.name, next_event, {
-				computeNextEventsInitialPreviousValue = function ()
-					return %event.value;
-				end
-			});
+			modkit.scheduler:on(event.name, next_event);
+
 			return _makeEventChain(next_event);
 		end
 
@@ -225,22 +239,41 @@ if (modkit.scheduler == nil) then
 			};
 		end
 
+		modkit.table.printTbl(new_event, "new event request");
+
+		---@type EventCoreState
+		local core_state = {
+			_started_gametime = Universe_GameTime(),
+			_tick = 0,
+			_remaining_iterations = new_event.iterations,
+		};
+
 		local new_event = {
 			-- from def
 			fn = new_event.fn,
 			iterations = new_event.iterations,
 			interval = new_event.interval or modkit.scheduler.default_interval,
 			name = new_event.name or ("schedule_event_" .. id),
-			state = new_event.state or {},
+			state = modkit.table:merge(new_event.state or {}, core_state),
 			-- construct the rest
 			id = id,
-			status = EVENT_STATUS.INIT,
-			started_gametime = Universe_GameTime(),
-			tick = 0
+			status = EVENT_STATUS.INIT
 		};
 
 		function new_event:begin()
 			return modkit.scheduler:begin(self);
+		end
+
+		---@param status EventStatus
+		function new_event:finish(status, args)
+
+			self.status = status;
+
+			if (status == EVENT_STATUS.REJECTED) then
+				return _schedulerRejecter(self)(args);
+			end
+
+			return _schedulerResolver(self)(args);
 		end
 
 		---@cast new_event Event
@@ -256,15 +289,13 @@ if (modkit.scheduler == nil) then
 		settagmethod(identifier_tag, "gettable", identifier_hook);
 		settag(new_event, identifier_tag);
 
-		GLOBAL_SCHEDULE_EVENTS:set(new_event.id, new_event);
-
-		return new_event;
+		return GLOBAL_SCHEDULE_EVENTS:set(new_event.id, new_event);
 	end
 
 	---@param event EventLike
 	---@return EventChain
 	function scheduler_lib:begin(event)
-		if (not event.__is_event) then
+		if (type(event) == "function" or not event.__is_event) then
 			---@cast event EventConfig
 			event = modkit.scheduler:make(event);
 		end
@@ -287,7 +318,7 @@ if (modkit.scheduler == nil) then
 		);
 		---@cast options EventListenerOptions
 
-		if (not event_to_trigger.__is_event) then
+		if (type(event_to_trigger) == "function" or not event_to_trigger.__is_event) then
 			---@cast event_to_trigger EventConfig|EventFn
 			event_to_trigger = modkit.scheduler:make(event_to_trigger);
 		end
