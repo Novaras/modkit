@@ -601,6 +601,33 @@ if (nil) then
 	function SobGroup_CreateSubSystem(group_name, subs_name_or_type)
 	end
 
+	--- Causes ships in `docking_group` to attempt to dock with the closest ship available in `target_group`.
+	---
+	---@param docking_group string
+	---@param target_group string
+	function SobGroup_DockSobGroup(docking_group, target_group)
+	end
+
+	--- Causes ships in `docking_group` to dock with the closest ship in `target_group` and _'stay docked'_; once docked, the ships cannot launch until ordered to do so.
+	---
+	---@param docking_group string
+	---@param target_group string
+	function SobGroup_DockSobGroupAndStayDocked(docking_group, target_group)
+	end
+
+	--- Causes ships in `docking_group` to dock with the closest ship in `target_group` _'instantly'_; it is teleported with no effect or other action taken.
+	---
+	---@param docking_group string
+	---@param target_group string
+	function SobGroup_DockSobGroupInstant(docking_group, target_group)
+	end
+
+	--- Causes ships in `docking_group` to dock with the closest availble ship.
+	---@param docking_group any
+	---@param target_group any
+	function SobGroup_DockSobGroupWithAny(docking_group, target_group)
+	end
+
 	--- Makes ships with salvage ability in `group_name` begin salvaging viabel ships in `target_group`.
 	---
 	---@param group_name string
@@ -641,6 +668,14 @@ if (nil) then
 	---@param attribute "buildCost" | "buildTime" | "buildBatch"
 	---@return integer
 	function SobGroup_GetStaticF(ship_type, attribute)
+	end
+
+	--- Returns whether or not `needle_group` is contained within `haystack_group`.
+	---
+	---@param needle_group string
+	---@param haystack_group string
+	---@return 0|1
+	function SobGroup_GroupInGroup(needle_group, haystack_group)
 	end
 
 	--- Returns the player who owns the given group.
@@ -1003,7 +1038,7 @@ if (nil) then
 	--- Same as `Objective_SetDescription`, but here `description` is a wchar string.
 	---
 	---@param id integer
-	---@param description string
+	---@param description userdata
 	function Objective_SetDescriptionw(id, description)
 	end
 
