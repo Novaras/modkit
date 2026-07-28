@@ -1,28 +1,34 @@
 -- no-dependency helper functions for mission scripts and levels
 
+---@class MissionShip
+---@field type string
+---@field player? integer
+---@field position? Arr3
+---@field rotation? Arr3
+---@field in_hyperspace? 0|1
+---@field id_override? string|number
+---@field group_name_override? string
+
+---@type MissionShip[]
+MODKIT_MISSION_SHIPS = {};
+
 if (H_SP_HELPERS == nil) then
 	SHIP_NEXT_ID = 0;
 
 	--- In the context of a .level script, creates squads & groups for the ships and positions them on the map etc.
 	--- In the context of a .lua script, creates `Ship` definitions from this information instead, stored in `GLOBAL_MISSION_SHIPS`
-	---@param type string
-	---@param player? integer
-	---@param position? Arr3
-	---@param rotation? Arr3
-	---@param in_hyperspace? 0|1
-	---@param id_override? string|number
-	---@param group_name_override? string
-	function RegisterShip(type, player, position, rotation, in_hyperspace, id_override, group_name_override)
-		local group_name = group_name_override or ("_registergroup_" .. SHIP_NEXT_ID);
+	---@param mission_ship MissionShip
+	function RegisterShip(mission_ship)
+		local group_name = mission_ship.group_name_override or ("_registergroup_" .. SHIP_NEXT_ID);
 
-		player = player or 0;
-		position = position or { 0, 0, 0 };
-		rotation = rotation or { 0, 0, 0 };
-		in_hyperspace = in_hyperspace or 0;
+		local type = mission_ship.type;
 
-		if (id_override == nil) then
-			id_override = SHIP_NEXT_ID;
-		end
+		local player = mission_ship.player or 0;
+		local position = mission_ship.position or { 0, 0, 0 };
+		local rotation = mission_ship.rotation or { 0, 0, 0 };
+		local in_hyperspace = mission_ship.in_hyperspace or 0;
+
+		local id_override = mission_ship.id_override or SHIP_NEXT_ID;
 		SHIP_NEXT_ID = SHIP_NEXT_ID + 1;
 
 		if (addSquadron ~= nil and createSOBGroup ~= nil) then -- defined only during .level load by engine
@@ -51,7 +57,6 @@ if (H_SP_HELPERS == nil) then
 			dofilepath(level_path);
 		end
 
-		-- in case the level has no ships at all
 		MODKIT_MISSION_SHIPS = MODKIT_MISSION_SHIPS or {};
 
 		for id, ship in MODKIT_MISSION_SHIPS do
@@ -59,15 +64,7 @@ if (H_SP_HELPERS == nil) then
 				ship.count = 1;
 			end
 			for i = 1, ship.count do
-				RegisterShip(
-					ship.type,
-					ship.player,
-					ship.position,
-					ship.rotation,
-					ship.in_hyperspace,
-					id,
-					ship.group_name_override
-				);
+				RegisterShip(ship);
 			end
 		end
 	end
