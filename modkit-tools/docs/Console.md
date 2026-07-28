@@ -136,7 +136,7 @@ There are several _`ParamConfig`_ objects already defined in `commands.lua`. The
 
 ### Reading Flags
 
-Flags are supplied as the third argument to a command's `fn`, are are given as a `bool[]` (that is, its just a table of `1`s).
+Flags are supplied as the third argument to a command's `fn`, are are given as a `table<string, bool>` (that is, its just a table of `1`s). If a key is present on this table the flag was set to true.
 
 ```
 move t=kus_scout pos=0 0 0 --force
