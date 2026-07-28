@@ -10,12 +10,14 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 
 	--- Cast a `RuleFn` to a `Rule` (filling with defaults). Does nothing if `rule` is not a `function` type.
 	---
-	---@param rule Rule|RuleFn
+	---@param rule Rule|RuleFn|RuleInitConfig
 	---@return Rule
 	function toRule(rule)
-		if (type(rule) == "function") then
+		if (type(rule) == "function" or not rule.api_name) then
+			---@cast rule RuleFn|RuleInitConfig
 			return modkit.campaign.rules:make(rule);
 		end
+		---@cast rule Rule
 
 		return rule;
 	end
@@ -35,23 +37,30 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 	if (GLOBAL_RULES == nil) then
 
 		---@class RuleCoreState
-		---@field _rule_name string
 		---@field _interval integer
 		---@field _started_gametime number
 		---@field _tick integer
-		---@field _value any
-		---@field _previous_return any
+		---@field _value any The return of the supplied callbacks previous run
+		---@field _previous_result any The resolve value from the previous rule, if any
 
-		---@class RuleState : RuleCoreState, any[]
+		---@class RuleState : RuleCoreState, table
 
 		--- Call to end the rule executing this `RuleFn`. Args are included as the initial `_value` of the next chained rule, if any.
-		---@alias RuleResolve fun(...: any): nil
+		---@alias RuleResolver fun(...: any): nil
 
-		---@alias RuleError fun(message: string): nil
+		---@alias RuleRejector fun(message: string): nil
 
-		---@alias RuleFn fun(resolveCallback: RuleResolve, rejectCallback: RuleError, state: RuleState, rules: Rules): any
+		---@alias RuleFn fun(resolveCallback: RuleResolver, rejectCallback: RuleRejector, state: RuleState): any
 
 		---@alias RuleStatus "init"|"running"|"resolved"|"rejected"
+
+		---@class RuleInitConfig
+		---@field name? string
+		---@field fn RuleFn
+		---@field interval? number
+		---@field initial_state? table
+		---@field awaits_rules? string
+		---@field immediate? bool In case the user wants to pass a whole bunch of rules from a big table etc.
 
 		---@class Rule
 		---@overload fun(): RuleChain
@@ -59,23 +68,28 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 		---@field id string
 		---@field interval integer
 		---@field status RuleStatus
+		---@field name string
 		---@field api_name string
 		---@field fn_state RuleState
 		---@field core_state RuleCoreState
-		---@field result any[] Table of values from the previous `RuleResolve` call in the chain
+		---@field result any Resolved value after this rule ends via a `resolve` call
 		---@field error? string Error message passed to a `RuleError` call in the chain
+		--- Begins the rule, by calling `Rule_AddInterval` under the hood
 		---@field begin fun(self: Rule, previous_result: any): RuleChain
+		--- Wrapper callback for the user defined callback; forces the params into (resolver, rejecter, state, rules_handle)
 		---@field run function
+		--- Exits the rule, callng `Rule_Remove`. This rule object is presisted, and can be restarted later for example.
 		---@field finish function
 
 		---@class RuleChain
+		--- Accepts a `Rule`, a callback, or a `Rule` id; invokes whatever was given as soon as the previous rule resolves.
 		---@field next fun(self: RuleChain, action: Rule|RuleFn|string): RuleChain
-		---@field catch fun(self: RuleChain, action: function): nil
+		---@field catch fun(self: RuleChain, handler: function): nil If the previous rule exits via a reject, the error and rule object are passed to the supplied handler
 
 		---@class Listener
 		---@field pattern string
 		---@field exec function
-		---@field callback function
+		---@field callback function|RuleInitConfig|Rule
 
 		---@class GLOBAL_RULES : MemGroupInst
 		---@field find fun(self: GLOBAL_RULES, predicate: fun(rule: Rule): bool): Rule|nil
@@ -84,69 +98,73 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 		---@field __listeners Listener[]
 		---@field __level_path string
 		---@field __tick integer
+		---@field __default_interval integer
 		GLOBAL_RULES = modkit.MemGroup.Create("mg-rules-global", {
 			__runner = nil,
 			__rule_pattern = nil,
 			__listeners = {},
 			__level_path = nil,
 			__tick = 0,
+			__default_interval = 1,
 		});
 
 		---
 		---@param id string
-		---@param rule_fn Rule|RuleFn
-		---@param interval number
-		---@param state RuleState
+		---@param rule_init_conf RuleInitConfig|RuleFn
 		---@return Rule
-		function GLOBAL_RULES:add(id, rule_fn, interval, state)
+		function GLOBAL_RULES:add(id, rule_init_conf)
+			if (type(rule_init_conf) == "function") then
+				rule_init_conf = {
+					fn = rule_init_conf,
+				};
+			end
+			---@cast rule_init_conf RuleInitConfig
+
 			local rule = {
 				id = id,
-				interval = interval,
+				interval = rule_init_conf.interval or self.__default_interval,
 				status = "init",
-				api_name = "modkit_rule_fn__" .. id,
-				fn = rule_fn,
-				core_state = {
-					_rule_name = id,
-					_interval = interval,
-				},
+				name = name,
+				api_name = rule_init_conf.name or ("modkit_rule_fn__" .. id),
+				fn = rule_init_conf.fn,
+			};
+
+			rule.core_state = {
+				_tick = 0,
+				_started_gametime = -1,
+				_interval = rule_init_conf.interval or 1
 			};
 
 			rule.fn_state = modkit.table:merge(
-				rule.core_state,
-				{
-					_tick = 0,
-					_started_gametime = -1
-				},
-				state
+				rule_init_conf.initial_state,
+				rule.core_state
 			);
 
 			---
 			---@param status RuleStatus
-			---@param args any[]
-			function rule:finish(status, args)
+			---@param result any|any[]
+			function rule:finish(status, result)
 				print("kill rule " .. self.api_name);
 
 				Rule_Remove(self.api_name);
 
 				self.status = status;
-
-				---@diagnostic disable-next-line: inject-field
-				args.n = nil;
-				self.result = args;
+				self.result = result;
 
 				-- modkit.table.printTbl(GLOBAL_RULES, "GLOBAL_RULES");
 			end
 
 			function rule:run()
-				-- unset any modification to core state and update tick
 				self.fn_state = modkit.table:merge(
 					self.fn_state,
 					self.core_state
 				);
-				self.fn_state._tick = self.fn_state._tick + 1;
 
-				local resolve = function (...)
-					%self:finish("resolved", arg);
+				-- unset any modification to core state and update tick
+				self.core_state._tick = self.core_state._tick + 1;
+
+				local resolve = function (result)
+					%self:finish("resolved", result);
 				end
 
 				local reject = function (message)
@@ -154,7 +172,7 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 					%self:finish("rejected", {});
 				end
 
-				self.core_state._value = self.fn(resolve, reject, self.fn_state, modkit.campaign.rules);
+				self.core_state._value = self.fn(resolve, reject, self.fn_state);
 				return self.core_state._value;
 			end
 
@@ -166,7 +184,7 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 				if (self.status ~= "init") then
 					return nil;
 				end
-				self.fn_state._started_gametime = Universe_GameTime();
+				self.core_state._started_gametime = Universe_GameTime();
 				print("begin rule " .. self.api_name);
 				-- we create a global function which runs the rule's 'run' callback
 				GLOBAL_RULES.__runner = function ()
@@ -176,7 +194,7 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 				dostring(self.api_name .. " = GLOBAL_RULES.__runner"); -- my word...
 				print(globals()[self.api_name]);
 				-- set the initial value (important for chaining)
-				self.core_state._previous_return = initial_value;
+				self.core_state._previous_result = initial_value;
 				-- and we then invoke it every `self.interval` ticks
 				Rule_AddInterval(self.api_name, self.interval);
 				self.status = "running";
@@ -187,8 +205,8 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 					if (type(rule) ~= "string" and type(rule.api_name) ~= "string") then
 						---@cast rule RuleFn
 						rule = toRule(rule);
-						---@cast rule Rule
 					end
+					---@cast rule Rule
 					---@diagnostic disable-next-line: cast-local-type
 					rule = modkit.campaign.rules:get(rule);
 					---@cast rule Rule
@@ -241,7 +259,13 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 			end);
 			settag(rule, rule_callable_tag);
 
+			if (rule.awaits_rules) then
+				modkit.campaign.rules:on(new_rule.awaits_rules, created);
+			end
+
 			---@cast rule Rule
+
+			-- modkit.table.printTbl(rule, "new rule " .. rule.id);
 
 			return self:set(id, rule);
 		end
@@ -273,21 +297,15 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 		end);
 	end
 
-	---@param rule_fn RuleFn
-	---@param options? { name?: string, interval?: number }
-	---@param state? any[]
+	---@param new_rule RuleInitConfig|RuleFn
 	---@return Rule
-	function rules:make(rule_fn, options, state)
-		options = options or {};
-		name = options.name or ("__rule__" .. tostring(GLOBAL_RULES.__tick) .. "_" .. tostring(modkit.table.length(GLOBAL_RULES._entities)));
-		interval = options.interval or self.min_poll_interval;
-	
-		local already_exists = GLOBAL_RULES:get(name);
-		if (already_exists) then
-			print("overriding already existing rule: " .. name);
+	function rules:make(new_rule)
+		local id = ("mk_rule__" .. tostring(GLOBAL_RULES.__tick) .. "_" .. tostring(modkit.table.length(GLOBAL_RULES._entities)));
+		if (type(new_rule) == "table" and new_rule.name) then
+			id = id .. "__" .. new_rule.name;
 		end
 
-		return GLOBAL_RULES:add(name, rule_fn, interval, state or {});
+		return GLOBAL_RULES:add(id, new_rule);
 	end
 
 	---@param rule Rule|string
@@ -303,8 +321,9 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 		return rule;
 	end
 
-	--- Takes a 'rule pattern', which is lua-style 'and' and 'or' with rule names, firing `callback` if the patten
-	-- is satisfied.
+	--- Takes a 'rule pattern', which is lua-style 'and' and 'or' with rule names, firing `event` if the patten is satisfied.
+	--- 
+	--- If `event` is a rule or a rule definition, that rule will be started. If `event` is just a function, is is simply invoked.
 	---
 	--- This pattern would trigger `callback` if rules `'A'` AND `'rule_b'` AND `'myC0OlRule'` were finished, OR if rule `'D'` finished:
 	--- ```lua
@@ -313,9 +332,9 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 	--- Returns a LUA string to execute (we just leverage LUA's inbuilt language parsing).
 	---
 	---@param pattern string
-	---@param callback function
+	---@param event function|RuleInitConfig|Rule
 	---@return nil
-	function rules:on(pattern, callback)
+	function rules:on(pattern, event)
 		-- 'A and (B or C)'
 		-- -> 'A&(B or C)'
 		-- -> 'A&(B|C)'
@@ -353,9 +372,16 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 			print("overrriding already existing listener for [ " .. pattern .. " ]");
 		end
 
-		callback = toRuleFn(callback);
+		local callback = event;
 
-		-- how to wait for this value?
+		if (type(event) ~= "function" and not event.api_name) then -- no need to convert if already a `Rule`, as they are callable via the tag method
+			local as_rule = toRule(event);
+
+			callback = function ()
+				%as_rule:begin();
+			end
+		end
+
 		GLOBAL_RULES.__listeners[pattern] = {
 			pattern = pattern,
 			exec = exec,
@@ -363,24 +389,23 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 		};
 	end
 
-	---@class RuleDef
-	---@field name? string
-	---@field pattern? string
-	---@field interval? number
-	---@field immediate? bool
-	---@field fn RuleFn
 
-	--- Parses a table of rule definitions. The rules are registered, then, if they have no `pattern` to wait for, they're fired.
+	--- Parses a table of rule definitions. The rules are registered, then, if they have no `listener_pattern` to wait for, they're fired.
 	--- Otherwise the rule is fired when the pattern is satisfied using `rules:on`.
-	---@param rules_table table<string, RuleDef>
+	---@param rules_table table<string, RuleInitConfig>
 	function rules:parse(rules_table)
 		modkit.table.forEach(rules_table, function (def, name)
-			---@cast def RuleDef
+			---@cast def RuleInitConfig
 
-			print("make w name " .. tostring(def.name or name));
-			local r = modkit.campaign.rules:make(def.fn, { interval = def.interval, name = tostring(def.name or name) });
-			if (def.pattern) then
-				modkit.campaign.rules:on(def.pattern, function ()
+			if (type(def) == "function") then
+				def = {
+					fn = def,
+				};
+			end
+
+			local r = modkit.campaign.rules:make(def);
+			if (def.awaits_rules) then
+				modkit.campaign.rules:on(def.awaits_rules, function ()
 					%r:begin();
 				end);
 			end

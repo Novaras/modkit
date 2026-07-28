@@ -23,30 +23,29 @@ if (not MK_CAMPAIGN_UTIL) then
 			message_time_offset = 1,
 		}, options or {});
 
-		return rules:make(function (res, rej, state)
-			---@class GPRuleState : { gametime_set?: 1, message_shown?: 1 }, RuleState
-			---@cast state GPRuleState
+		return modkit.campaign.rules:make({
+			fn = function (res, rej, state)
+				---@class GPRuleState : { gametime_set?: 1, message_shown?: 1 }, RuleState
+				---@cast state GPRuleState
 
-			if (not state._value) then
-				state._value = %options.value;
-			end
+				if (%options.gametime_set and not state.gametime_set) then
+					UI_TimerReset("NewTaskbar", "GameTimer");
+					UI_SetTimerOffset("NewTaskbar", "GameTimer", %options.gametime_set);
+					state.gametime_set = 1;
+				end
 
-			if (%options.gametime_set and not state.gametime_set) then
-				UI_TimerReset("NewTaskbar", "GameTimer");
-				UI_SetTimerOffset("NewTaskbar", "GameTimer", %options.gametime_set);
-				state.gametime_set = 1;
-			end
+				if (%options.message and not state.message_shown and Universe_GameTime() - state._started_gametime >= %options.message_time_offset) then
+					Subtitle_Message(%options.message, %options.message_duration);
+					state.message_shown = 1;
+				end
 
-			if (%options.message and not state.message_shown and Universe_GameTime() - state._started_gametime >= %options.message_time_offset) then
-				Subtitle_Message(%options.message, %options.message_duration);
-				state.message_shown = 1;
-			end
-
-			if (Universe_GameTime() >= state._started_gametime + %options.duration) then
-				print("EXIT GRACE PERIOD");
-				return res(state._value);
-			end
-		end, { interval = 2 });
+				if (Universe_GameTime() >= state._started_gametime + %options.duration) then
+					print("EXIT GRACE PERIOD");
+					return res(state._previous_result);
+				end
+			end,
+			interval = 2,
+		});
 	end
 
 	MK_CAMPAIGN_UTIL = 1;
