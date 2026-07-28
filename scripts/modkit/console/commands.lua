@@ -193,7 +193,7 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 				PARAMS.vec3(names, default),
 				{
 					transform = function (value)
-						return strsplit(value, "%s+", 1);
+						return Vec3:create(strsplit(value, "%s+", 1));
 					end
 				}
 			);
@@ -224,7 +224,7 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 		end
 	};
 
-	---@type CommandFn[]
+	---@class COMMANDS: table
 	COMMANDS = {};
 	doscanpath("data:scripts/modkit/console/commands", "*.lua");
 
