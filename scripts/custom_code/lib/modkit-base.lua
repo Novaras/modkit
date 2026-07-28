@@ -11,6 +11,7 @@ dofilepath("data:scripts/modkit/research.lua"); -- research...
 ---@field own_group string
 ---@field player Player
 ---@field _tick integer
+---@field _hoisted bool
 ---@field created_at number
 
 ---@class Base : Attribs
@@ -27,6 +28,7 @@ modkit_base = {
 			own_group = SobGroup_Clone(g, g .. "-" .. s),
 			player = GLOBAL_PLAYERS:get(p),
 			_tick = 0,
+			_hoisted = nil,
 			created_at = Universe_GameTime()
 		};
 	end
@@ -56,6 +58,16 @@ end
 ---@return integer
 function modkit_base:batchSize()
 	return SobGroup_GetStaticF(self.ship_type, "buildBatch");
+end
+
+--- Calls `Volume_Fresh` with a unique name based on the calling ship.
+---
+---@param position? Position|Arr3
+---@param radius? integer
+---@param type?'sphere'|'cube'
+---@return string
+function modkit_base:freshVolume(position, radius, type)
+	return Volume_Fresh(nil, position, radius, type);
 end
 
 modkit.compose:addBaseProto(modkit_base);

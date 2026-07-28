@@ -19,7 +19,11 @@ function scheduler:pruneOthers()
 end
 
 function scheduler:update()
+	-- print("scheduler tick " .. self:tick());
 	if (self:tick() == 1) then
+		GLOBAL_SCHEDULE_EVENTS._entities = {};
+		GLOBAL_SCHEDULE_EVENTS._listeners = {};
+
 		self:spawn(0);
 	end
 
@@ -33,10 +37,6 @@ function scheduler:update()
 		return event.status == EVENT_STATUS.RUNNING and mod(%self:tick(), event.interval) == 0;
 	end);
 
-	-- if (mod(self:tick(), 20) == 0) then
-	-- 	modkit.table.printTbl(modkit.scheduler:all(), "scheduler events");
-	-- end
-
 
 	-- for each running event
 	-- 1. set up the core state and merge it with the previous state
@@ -45,47 +45,22 @@ function scheduler:update()
 	for _, event in running_events do
 		---@cast event Event
 
-		---@type EventCoreState
-		local core_state = {
-			_tick = event.tick,
-			_remaining_iterations = event.remaining_iterations,
-			_started_gametime = event.started_gametime
-		};
-
-		-- if there is a previous value, we copy it to the core state
-		-- in the case of a table, we should do a clone
-		if (event.previous_return) then
-			local prev = event.previous_return;
-			if (type(prev) == "table") then
-				core_state._previous = modkit.table.clone(prev);
-			else
-				core_state._previous = prev;
-			end
-		end
-
-		--- incoming `state` is overwritten on the core keys
-		---@type EventState
-		local parsed_state = modkit.table:merge(
-			event.state,
-			core_state
-		);
-
 		-- update prev to the callback return
-		local fn_ret = event.fn(event.previous_return, _schedulerResolver(event), _schedulerResolver(event), parsed_state);
-		event.previous_return = fn_ret;
+		local fn_ret = event.fn(_schedulerResolver(event), _schedulerRejecter(event), event.state);
+		event.state._value = fn_ret;
 
 		local status = event.status; -- if resolver or rejecter were invoked, we'll have that status, otherwise `RUNNING`
 		if (status == EVENT_STATUS.RUNNING) then -- do bookkeeping like tick update if running
-			event.tick = event.tick + 1;
+			event.state._tick = event.state._tick + 1;
 			if (event.remaining_iterations) then
 				event.remaining_iterations = event.remaining_iterations - 1;
 			end
 		end
 
 		if (event.remaining_iterations == 0) then
-			print("event " .. event.name .. " remaining_iterations is 0: " .. event.remaining_iterations);
+			-- print("event " .. event.name .. " remaining_iterations is 0: " .. event.remaining_iterations);
 			event.status = EVENT_STATUS.RESOLVED;
-			event.value = event.previous_return;
+			event.result = event.state._value;
 		end
 	end
 
@@ -97,11 +72,13 @@ function scheduler:update()
 		-- print(listener.pattern .. ": " .. listener.exec());
 		if (_schedulerListenerPasses(listener)) then
 			-- modkit.table.printTbl(listener);
-			print(listener.pattern .." passed conditions!");
-			if (listener.options.computeNextEventsInitialPreviousValue) then
-				listener.event_to_trigger.previous_return = listener.options.computeNextEventsInitialPreviousValue();
-				print("first previous val for event " .. listener.event_to_trigger.name .. " set as " .. tostring(listener.event_to_trigger.previous_return));
+			-- print(listener.pattern .." passed conditions!");
+			local previous_result = nil;
+			if (listener.options.computePreviousResolve) then
+				previous_result = listener.options.computePreviousResolve();
 			end
+			-- print("previous result for event " .. listener.event_to_trigger.name .. " set as " .. tostring(previous_result));
+			listener.event_to_trigger.state._previous_result = previous_result;
 			modkit.scheduler:begin(listener.event_to_trigger);
 
 			GLOBAL_SCHEDULE_EVENTS._listeners[pattern] = nil; -- remove this listener
