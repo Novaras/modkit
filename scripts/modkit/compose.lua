@@ -46,6 +46,20 @@ if (modkit.compose == nil) then
 	--- **Returns a new `Ship` of the given type. This `Ship` object is a rich representation of the actual ship ingame.**
 	--- 
 	--- ---
+	--- Example:
+	--- ```lua
+	--- function update(CustomGroup, playerIndex, shipID)
+	--- 	local repair_vette = modkit.compose:instantiate(CustomGroup, playerIndex, shipID);
+	--- 
+	--- 	repair_vette:HP(0.5);
+	--- 	repair_vette:ROE(PassiveROE);
+	--- 	if (repair_vette:attacking()) then
+	--- 		repair_vette:stop();
+	--- 	end
+	--- 	-- etc..
+	--- end
+	--- ```
+	--- ---
 	---
 	--- The definition of a specific type of `Ship` object is a composition of any base prototypes supplied via `addBaseProto`,
 	--- which is finally overlayed with any specific ship type definition for the given `ship_type` via `addShipProto`.
