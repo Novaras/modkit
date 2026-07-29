@@ -104,7 +104,7 @@ end
 function res_ships_proto:dockAnyUndocked()
 	for _, res_ship in self:getOurResShips() do
 		if (res_ship.own_group ~= self.own_group and res_ship:docked() ~= 1) then -- if not docked, dock it and stay docked
-			res_ship:dock(self, 1);
+			res_ship:dock(self, { stay_docked = 1 });
 		end
 	end
 end
