@@ -53,7 +53,7 @@ function modkit_hoist_memgroups()
 
 		for ship_id, line in incoming do
 			local data_str = strsplit(line, ",", 1);
-			local own_group = data_str[1];
+			local own_group = data_str[1] .. "-" .. ship_id;
 			local player_index = tonumber(data_str[2]);
 			-- modkit.table.printTbl(words, "words");
 
