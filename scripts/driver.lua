@@ -155,7 +155,7 @@ if (H_DRIVER == nil) then
 
 			if (not already_hoisted) then
 				print("no ship matched, hoisting ship " .. ship_id);
-				local data = own_group .. "," .. player_index;
+				local data = caller.own_group .. "," .. player_index .. "," .. caller.ship_type;
 
 				local new_state = hypertable_handle().GLOBAL_SHIPS;
 				new_state[ship_id] = data;
