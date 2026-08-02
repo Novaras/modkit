@@ -9,7 +9,7 @@
 ---@field _current_dmg_mult number
 ---@field _current_tumble Arr3
 ---@field _despawned_at_volume string
----@field _reposition_volume string
+---@field _reposition_volume string Used by `:move` and related methods
 ---@field _default_vol string
 ---@field _auto_launch 0|1
 ---@field _visibility table<Player, Visibility>
@@ -44,6 +44,24 @@ modkit_ship = {
 };
 -- === Util ===
 
+--- Converts the given value to a volume (`string` name).
+---
+---@param val string | Ship | Position | Arr3
+function asVol(val)
+	if (type(val) ~= "string") then
+		if (val.own_group) then
+			---@cast val Ship
+			val = val:position();
+		end
+		---@cast val Position | Arr3
+
+		val = Volume_Fresh(nil, val);
+	end
+	---@cast val string
+	
+	return val;
+end
+
 function modkit_ship:age()
 	return (Universe_GameTime() - self.created_at);
 end
@@ -53,9 +71,18 @@ end
 ---@param hp? number
 ---@return number
 function modkit_ship:HP(hp)
-	if (hp) then
-		SobGroup_SetHealth(self.own_group, hp);
+	if (type(hp) == "string" or type(hp) == "number") then
+		local hp_num = tonumber(hp);
+
+		if (type(hp_num) == "number") then
+			-- print(self.own_group .. " set hp to " .. hp_num);
+			SobGroup_SetHealth(self.own_group, hp_num);
+		else
+			local printErr = (consoleError or print);
+			printErr(self.own_group .. ": ERROR while trying to set HP; value `" .. tostring(hp) .. "` not convertable to a number");
+		end
 	end
+
 	return SobGroup_GetHealth(self.own_group);
 end
 
@@ -64,7 +91,15 @@ function modkit_ship:alive()
 	return self:HP() > 0;
 end
 
-function modkit_ship:die()
+--- Causes this ship to die (HP is set to 0).
+--- 
+--- If `quiet` is passed, the ship despawns first, avoiding death animations and explosions etc.
+---
+---@param quiet bool
+function modkit_ship:die(quiet)
+	if (quiet) then
+		self:spawn(0);
+	end
 	self:HP(0);
 end
 
@@ -343,24 +378,92 @@ function modkit_ship:stop()
 	SobGroup_Stop(self.player.id, self.own_group);
 end
 
---- Moves this ship to `where`, which may be:
---- - `string`: a volume name
---- - `Ship`: a `Ship`
---- - `Position`: a `Position`
+--- Moves this ship to `target`.
+--- 
+--- The fields for the `options` param behave as follows:
+--- - `distance_threshold`: allow the move to mark as 'complete' so long as within this proximity of target
+--- - `no_event`: don't fire an event; return `nil` instead
+--- 
+--- Returns an `EventChain` or a `RuleChain` if `options.no_event` is `nil` (default):
+--- - Use `:next(...)` to execute code _after_ the move finishes successfully.
+--- - Use `:catch(...)` to execute code _after_ the move is interrupted or fails.
 ---
----@param where string | Ship | Position | Arr3
-function modkit_ship:move(where)
-	if (type(where) == "string") then -- a volume
-		SobGroup_Move(self.player.id, self.own_group, where);
+---@param target string | Ship | Position | Arr3
+---@param options? { distance_threshold: number, no_event: bool }
+---@return EventChain|RuleChain|nil
+function modkit_ship:move(target, options)
+	options = modkit.table:merge(
+		{
+			distance_threshold = 1500,
+			no_event = nil,
+		},
+		options
+	);
+
+
+	local distance_threshold = options.distance_threshold;
+	local no_event = options.no_event;
+
+	if (type(target) == "string") then -- a volume
+		SobGroup_Move(self.player.id, self.own_group, target);
 	else -- a position
-		if (where.own_group) then
-			---@cast where Ship
-			where = where:position();
+		if (target.own_group) then
+			---@cast target Ship
+			target = target:position();
 		end
-		Volume_AddSphere(self._default_vol, where, 1);
-		SobGroup_MoveToPoint(self.player.id, self.own_group, where);
-		Volume_Delete(self._default_vol);
+		---@cast target Position | Arr3
+
+		-- print("move issued for " .. self.own_group);
+		modkit.table.printTbl(options, "options");
+
+		-- print("SobGroup_MoveToPoint(" .. self.player.id .. ", " .. self.own_group .. ", " .. Vec3(target) .. ");");
+		SobGroup_MoveToPoint(self.player.id, self.own_group, target);
 	end
+
+	if (no_event) then
+		return nil;
+	end
+
+	local api = nil;
+	-- return a promise which resolves if we moved successfully, or rejects if the move was interrupted, or we were moved out of normal space, or we died
+	if (Rule_AddInterval) then
+		api = modkit.campaign.rules;
+	else
+		api = modkit.scheduler;
+	end
+
+	-- also we need to clear this if its already running
+	return api:make({
+		name = self.type_group .. "_" .. self.id ..  "_move_command_listener",
+		fn = function (resolve, reject)
+			if (%self:isNear(%target, %distance_threshold)) then
+				return resolve(%self);
+			end
+
+			if (not %self:moving())then
+				return reject("move promise for ship " .. %self.own_group .. " rejected: move order was interrupted before completion (current command: " .. %self:currentCommand() .. ")");
+			end
+		end
+	}):begin();
+end
+
+--- Returns `1` if this ship is currently moving (`AB_Move` + alive + in real space).
+--- 
+--- @return bool
+--- 
+function modkit_ship:moving()
+	return self:alive() and self:isDoingAbility(AB_Move) and self:allInRealSpace();
+end
+
+--- Returns `1` if this ship is within `threshold` units of `where`.
+--- 
+---@param where string | Ship | Position | Arr3
+---@param threshold? number
+---@return bool
+function modkit_ship:isNear(where, threshold)
+	threshold = threshold or 2000;
+
+	return SobGroup_IsShipNearPoint(self.own_group, asVol(where), threshold) == 1;
 end
 
 --- Makes this ship guard `target`, which may be one or multiple other ships.
@@ -380,17 +483,32 @@ function modkit_ship:parade(other, mode)
 	return SobGroup_ParadeSobGroup(self.own_group, other.own_group, mode);
 end
 
---- Causes the ship to dock with `target`. If stay docked is not `nil`, the ship will stay docked.
+--- Causes the ship to dock with `target`.
 ---
---- If `target` is `nil`, the ship will dock with any valid target.
+--- Calls `SobGroup_DockSobGroupWithAny`, unless one of `options` is passed.
+--- 
+--- Options:
+--- - `
+--- - `instant`: Docks _instantly_
+--- - `stay_docked`: Docks and stays docked unless manually launched
 ---
----@param target nil|Ship
----@param stay_docked bool
-function modkit_ship:dock(target, stay_docked)
+--- @class DockTargetOptions
+--- @field instant boolean
+--- @field stay_docked boolean 
+---
+---@param target? Ship
+---@param options? DockTargetOptions
+function modkit_ship:dock(target, options)
+	options = options or {};
+	local instant = options.instant
+	local stay_docked = options.stay_docked;
+
 	if (target == nil) then -- if no target, target = closest ship
 		SobGroup_DockSobGroupWithAny(self.own_group);
 	else
-		if (stay_docked) then
+		if (instant) then
+			SobGroup_DockSobGroup(self.own_group, target.own_group);
+		elseif (stay_docked) then
 			SobGroup_DockSobGroupAndStayDocked(self.own_group, target.own_group);
 		else
 			SobGroup_DockSobGroup(self.own_group, target.own_group);
@@ -1067,10 +1185,8 @@ end
 ---@param volume? string | Position
 ---@return string
 function modkit_ship:spawn(spawn, volume)
-	volume = volume or self._despawned_at_volume;
-	if (type(volume) == "table") then -- if 'volume' is a {x, y, z} position
-		volume = Volume_Fresh(self._despawned_at_volume, volume); -- create a volume from it
-	end
+	volume = asVol(volume or self._despawned_at_volume);
+
 	if (spawn == 1) then
 		SobGroup_Spawn(self.own_group, volume);
 		Volume_Delete(self._despawned_at_volume);
@@ -1081,46 +1197,43 @@ function modkit_ship:spawn(spawn, volume)
 	return self._despawned_at_volume;
 end
 
---- Spawns a new ship of `type` at `where` for `player_index`. This new ship is placed in `spawn_group`, or a fresh group if `spawn_group` is not supplied.
+--- Spawns new ships, as specified by `spawn_args`.
 ---
---- **Note: The temporary group returned should be functionally equivalent to `own_group` of a more typically
---- available ship, but is _not_ the same group (it should only contain the same ships).**
+--- Returns a `RuleChain|EventChain` which resolves with the newly spawned ships.
 ---
----@param ship_type ShipType
----@param where? Position|string
----@param player_index? integer
----@param spawn_group? string
----@return string
-function modkit_ship:spawnShip(ship_type, where, player_index, spawn_group)
-	where = where or self:position();
-
-	if (type(where) == "table") then
-		where = Volume_Fresh("_spawn-vol-ship-" .. self.id, where);
-	end
-	---@cast where string
-
-	spawn_group = spawn_group or SobGroup_Fresh("spawner-group-" .. self.id .. "_" .. SobGroup_Fresh());
-	player_index = player_index or self.player.id;
-	SobGroup_SpawnNewShipInSobGroup(player_index, ship_type, "-", spawn_group, where);
-	Volume_Delete(where);
-	return spawn_group;
+---@param spawn_args (SpawnArgs|string)|(SpawnArgs|string)[]
+function modkit_ship:spawnShip(spawn_args)
+	return modkit.ships():spawnShips(spawn_args);
 end
 
---- Causes this ship to produce a new ship of the given `type`, if it can do so.
---- The created ship is available through a temporary group (`spawn_group`).
+--- Spawns new ships, as specified by `spawn_args`. The spawned ships
 ---
---- **Note: The temporary group returned should be functionally equivalent to `own_group` of a more typically
---- available ship, but is _not_ the same group (it should only contain the same ships).**
+--- Returns a `RuleChain|EventChain` which resolves with the newly spawned ships.
 ---
----@param type string
----@param spawn_group? string
----@return string
-function modkit_ship:produceShip(type, spawn_group)
-	spawn_group = spawn_group or SobGroup_Fresh("spawner-group-" .. self.id);
-	local mixed = SobGroup_Clone(self.own_group, self.own_group .. "-temp-spawner-group");
-	SobGroup_CreateShip(mixed, type);
-	SobGroup_FillSubstract(spawn_group, mixed, self.own_group);
-	return spawn_group;
+--- @todo: this doesn't work as expected; producted ships all share a group for some reason
+---
+---@param spawn_args (SpawnArgs|string)|(SpawnArgs|string)[]
+function modkit_ship:produceShips(spawn_args)
+	self:spawnShip(spawn_args):next(function(res, _, state)
+		local this_ship = %self;
+		---@type Ship[]
+		local prev = state._previous_result;
+
+		print(prev);
+		if (type(prev) == "table") then
+			modkit.table.printTbl(prev, "prev result as captured in 'produceShips'");
+		end
+
+		for _, ship in prev do
+			---@cast ship Ship
+			ship:spawn(0);
+			-- from here we want it to 'launch' from the producer vessel... probably we want to treat dockables and non-dockables differently
+			-- dockables: instadock + launch
+			-- non-dockables: need to enter parade position while in hyperspace?
+
+			ship:dock(this_ship.own_group, { instant = 1, stay_docked = 1 });
+		end
+	end);
 end
 
 -- ==== printing (debugging) ====
@@ -1136,11 +1249,11 @@ function modkit_ship:print(verbose)
 	else
 		modkit.table.printTbl(
 			{
-				id = self.id,
-				ship_type = self.ship_type,
-				group = self.type_group,
-				tick = self:age(),
-				health = self:HP()
+				id			= self.id,
+				ship_type	= self.ship_type,
+				group 		= self.type_group,
+				tick		= self:age(),
+				health		= self:HP()
 			},
 			"ship: " .. (self.id or ('temporary_' .. (self.own_group)))
 		);

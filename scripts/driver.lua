@@ -130,30 +130,8 @@ if (H_DRIVER == nil) then
 				});
 			end
 
-			-- guard to ensure no duplicates
-			local already_hoisted = nil;
-			for id, _ in hypertable_handle().GLOBAL_SHIPS do
 
-				local existing = GLOBAL_SHIPS:find(function (ship)
-					return ship.id == %id;
-				end);
-
-				-- if this id matches no ship, it probably died, so we need to wipe the data
-				if (not existing) then
-					local state = hypertable_handle().GLOBAL_SHIPS;
-					state[id] = nil;
-					hypertable_handle({
-						GLOBAL_SHIPS = state
-					});
-				end
-
-				if (not already_hoisted) then -- if already found, dont update the val
-					-- print("check if ship " .. ship_id .. " was alreay hoisted");
-					already_hoisted = ship_id == existing_id;
-				end
-			end
-
-			if (not already_hoisted) then
+			if (not caller._hoisted) then
 				print("no ship matched, hoisting ship " .. ship_id);
 				local data = own_group .. "," .. player_index;
 
@@ -162,6 +140,8 @@ if (H_DRIVER == nil) then
 				hypertable_handle({
 					GLOBAL_SHIPS = new_state
 				});
+
+				caller._hoisted = 1;
 			end
 		end
 
@@ -263,16 +243,17 @@ if (H_DRIVER == nil) then
 	---@param g string The sobgroup containing the callee's squad
 	---@param p integer The player index (id)
 	---@param i integer The ship's unique id
-	---@return DriverShip
 	destroy = destroy or function(g, p, i)
 		local caller = GLOBAL_SHIPS:get(i);
 		---@cast caller DriverShip
 
+		if (not caller) then
+			return nil;
+		end
+
 		caller:destroy(); -- run the caller's custom destroy hook
 
 		GLOBAL_SHIPS:delete(i);
-
-		return caller;
 	end
 
 	-- === start, go, finish ===

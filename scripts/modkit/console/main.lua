@@ -9,7 +9,7 @@ if (MK_CONSOLE == nil) then
 	--- Initialises state for the console code to interact with the UI window. If already initialised, does nothing unless `force` is set.
 	---
 	---@param force? bool
-	function consoleInit(force)
+	function tryConsoleInit(force)
 		if (force or MK_CONSOLE_INIT == nil) then
 			hyperTableHandle()({
 				MK_CONSOLE_SCREEN_NAME = MK_CONSOLE_SCREEN_NAME,
@@ -19,6 +19,8 @@ if (MK_CONSOLE == nil) then
 			});
 			MK_CONSOLE_INIT = 1;
 		end
+
+		return MK_CONSOLE_INIT;
 	end
 
 	function strToConsoleLines(str)
@@ -55,32 +57,47 @@ if (MK_CONSOLE == nil) then
 	--- Calls `consoleInit`.
 	---
 	consoleLog = consoleLog or function (...)
-		consoleInit();
+		arg["n"] = nil; -- remove the lua-supplied n field so it doesn't interfere with later loops
+		local init_success = tryConsoleInit();
 
-		local hyper_handle = hyperTableHandle();
+		if (init_success) then
+			local hyper_handle = hyperTableHandle();
 
-		local raw = "";
-		for k, v in arg do
-			if k ~= "n" then
+			local raw = "";
+			for k, v in arg do
 				raw = raw .. tostring(v);
 			end
-		end
-		raw = gsub(raw, "\t", "    ");
+			raw = gsub(raw, "\t", "    ");
 
-		local new_lines = strToConsoleLines(raw);
-		local lines = hyper_handle().MK_CONSOLE_LINES or {}; -- tbl ref
-		for _, line in new_lines do
-			print(line);
-			-- a bit extraneous, should probably only write to the handle once
-			hyper_handle({
-				MK_CONSOLE_LINES = modkit.table.push(lines, line)
-			});
-			if (modkit.table.length(lines) > MK_CONSOLE_MAX_LINES) then
-				modkit.table.pop(lines);
+			local new_lines = strToConsoleLines(raw);
+			local lines = hyper_handle().MK_CONSOLE_LINES or {};
+			for _, line in new_lines do
+				print(line);
+				modkit.table.push(lines, line);
+
+				-- ensure log length does not exceed `MK_CONSOLE_MAX_LINES` by removing oldest lines first
+				if (modkit.table.length(lines) > MK_CONSOLE_MAX_LINES) then
+					modkit.table.pop(lines);
+				end
 			end
-		end
 
-		printConsoleLines(hyper_handle().MK_CONSOLE_LINES);
+			printConsoleLines(lines);
+			hyper_handle({
+				MK_CONSOLE_LINES = lines
+			});
+		else
+			print("\n\tWARNING: Unable to initialise console for `consoleLog` use; falling back to `print` instead...");
+			local arg_len = modkit.table.length(arg);
+			local concat = modkit.table.reduce(concat, function (accumulated, val, idx)
+				local delimeter = "\t";
+				if (idx == %arg_len) then
+					delimeter = "";
+				end
+
+				return accumulated .. tostring(val) .. delimeter;
+			end, "");
+			print(concat);
+		end
 	end
 
 	consoleError = consoleError or function (...)

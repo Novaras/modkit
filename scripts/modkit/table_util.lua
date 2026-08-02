@@ -162,6 +162,21 @@ if (modkit.table == nil) then
 			end
 		end,
 
+		--- Returns the 'position' of the entry passing the predicate. The 'position' is how many loops we have to perform to reach this value using a for loop.
+		---@return any|nil
+		findPosition = function (table, predicate_or_value)
+			local i = 1;
+			for k, v in table do
+				if (type(predicate_or_value) == "function" and predicate_or_value(v, k, i, table)) then
+					return i;
+				elseif (v == predicate_or_value) then
+					return i;
+				end
+
+				i = i + 1;
+			end
+		end,
+
 		length = function (table)
 			local n = 0;
 			for k, v in table do
@@ -187,6 +202,10 @@ if (modkit.table == nil) then
 			end
 			return values;
 		end,
+		---@generic V
+		---@param table table<TableKey, V>
+		---@param value V
+		---@return { [TableKey]: V }
 		push = function (table, value)
 			table[modkit.table.length(table) + 1] = value;
 			return table;
@@ -419,6 +438,11 @@ if (modkit.table == nil) then
 		elseif (tbl_b == nil and tbl_b == nil) then
 			return {};
 		end
+
+		if (type(tbl_a) ~= "table" or type(tbl_b) ~= "table") then
+			print("error in table::merge:\tone or both supplied arguments are not a table (not mergeable)");
+		end
+
 		local out = {};
 		-- basic copy
 		for k, v in tbl_a do

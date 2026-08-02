@@ -10,7 +10,7 @@ end
 ---@field _tick integer
 ---@field _started_gametime number
 ---@field _value? any -- running value, set by the callback's return each execution
----@field _previous_resolve? any -- resolve value of the previous event, if any
+---@field _previous_result? any -- resolve value of the previous event, if any
 ---@field _remaining_iterations? integer
 
 ---@class EventState: table, EventCoreState
@@ -40,7 +40,7 @@ EVENT_STATUS = {
 ---@field interval integer
 ---@field remaining_iterations? integer
 ---@field error? string -- only exists after rejecting
----@field begin fun(self: Event): EventChain
+---@field begin fun(self: Event, initial_value?: any): EventChain
 ---@field finish fun(self: Event, state: EventStatus, args: any): nil
 ---@field __is_event bool
 
@@ -61,7 +61,7 @@ EVENT_STATUS = {
 ---@field event_to_trigger Event
 
 ---@alias EventResolve fun(...: any): nil
----@alias EventReject fun(message: string): nil
+---@alias EventReject fun(message?: string): nil
 ---@alias EventFn fun(resolveCallback: EventResolve, rejectCallback: EventReject, state: EventState): any
 
 if (modkit.scheduler == nil) then
@@ -91,10 +91,12 @@ if (modkit.scheduler == nil) then
 
 	---@return EventResolve
 	_schedulerResolver = function (event)
-		return function (...)
-			print("RESOLVING EVENT " .. %event.name .. "!");
+		return function (result)
+			-- print("RESOLVING EVENT " .. %event.name .. "!");
+			-- print("resolve with result: " .. tostring(result));
+
 			%event.status = EVENT_STATUS.RESOLVED;
-			%event.result = args;
+			%event.result = result;
 		end;
 	end
 
@@ -185,13 +187,28 @@ if (modkit.scheduler == nil) then
 				next_event = modkit.scheduler:make(next_event);
 			end
 
-			modkit.scheduler:on(event.name, next_event);
+			modkit.scheduler:on(event.name, function (res)
+				if (%event.status == EVENT_STATUS.REJECTED) then
+					%next_event:finish(%event.status, %event.error);
+				else
+					%next_event:begin(%event.result);
+				end
+
+				res();
+			end);
 
 			return _makeEventChain(next_event);
 		end
 
 		function chain:catch(handler)
-			handler(%event.error);
+			local event = %event;
+
+			modkit.scheduler:on(event.name, function (res)
+				if (%event.status == EVENT_STATUS.REJECTED) then
+					%handler(%event.error);
+				end
+				res();
+			end)
 		end
 
 		return chain;
@@ -239,7 +256,7 @@ if (modkit.scheduler == nil) then
 			};
 		end
 
-		modkit.table.printTbl(new_event, "new event request");
+		-- modkit.table.printTbl(new_event, "new event request");
 
 		---@type EventCoreState
 		local core_state = {
@@ -260,8 +277,8 @@ if (modkit.scheduler == nil) then
 			status = EVENT_STATUS.INIT
 		};
 
-		function new_event:begin()
-			return modkit.scheduler:begin(self);
+		function new_event:begin(previous_result)
+			return modkit.scheduler:begin(self, previous_result);
 		end
 
 		---@param status EventStatus
@@ -293,8 +310,9 @@ if (modkit.scheduler == nil) then
 	end
 
 	---@param event EventLike
+	---@param previous_result? any
 	---@return EventChain
-	function scheduler_lib:begin(event)
+	function scheduler_lib:begin(event, previous_result)
 		if (type(event) == "function" or not event.__is_event) then
 			---@cast event EventConfig
 			event = modkit.scheduler:make(event);
@@ -302,6 +320,7 @@ if (modkit.scheduler == nil) then
 		---@cast event Event
 
 		event.status = EVENT_STATUS.RUNNING;
+		event.state._previous_result = previous_result;
 
 		return _makeEventChain(event);
 	end

@@ -69,7 +69,7 @@ function UI_ForceBindKeyEvent(key, fn_name)
 	end
 end
 
---- Returns a new `Rule`, which resolves when all the ships in the `spawn_group` are found in the global register, resolving with those ships.
+--- Returns a new `Rule|Event`, which resolves when all the ships in the `spawn_group` are found in the global register, resolving with those ships.
 ---
 --- In the case that `timeout` is exceeded, instead rejects.
 ---
@@ -104,21 +104,40 @@ function awaitShips(spawn_group, timeout)
 	else
 		-- print("returns an event")
 		return modkit.scheduler:make({
-			interval = 5,
+			name = "awaitShips_event_" .. modkit.table.length(modkit.scheduler:all()),
+			interval = 20,
 			fn = function (res, rej, state)
-				-- print("call from awaitShips event");
+				-- modkit.table.printTbl(%subgroups, "subgroups from SobGroup_Split(" .. %spawn_group .. ")");
 				local found_ships = modkit.table.map(%subgroups, function (group)
+					-- print("\n\tcheck group .. " .. group);
 					return modkit.ships():find(function (ship)
-						return SobGroup_GroupsAreEqual(ship.own_group, %group);
+						-- print("cmp " .. ship.own_group .. "(c: " .. SobGroup_Count(ship.own_group) .. ", t: " .. SobGroup_GetShipType(ship.own_group) .. ") vs " .. %group .. " (c: " .. SobGroup_Count(%group) .. ", t: " .. SobGroup_GetShipType(%group) .. ")");
+						local eq = SobGroup_AreEqual(ship.own_group, %group) == 1;
+						if (eq) then
+							-- print("\tHIT! GROUPS MATCH");
+							return eq;
+						end
+
+						local subset = SobGroup_GroupInGroup(%group, ship.own_group) == 1;
+						if (subset) then
+							-- print("\tHIT!? OWN GROUP IS SUBSET OF CHECK GROUP?");
+							-- print("SobGroup_GetShipType(ship.own_group) = " .. SobGroup_GetShipType(ship.own_group));
+							-- print("SobGroup_GetShipType(%group) = " .. SobGroup_GetShipType(%group));
+							return nil;
+						end
 					end);
 				end);
 				-- all are registered if every subgroup was matched to a registered ship (arr lengths are eq.)
 				local all_registered = modkit.table.length(found_ships) == modkit.table.length(%subgroups);
 
-				-- modkit.table.printTbl(found_ships, "found ships");
+				-- modkit.table.printTbl(modkit.table.map(found_ships, function (val, idx, tbl)
+				-- 	return val.own_group;
+				-- end), "found ships");
 
 				if (all_registered) then
-					-- modkit.table.printTbl(found_ships);
+					-- modkit.table.printTbl(modkit.table.map(found_ships, function (ship)
+					-- 	return { own_group = ship.own_group, player_id = ship.player.id };
+					-- end), "awaitShips resolve");
 					res(found_ships);
 				end
 

@@ -19,16 +19,18 @@ if (MODKIT_OBJECTIVES == nil) then
 	---@class Objective
 	---@field id fun(self): integer
 	---@field name fun(self, name?: string|userdata): string|userdata
-	---@field description fun(self, description?: string|userdata): string|userdata
+	---@field description fun(self, description?: string|userdata, overwrite: bool): string|userdata
 	---@field visible fun(self, visible?: 0|1): bool
 	---@field completed fun(self, completed?: 0|1): bool
+	---@field failed fun(self): bool
+	---@field off fun(self): bool
 	---@field type fun(self, type?: ObjectiveType): ObjectiveType
 	---@field select fun(self): nil
 
 	---@class GlobalObjectives: MemGroupInst
 	---@field _entities table<integer, ObjectiveDef>
 	---@field _saved_states table<integer, ObjectiveState>
-	---@field all fun(self): table<integer, ObjectiveDef>
+	---@field all fun(self): table<integer, Objective>
 	GLOBAL_OBJECTIVES = modkit.MemGroup.Create("mg-objectives-global");
 	GLOBAL_OBJECTIVES._saved_states = {};
 
@@ -65,10 +67,10 @@ if (MODKIT_OBJECTIVES == nil) then
 			end,
 			completed = function (_, completed)
 				local state = nil;
-				if (completed == 1) then
-					state = OBJECTIVE_STATE.OS_Complete;
-				elseif (completed == 0) then
+				if (completed == 0) then
 					state = OBJECTIVE_STATE.OS_Incomplete;
+				else
+					state = OBJECTIVE_STATE.OS_Complete;
 				end
 
 				if (state) then
@@ -79,12 +81,38 @@ if (MODKIT_OBJECTIVES == nil) then
 
 				return %def.state == OBJECTIVE_STATE.OS_Complete;
 			end,
-			description = function (_, description)
-				consoleLog("\tcall to description!");
-				if (description) then
-					consoleLog("\tsetting to " .. tostring(description or "nil"));
-					%def.description = description;
+			failed = function(_)
+				Objective_SetState(%def.id, OBJECTIVE_STATE.OS_Failed);
+
+				%def.state = Objective_GetState(%def.id);
+
+				return %def.state == OBJECTIVE_STATE.OS_Failed;
+			end,
+			off = function(_)
+				Objective_SetState(%def.id, OBJECTIVE_STATE.OS_Off);
+
+				%def.state = Objective_GetState(%def.id);
+
+				return %def.state == OBJECTIVE_STATE.OS_Off;
+			end,
+			description = function (_, description, overwrite)
+				if (not description) then
+					Objective_SetDescription(%def.id, '');
+				elseif (type(description) == "string") then
+					if (overwrite) then
+						Objective_SetDescription(%def.id, description);
+					else
+						Objective_AddDescription(%def.id, description);
+					end
+				else
+					if (overwrite) then
+						Objective_SetDescriptionw(%def.id, description);
+					else
+						Objective_AddDescriptionw(%def.id, description);
+					end
 				end
+
+				%def.description = description;
 
 				return %def.description;
 			end,
@@ -138,13 +166,33 @@ if (MODKIT_OBJECTIVES == nil) then
 		-- avoid using `Objective_Add`; if we used `_AddPresetID` in-between those calls, it throws an error
 		-- complaining about non-sequential objective IDs (dumbest possible behavior)
 
-		---@type integer
-		local o = fields.id;
 		Objective_AddPresetID(fields.id, fields.name, fields.type);
 
-		self._entities[o] = fields;
+		self._entities[fields.id] = fields;
 
-		return objectiveDefToObjective(self._entities[o]);
+		return objectiveDefToObjective(self._entities[fields.id]);
+	end
+
+	function GLOBAL_OBJECTIVES:get(id)
+		local found = this._entities[id];
+
+		if (found) then
+			return objectiveDefToObjective(found);
+		end
+	end
+
+	function GLOBAL_OBJECTIVES:all()
+		return modkit.table.map(self._entities, function (def)
+			return objectiveDefToObjective(def);
+		end);
+	end
+
+	function GLOBAL_OBJECTIVES:find(predicate)
+		return modkit.table.findVal(self:all(), predicate);
+	end
+
+	function GLOBAL_OBJECTIVES:filter(predicate)
+		return modkit.table.filter(self:all(), predicate);
 	end
 
 	-- add it also to the modkit table

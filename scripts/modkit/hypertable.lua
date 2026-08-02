@@ -37,18 +37,28 @@ if (not MK_hypertable) then
 			UI_SelectDropDownListboxItemIndex(%screen_name, %dropdown_host_el, 0);
 			local ui_str = UI_GetDropdownListBoxSelectedCustomDataString(%screen_name, %dropdown_host_el) or "";
 
-			-- remove newlines from parsed lines, otherwise it breaks the `doline` parse
-			ui_str = gsub(ui_str, "%\n?%\r?", "");
+			local parsePayload = function ()
+				if (not type(%ui_str) == "string" or strlen(%ui_str) < 1) then
+					print("ui_str was invalid, type is " .. type(%ui_str) .. ", tostring() = " .. tostring(%ui_str));
+					return "{}";
+				end
+
+				-- remove newlines from parsed lines, otherwise it breaks the `doline` parse
+				return gsub(%ui_str, "%\n?%\r?", "");
+			end
+
+			local payload = parsePayload();
 
 			-- convert the state held as a string into an actual table by executing it as a Lua string and returning it
-			local current_state = dostring("return " .. (ui_str or "{}"));
+			local current_state = dostring("return " .. payload) or {};
 
 			if (new_state) then
 				UI_ClearDropDownListbox(%screen_name, %dropdown_host_el);
 
-				if (overwrite) then -- if overwrite flag set, we just overwrite the whole state
+				if (overwrite) then -- if overwrite flag set, we just overwrite the whole stte
 					current_state = new_state;
-				else -- otherwise, we do a regular table merge onto it
+				else -- otherwise, we do a regular table merge ontoit
+					-- print(">> attempting to use 'current_state' which is a " .. type(current_state) .. " type, of value " .. tostring(current_state));
 					current_state = modkit.table.clone(
 						modkit.table:merge(current_state, new_state),
 						custom_key_behaviors
