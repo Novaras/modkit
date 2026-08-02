@@ -99,6 +99,11 @@ if (H_DRIVER == nil) then
 			return caller;
 		end
 
+		-- print("![DRIVER]: does composer have a proto for ship type '" .. own_group .. "'?");
+		-- print(tostring(modkit.compose._ship[own_group] or "\tNO"));
+		-- modkit.table.printTbl(modkit.table.keys(modkit.compose._ship), "prototypes");
+
+
 		---@type Ship
 		caller = GLOBAL_SHIPS:set(
 			ship_id,
@@ -132,8 +137,7 @@ if (H_DRIVER == nil) then
 
 
 			if (not caller._hoisted) then
-				print("no ship matched, hoisting ship " .. ship_id);
-				local data = own_group .. "," .. player_index;
+				local data = caller.own_group .. "," .. player_index .. "," .. caller.ship_type;
 
 				local new_state = hypertable_handle().GLOBAL_SHIPS;
 				new_state[ship_id] = data;
@@ -205,6 +209,8 @@ if (H_DRIVER == nil) then
 			caller = register(g, p, i, 1);
 		end
 		---@cast caller DriverShip
+		
+		-- print("![DRIVER]: update call for ship " .. i .. "(" .. caller.own_group .. "), addr = " .. tostring(caller.update));
 
 		-- if (caller.own_group == nil) then
 		-- 	print("og: " .. (caller.own_group or "nil"));

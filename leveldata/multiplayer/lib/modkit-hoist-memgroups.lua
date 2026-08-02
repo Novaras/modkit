@@ -52,17 +52,18 @@ function modkit_hoist_memgroups()
 		end
 
 		for ship_id, line in incoming do
+			-- print("modkit_hoist_memgroups: parsing data string for " .. ship_id .. ": " .. line);
 			local data_str = strsplit(line, ",", 1);
-			local own_group = data_str[1] .. "-" .. ship_id;
+			local own_group = data_str[1];
 			local player_index = tonumber(data_str[2]);
-			-- modkit.table.printTbl(words, "words");
+			local ship_type = data_str[3];
 
 			-- consoleLog("trying with " .. line);
-			-- consoleLog("tg: \t" .. tostring(own_group));
+			-- consoleLog("og: \t" .. tostring(own_group));
 			-- consoleLog("pi: \t" .. tostring(player_index));
 			-- consoleLog("si: \t" .. tostring(ship_id));
 			if (own_group and player_index and ship_id) then
-				local new_ship = register(own_group, player_index, ship_id);
+				local new_ship = register(SobGroup_Overwrite(ship_type, own_group), player_index, ship_id);
 
 				new_ship.player = GLOBAL_PLAYERS:get(player_index);
 			end
