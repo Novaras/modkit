@@ -12,6 +12,7 @@ end
 ---@field _value? any -- running value, set by the callback's return each execution
 ---@field _previous_result? any -- resolve value of the previous event, if any
 ---@field _remaining_iterations? integer
+---@field _event Event
 
 ---@class EventState: table, EventCoreState
 
@@ -41,6 +42,7 @@ EVENT_STATUS = {
 ---@field remaining_iterations? integer
 ---@field error? string -- only exists after rejecting
 ---@field begin fun(self: Event, initial_value?: any): EventChain
+---@field stop fun(self: Event)
 ---@field finish fun(self: Event, state: EventStatus, args: any): nil
 ---@field __is_event bool
 
@@ -150,9 +152,9 @@ if (modkit.scheduler == nil) then
 
 	--- API for managing `ScheduledEvent`s, scope-agnostic version of `Rule`s.
 	---@class Scheduler
-	---@field default_interval 20
+	---@field default_interval integer 20 intervals pass per second
 	local scheduler_lib = {
-		default_interval = 20,
+		default_interval = 10,
 	};
 
 	---@param event EventLike
@@ -258,11 +260,11 @@ if (modkit.scheduler == nil) then
 
 		-- modkit.table.printTbl(new_event, "new event request");
 
-		---@type EventCoreState
 		local core_state = {
 			_started_gametime = Universe_GameTime(),
 			_tick = 0,
 			_remaining_iterations = new_event.iterations,
+			_event = nil
 		};
 
 		local new_event = {
@@ -277,8 +279,14 @@ if (modkit.scheduler == nil) then
 			status = EVENT_STATUS.INIT
 		};
 
+		new_event.state._event = new_event;
+
 		function new_event:begin(previous_result)
 			return modkit.scheduler:begin(self, previous_result);
+		end
+
+		function new_event:stop()
+			self.status = EVENT_STATUS.INIT;
 		end
 
 		---@param status EventStatus
@@ -362,6 +370,8 @@ if (modkit.scheduler == nil) then
 			event = modkit.scheduler:get(event);
 		end
 		---@cast event Event
+		
+		print("deleting event " .. tostring(event.name or event.id));
 
 		GLOBAL_SCHEDULE_EVENTS:delete(event.id);
 	end
