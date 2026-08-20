@@ -29,10 +29,12 @@ if (modkit.compose == nil) then
 	---
 	---@param proto table
 	---@param type_filter? string[]
-	function compose:addBaseProto(proto, type_filter)
+	---@param inverse_filter bool
+	function compose:addBaseProto(proto, type_filter, inverse_filter)
 		self._base[modkit.table.length(self._base) + 1] = {
 			proto = proto,
-			filter = type_filter
+			filter = type_filter,
+			inverse_filter = inverse_filter
 		};
 	end
 
@@ -73,17 +75,33 @@ if (modkit.compose == nil) then
 	---@param ship_type? string The ship's type (e.g `'kus_scout'`)
 	---@return Ship
 	function compose:instantiate(sobgroup, player_index, id, ship_type)
-		-- print("instantiate run for " .. type_group .. "(pid: " .. player_index .. ")");
 		local ship_type = ship_type or sobgroup;
+
+		-- print("\n\ninstantiate run for " .. ship_type .. "(pid: " .. player_index .. "), group = " .. sobgroup);
+		-- print("\tst = " .. ship_type);
+		-- print("\tposition = " .. Vec3(SobGroup_GetPosition(sobgroup)));
+		-- print("\trules runtime? " .. tostring(Rule_AddInterval));
+		-- print("\n\n");
 
 		local base_protos = modkit.table.map(
 			modkit.table.filter(
 				self._base,
 				function (base)
 					local tg = %ship_type;
-					return base.filter == nil or modkit.table.findVal(base.filter, function (ship_type)
-						return ship_type == %tg;
+					-- print("COMPOSE: SEES SHIP TYPE " .. tg);
+					if (not base.filter) then
+						return 1;
+					end
+
+					local is_filter_type = modkit.table.findVal(base.filter, function (filter_str)
+						return strfind(%tg, filter_str);
 					end) ~= nil;
+
+					if (base.inverse_filter) then
+						return not is_filter_type;
+					end
+
+					return is_filter_type;
 				end
 			),
 			function (base)
@@ -91,11 +109,16 @@ if (modkit.compose == nil) then
 			end
 		);
 
+		-- print("instantiate for " .. sobgroup);
+		-- modkit.table.printTbl(base_protos, "base protos to be applied");
+
 		-- append custom proto to the base ones:
 		local source = modkit.table:merge(
 			base_protos,
 			{
-				[getn(self._base) + 1] = self._ship[ship_type]
+				[getn(self._base) + 1] = modkit.table.findVal(self._ship, function (ship_proto, filter_str)
+					return strfind(%ship_type, filter_str);
+				end)
 			}
 		);
 
@@ -154,8 +177,24 @@ if (modkit.compose == nil) then
 			static,
 			instance
 		);
+		-- modkit.table.printTbl(out_ship, "newly instantiated " .. ship_type .. ", sid = " .. id);
 
-		-- modkit.table.printTbl(out_ship, "newly instantiated " .. type_group .. ", sid = " .. id);
+		local tag = newtag();
+
+		local concatHook = function (lhs, rhs)
+			local toStr = function (arg)
+				if (type(arg) == "table" and arg.own_group) then
+					return arg.own_group;
+				end
+
+				return tostring(arg);
+			end
+
+			return toStr(lhs) .. toStr(rhs);
+		end
+		settagmethod(tag, "concat", concatHook);
+
+		settag(out_ship, tag);
 
 		return out_ship;
 	end
@@ -163,9 +202,17 @@ if (modkit.compose == nil) then
 
 	modkit.compose = compose;
 
+	print("== modkit: load ship scripts... ==");
+
 	doscanpath("data:scripts/custom_code", "*.lua");
 	doscanpath("data:scripts/custom_code/lib", "*.lua");
 
 	doscanpath("data:scripts/custom_code/hw1", "*.lua");
 	doscanpath("data:scripts/custom_code/hw2", "*.lua");
+
+	-- add extras here
+
+	print("== modkit: ship scripts loaded ==")
+
+	-- modkit.table.printTbl(modkit.table.keys(modkit.compose._ship), "ship protos");
 end
