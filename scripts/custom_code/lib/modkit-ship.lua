@@ -9,7 +9,7 @@
 ---@field _current_dmg_mult number
 ---@field _current_tumble Arr3
 ---@field _despawned_at_volume string
----@field _reposition_volume string Used by `:move` and related methods
+---@field _move_volume string Used by `:move` and related methods
 ---@field _default_vol string
 ---@field _auto_launch 0|1
 ---@field _visibility table<Player, Visibility>
@@ -17,6 +17,8 @@
 ---@field _ghosted bool
 ---@field _invulnerable bool
 ---@field _hidden bool
+---@field _reposition_event? Event
+---@field _resposition_target? Position
 
 ---@class Ship : Base, ShipAttribs
 modkit_ship = {
@@ -30,8 +32,8 @@ modkit_ship = {
 			_ab_targets = {},
 			_current_dmg_mult = 1,
 			_current_tumble = { 0, 0, 0 },
-			_despawned_at_volume = "despawn-vol-" .. s,
-			_reposition_volume = "reposition-vol-" .. s,
+			_despawned_at_volume = Volume_Fresh(),
+			_move_volume = "move-vol-" .. s,
 			_default_vol = "vol-default-" .. s,
 			_auto_launch = 1,
 			_visibility = {
@@ -39,6 +41,8 @@ modkit_ship = {
 			},
 			_capturable_mod = 1,
 			_hidden = nil,
+			_reposition_event = nil,
+			_reposition_target = nil
 		};
 	end,
 };
@@ -86,6 +90,37 @@ function modkit_ship:HP(hp)
 	return SobGroup_GetHealth(self.own_group);
 end
 
+--- Causes this ship to take `amount` damage as a fraction of total HP (between 0 and 1).
+---
+--- If `absolute` is true, instead takes an absolute about of damage, i.e `1234`
+---
+--- Returns the new HP fraction, or the current absolute if `absolute` is passed.
+---
+---@param amount number
+---@param options? { absolute?: bool }
+function modkit_ship:takeDamage(amount, options)
+	options = options or {};
+	local absolute = options.absolute;
+
+	if (not absolute) then
+		return self:HP(self:HP() - amount);
+	end
+
+	local max_hp = self:maxActualHP();
+	local current = self:currentActualHP();
+
+	if (amount > current) then
+		self:HP(0);
+
+		return self:currentActualHP();
+	end
+
+	local new_fraction = (current - amount) / max_hp;
+	self:HP(new_fraction);
+
+	return self:currentActualHP();
+end
+
 ---@return bool
 function modkit_ship:alive()
 	return self:HP() > 0;
@@ -127,13 +162,110 @@ end
 --- Returns the ship's current position (or the center position of the ship's batch squad).
 --- If `pos` is supplied, it will set the position of the ship instantly.
 ---
----@param pos? Position
+---@param pos? Position|Vec3Like
 ---@return Position
 function modkit_ship:position(pos)
 	if (pos) then
+		-- print("setting position for ship " .. self.own_group .. " as {" .. pos[1] .. ", " .. pos[2] .. ", " .. pos[3] .. " }");
 		SobGroup_SetPosition(self.own_group, pos);
 	end
 	return Vec3(SobGroup_GetPosition(self.own_group));
+end
+
+--- 'Repositions' this ship to the given `target` position, in increments from its current location to the target.
+---
+---@param target Ship|Vec3Like
+---@param options? { increment?: number, success_threshold?: number, others_to_drag?: Ship[], increment?: number, interval?: integer, stubborn?: bool }
+function modkit_ship:respositionTo(target, options)
+	options = options or {};
+
+	local others_to_drag = options.others_to_drag;
+	local increment = options.increment or self:distanceTo(target) / 32;
+	local success_threshold = options.success_threshold or increment;
+	local stubborn = options.stubborn;
+
+	self._resposition_target = target;
+
+	local new_ev = modkit.scheduler:make({
+		fn = function (resolveReposition, rejectReposition, resposition_state)
+			print("reposition event for " .. %self);
+
+			-- print("do I already have a reposition event?: " .. tostring(%self._reposition_event));
+			-- print("can see new event from here? " .. tostring(resposition_state._event));
+
+			-- here we cancel any other possibly running resposition event for this ship, unless its stubborn, in which case this event is cancelled instead
+			if (not resposition_state.init and %self._reposition_event) then
+				local err_msg = %self .. " already doing a reposition, exiting old event...";
+				consoleError(err_msg);
+				%self._reposition_event:finish(EVENT_STATUS.REJECTED, err_msg);
+			end
+			%self._reposition_event = resposition_state._event;
+			---@diagnostic disable-next-line: inject-field
+			resposition_state.init = 1;
+
+			if (not resposition_state.target) then
+				-- print(%self .. " currently at " .. %self:position());
+
+				local resolved_target = nil;
+				if (%target.own_group) then
+					---@cast %target Ship
+					resolved_target = %target:position();
+				else
+					resolved_target = Vec3(%target);
+				end
+				---@cast resolved_target Position
+
+				---@diagnostic disable-next-line: inject-field
+				resposition_state.target = resolved_target;
+				print("target is " .. resposition_state.target);
+
+				---@diagnostic disable-next-line: inject-field
+				resposition_state.increment_vec = Vec3:unit(resposition_state.target - %self:position()) * %increment;
+			end
+
+			local ds = %self:distanceTo(resposition_state.target);
+
+			if (not %stubborn and resposition_state.distance_left and ds > resposition_state.distance_left) then -- consider an error
+				return rejectReposition("Error: " .. %self .. " was found to be moving away from it's target during reposition event! Exiting!");
+			end
+
+			if (ds <= %success_threshold) then
+				print(%self .. " DONE MOVING!!");
+
+				return resolveReposition(%self);
+			end
+
+			local increment_vec = resposition_state.increment_vec;
+
+			if (ds < Vec3:mag(increment_vec)) then
+				increment_vec = Vec3:unit(increment_vec) * ds;
+			end
+
+			-- print(%self .. " currently at " .. %self:position());
+			-- print("\tincrement :" .. increment);
+			-- print("\ttarget is " .. state.target);
+			%self:position(%self:position() + increment_vec);
+
+			if (%others_to_drag) then
+				for _, ship in %others_to_drag do
+					ship:position(ship:position() + increment_vec);
+				end
+			end
+
+			-- print("distance to target: " .. tostring(ds));
+			---@diagnostic disable-next-line: inject-field
+			resposition_state.distance_left = ds;
+
+			if (ds <= %success_threshold) then
+				print(%self .. " DONE MOVING!!");
+
+				return resolveReposition(%self);
+			end
+		end,
+		interval = options.interval or 1,
+	});
+
+	return new_ev;
 end
 
 --- Gets or optionally sets / clears the ship's tumble. In modkit, this vector is tracked.
@@ -164,7 +296,7 @@ end
 --- The multiplier is always relative to 1 (its reset every time you call this fn), unless `relative` is non-nil,
 --- meaning the function is being called _relative_ to its last value (instead of 1).
 ---
----@param mult number
+---@param mult? number
 ---@param relative? bool
 ---@return number # the current dmg mult after being set
 function modkit_ship:damageMult(mult, relative)
@@ -219,6 +351,10 @@ end
 ---@return bool
 function modkit_ship:hasSubsystem(subs_name)
 	return SobGroup_HasSubsystem(self.own_group, subs_name) == 1;
+end
+
+function modkit_ship:createSubsystem(subs_name)
+	return SobGroup_CreateSubSystem(self.own_group, subs_name);
 end
 
 --- Returns whether or not this ship hosts a research module of any kind.
@@ -312,20 +448,28 @@ function modkit_ship:attack(targets)
 	end
 end
 
+--- Causes this ship to attack all the ships belonging to the given player.
+---
+---@param player integer|Player
 function modkit_ship:attackPlayer(player)
-	return SobGroup_AttackPlayer(self.own_group, player.id);
+	local id = player;
+	if (type(player) == "table") then
+		id = player.id;
+	end
+	---@cast id integer
+
+	return SobGroup_AttackPlayer(self.own_group, id);
 end
 
 --- Causes this ship to kamikazi into `targets`, which can be one or more ships.
 ---
 ---@param targets Ship | Ship[]
 function modkit_ship:kamikazi(targets)
-	if (targets.own_group) then -- need to turn into `Ship[]`
-		targets = {
-			[1] = targets
-		}
+	if (targets.own_group) then
+		return SobGroup_Kamikaze(self.own_group, targets.own_group);
 	end
-	SobGroup_Kamikaze(self.own_group, SobGroup_FromShips(targets));
+
+	return SobGroup_Kamikaze(self.own_group, SobGroup_FromShips(targets));
 end
 
 --- Returns the cloak state of this ship, optionally setting it.
@@ -389,7 +533,7 @@ end
 --- - Use `:catch(...)` to execute code _after_ the move is interrupted or fails.
 ---
 ---@param target string | Ship | Position | Arr3
----@param options? { distance_threshold: number, no_event: bool }
+---@param options? { distance_threshold?: number, no_event: bool }
 ---@return EventChain|RuleChain|nil
 function modkit_ship:move(target, options)
 	options = modkit.table:merge(
@@ -414,7 +558,7 @@ function modkit_ship:move(target, options)
 		---@cast target Position | Arr3
 
 		-- print("move issued for " .. self.own_group);
-		modkit.table.printTbl(options, "options");
+		-- modkit.table.printTbl(options, "options");
 
 		-- print("SobGroup_MoveToPoint(" .. self.player.id .. ", " .. self.own_group .. ", " .. Vec3(target) .. ");");
 		SobGroup_MoveToPoint(self.player.id, self.own_group, target);
@@ -458,7 +602,7 @@ end
 --- Returns `1` if this ship is within `threshold` units of `where`.
 --- 
 ---@param where string | Ship | Position | Arr3
----@param threshold? number
+---@param threshold? number 2000
 ---@return bool
 function modkit_ship:isNear(where, threshold)
 	threshold = threshold or 2000;
@@ -493,9 +637,9 @@ end
 --- - `stay_docked`: Docks and stays docked unless manually launched
 ---
 --- @class DockTargetOptions
---- @field instant boolean
---- @field stay_docked boolean 
----
+--- @field instant? bool
+--- @field stay_docked? bool 
+
 ---@param target? Ship
 ---@param options? DockTargetOptions
 function modkit_ship:dock(target, options)
@@ -507,7 +651,7 @@ function modkit_ship:dock(target, options)
 		SobGroup_DockSobGroupWithAny(self.own_group);
 	else
 		if (instant) then
-			SobGroup_DockSobGroup(self.own_group, target.own_group);
+			SobGroup_DockSobGroupInstant(self.own_group, target.own_group);
 		elseif (stay_docked) then
 			SobGroup_DockSobGroupAndStayDocked(self.own_group, target.own_group);
 		else
@@ -862,6 +1006,17 @@ function modkit_ship:alliedWith(other)
 	return self.player:alliedWith(other_player);
 end
 
+--- Switches the owner of this ship to the supplied player.
+---
+---@param player Player|integer
+function modkit_ship:switchToPlayer(player)
+	if (type(player) == "number") then
+		player = GLOBAL_PLAYERS:get(player);
+	end
+
+	return SobGroup_SwitchOwner(self.own_group, player.id);
+end
+
 --- Returns `1` if this ship is under attack from any source, else `nil`. If `attacker` is provided, check instead if
 --- this ship is under attack by that attacker (instead of anything).
 ---
@@ -998,10 +1153,10 @@ function modkit_ship:selected(selected, add_to_current)
 		SobGroup_SobGroupAdd(to_select_group, self.own_group);
 		if (add_to_current) then
 			local current = SobGroup_FromShips(GLOBAL_SHIPS:selected());
-			modkit.table.printTbl(modkit.table.map(GLOBAL_SHIPS:selected(), function (ship)
-				return { own_group = ship.own_group, selected = ship:selected() };
-			end), "selected ships");
-			print("current selected group count: " .. tostring(SobGroup_Count(current)));
+			-- modkit.table.printTbl(modkit.table.map(GLOBAL_SHIPS:selected(), function (ship)
+			-- 	return { own_group = ship.own_group, selected = ship:selected() };
+			-- end), "selected ships");
+			-- print("current selected group count: " .. tostring(SobGroup_Count(current)));
 			SobGroup_SobGroupAdd(to_select_group, current);
 		end
 		SobGroup_SelectSobGroup(to_select_group);
@@ -1124,7 +1279,7 @@ end
 --- Causes the FX `name` to play at the ship's location.
 ---
 ---@param name string
----@param scale number
+---@param scale? number
 function modkit_ship:playEffect(name, scale)
 	FX_PlayEffect(name, self.own_group, scale or 1);
 end
@@ -1181,7 +1336,7 @@ end
 --- If `spawn` is given, causes this Ship to spawn/despawn. When spawning, may optionally accept a Volume or
 --- a `Position` to spawn into.
 ---
----@param spawn integer
+---@param spawn? integer
 ---@param volume? string | Position
 ---@return string
 function modkit_ship:spawn(spawn, volume)
@@ -1202,38 +1357,66 @@ end
 --- Returns a `RuleChain|EventChain` which resolves with the newly spawned ships.
 ---
 ---@param spawn_args (SpawnArgs|string)|(SpawnArgs|string)[]
+---@return EventChain|RuleChain
 function modkit_ship:spawnShip(spawn_args)
 	return modkit.ships():spawnShips(spawn_args);
 end
 
---- Spawns new ships, as specified by `spawn_args`. The spawned ships
+--- Calls `SobGroup_CreateShip`, which attempts to _produce_ a new ship from this ship.
+--- 
+--- Ship production will use a ship hold and launch points normally, but can also work just through hyperspacing in the desired ship.
 ---
---- Returns a `RuleChain|EventChain` which resolves with the newly spawned ships.
----
---- @todo: this doesn't work as expected; producted ships all share a group for some reason
----
----@param spawn_args (SpawnArgs|string)|(SpawnArgs|string)[]
-function modkit_ship:produceShips(spawn_args)
-	self:spawnShip(spawn_args):next(function(res, _, state)
-		local this_ship = %self;
-		---@type Ship[]
-		local prev = state._previous_result;
+--- @class ProduceArgs
+--- @field ship_type ShipType
+--- @field count? integer
+--- @field spawn_group? string
 
-		print(prev);
-		if (type(prev) == "table") then
-			modkit.table.printTbl(prev, "prev result as captured in 'produceShips'");
+---@param produce_args (ProduceArgs|string)|(ProduceArgs|string)[]
+function modkit_ship:produceShipsQuiet(produce_args)
+	local all_spawn_group = SobGroup_Fresh();
+
+	if (type(produce_args) == "table" and type(produce_args[1]) == "table") then
+
+		for _, args in produce_args do
+			if (type(args) == "string") then
+				args = {
+					ship_type = args
+				};
+			end
+			---@cast args SpawnArgs
+
+			SobGroup_SobGroupAdd(all_spawn_group, self:produceShipsQuiet(args));
 		end
 
-		for _, ship in prev do
-			---@cast ship Ship
-			ship:spawn(0);
-			-- from here we want it to 'launch' from the producer vessel... probably we want to treat dockables and non-dockables differently
-			-- dockables: instadock + launch
-			-- non-dockables: need to enter parade position while in hyperspace?
+		return all_spawn_group;
+	end
 
-			ship:dock(this_ship.own_group, { instant = 1, stay_docked = 1 });
-		end
-	end);
+	local defaults = {
+		ship_type = produce_args,
+		count = 1,
+		spawn_group = SobGroup_Fresh()
+	};
+	if (type(produce_args) == "string") then -- first coax string into a `ProduceArgs`
+		produce_args = defaults;
+	else
+		produce_args = modkit.table:merge(defaults, produce_args);
+	end
+
+	for _ = 1, produce_args.count do
+		local produced_group = SobGroup_CreateShip(self.own_group, produce_args.ship_type);
+		
+		-- SobGroup_DockSobGroupInstant(produced_group, self.own_group);
+
+		SobGroup_SobGroupAdd(all_spawn_group, produced_group);
+	end
+
+	return all_spawn_group;
+end
+
+---@param produce_args (ProduceArgs|string)|(ProduceArgs|string)[]
+---@param options? AwaitShipsOptions
+function modkit_ship:produceShips(produce_args, options)
+	return awaitShips(self:produceShipsQuiet(produce_args), options):begin();
 end
 
 -- ==== printing (debugging) ====
