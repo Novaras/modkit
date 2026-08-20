@@ -14,7 +14,7 @@ local makeLineBox = function (index, pt, color, name, pos, offset)
 		wrapping = 0,
 		Layout = {
 			margin_RB = { r = 0, b = 0, rr = "px", br = "px" },
-			size_WH = { w = 1, h = 22, wr = "par", hr = "px" },
+			size_WH = { w = 1, h = 30, wr = "par", hr = "px" },
 			pad_LT = { l = 0, t = pt, lr = "px", pt = "px" },
 			pos = pos,
 		},
@@ -56,7 +56,7 @@ MK_ConsoleScreen = {
 		TitleText =	"Modkit Console",
 		name = "mk_consolescreen_root",
 		Layout = {
-			size_WH = { w = 0.6, h = 650, wr = "scr", hr = "px", },
+			size_WH = { w = 0.6, h = 25 * 30 + 120, wr = "scr", hr = "px", },
 			pos_XY = {	x = 0.2, y = 0.15, xr = "scr", yr = "scr", },
 		},
 		arrangetype = "vert",
@@ -111,7 +111,7 @@ MK_ConsoleScreen = {
 			{ -- need a horizontal frame for the growing cursor offset / cursor
 				type = "Frame",
 				Layout = {
-					size_WH = { w = 1, h = 21, wr = 'par', hr = 'px', },
+					size_WH = { w = 1, h = 12, wr = 'par', hr = 'px', },
 				},
 				arrangetype = 'horiz',
 				;
@@ -122,7 +122,7 @@ MK_ConsoleScreen = {
 					autosize = 1,
 					Layout = {
 						margin_RB = { r = 0, b = 0, rr = "px", br = "px" },
-						size_WH = { w = 100, h = 20, wr = "px", hr = "px" },
+						size_WH = { w = 100, h = 12, wr = "px", hr = "px" },
 						pad_LT = { l = 0, t = 0, lr = "px", pt = "px" },
 						pos = {	x = 0, y = 1, xr = "par", yr = "par", },
 					},
