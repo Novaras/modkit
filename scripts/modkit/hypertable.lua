@@ -28,6 +28,9 @@ if (not MK_hypertable) then
 		screen_name = screen_name or "DefaultStateScreen";
 		dropdown_host_el = dropdown_host_el or "host_dropdown";
 
+		---@diagnostic disable-next-line: return-type-mismatch
+		if (not Universe_GameTime) then return nil; end
+
 		if (UI_GetElementCustomData and UI_GetElementCustomData(screen_name, dropdown_host_el) ~= 1) then
 			UI_AddDropDownListboxItem(screen_name, dropdown_host_el, "_", "", 0, "{}");
 			UI_SetElementCustomData(screen_name, dropdown_host_el, 1); -- 1 = init
