@@ -51,10 +51,14 @@ if (H_SP_HELPERS == nil) then
 
 	--- Called in the .level to place squads and assign them to groups
 	--- Called in the .lua gametime to register Ship objects for these defined ships
-	---@param level_path string The full path to the .level of the mission
-	function RegisterShips(level_path)
-		if (MODKIT_MISSION_SHIPS == nil) then
-			dofilepath(level_path);
+	---@param mission_ships_path string The path to the file defining `MODKIT_MISSION_SHIPS`
+	function RegisterShips(mission_ships_path)
+		dofilepath("data:scripts/modkit/table_util.lua");
+
+		if (modkit.table.length(MODKIT_MISSION_SHIPS) == 0) then
+			dofilepath(mission_ships_path);
+
+			-- modkit.table.printTbl(MODKIT_MISSION_SHIPS, "mission ships");
 		end
 
 		MODKIT_MISSION_SHIPS = MODKIT_MISSION_SHIPS or {};
