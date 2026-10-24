@@ -159,6 +159,36 @@ function modkit_ship:actualSpeedSq()
 	return SobGroup_GetActualSpeed(self.own_group);
 end
 
+--- Causes this ship to rotate around the given `point` by `theta` radians.
+---
+--- Note that the ship is repositioned; there is no smooth motion built in.
+---
+---@param theta number
+---@param point? Vec3Like
+function modkit_ship:rotateHorizontal(theta, point)
+	if (not point) then
+		point = Vec3(0);
+	else
+		point = Vec3(point);
+	end
+
+	local current_pos = self:position();
+	local dg = deg(theta);
+
+	local origin_pos = current_pos + { -point.x, 0, -point.z };
+
+	local x = origin_pos.x;
+	local z = origin_pos.z;
+	local c = cos(dg);
+	local s = sin(dg);
+
+	self:position({
+		(x * c - z * s) + point.x,
+		origin_pos.y,
+		(z * c + x * s) + point.z
+	});
+end
+
 --- Returns the ship's current position (or the center position of the ship's batch squad).
 --- If `pos` is supplied, it will set the position of the ship instantly.
 ---
@@ -180,7 +210,7 @@ function modkit_ship:respositionTo(target, options)
 	options = options or {};
 
 	local others_to_drag = options.others_to_drag;
-	local increment = options.increment or self:distanceTo(target) / 32;
+	local increment = max(1, options.increment or self:distanceTo(target) / 32);
 	local success_threshold = options.success_threshold or increment;
 	local stubborn = options.stubborn;
 
@@ -188,7 +218,20 @@ function modkit_ship:respositionTo(target, options)
 
 	local new_ev = modkit.scheduler:make({
 		fn = function (resolveReposition, rejectReposition, resposition_state)
-			print("reposition event for " .. %self);
+			-- print("reposition event for " .. %self);
+			-- modkit.table.printTbl(resposition_state._event, "respositionTo event", 1);
+
+			if (not %self or %self:HP() == 0 or %self:count() == 0) then
+				local err_msg = "Reposition event for " .. (%self or 'nil?') .. " running, but host ship can't be found; exiting!";
+
+				if (%self) then
+					%self._reposition_event = nil;
+				end
+
+				consoleError(err_msg);
+
+				return rejectReposition(err_msg);
+			end
 
 			-- print("do I already have a reposition event?: " .. tostring(%self._reposition_event));
 			-- print("can see new event from here? " .. tostring(resposition_state._event));
@@ -217,7 +260,7 @@ function modkit_ship:respositionTo(target, options)
 
 				---@diagnostic disable-next-line: inject-field
 				resposition_state.target = resolved_target;
-				print("target is " .. resposition_state.target);
+				-- print("target is " .. resposition_state.target);
 
 				---@diagnostic disable-next-line: inject-field
 				resposition_state.increment_vec = Vec3:unit(resposition_state.target - %self:position()) * %increment;
@@ -225,12 +268,14 @@ function modkit_ship:respositionTo(target, options)
 
 			local ds = %self:distanceTo(resposition_state.target);
 
-			if (not %stubborn and resposition_state.distance_left and ds > resposition_state.distance_left) then -- consider an error
+			if (not %stubborn and resposition_state.distance_left and ds > resposition_state.distance_left) then -- consier an error
+				%self._reposition_event = nil;
 				return rejectReposition("Error: " .. %self .. " was found to be moving away from it's target during reposition event! Exiting!");
 			end
 
 			if (ds <= %success_threshold) then
 				print(%self .. " DONE MOVING!!");
+				%self._reposition_event = nil;
 
 				return resolveReposition(%self);
 			end
@@ -242,8 +287,8 @@ function modkit_ship:respositionTo(target, options)
 			end
 
 			-- print(%self .. " currently at " .. %self:position());
-			-- print("\tincrement :" .. increment);
-			-- print("\ttarget is " .. state.target);
+			-- print("\tincrement :" .. %increment);
+			-- print("\ttarget is " .. resposition_state.target);
 			%self:position(%self:position() + increment_vec);
 
 			if (%others_to_drag) then
@@ -258,6 +303,7 @@ function modkit_ship:respositionTo(target, options)
 
 			if (ds <= %success_threshold) then
 				print(%self .. " DONE MOVING!!");
+				%self._reposition_event = nil;
 
 				return resolveReposition(%self);
 			end
@@ -437,6 +483,9 @@ function modkit_ship:customCommand(target)
 	end
 end
 
+--- Causes this ship to attack `targets`.
+---
+---@param targets string|Ship|Ship[]
 function modkit_ship:attack(targets)
 	if (type(targets) == "string") then
 		SobGroup_Attack(self.player.id, self.own_group, targets);
@@ -465,7 +514,7 @@ end
 ---
 ---@param targets Ship | Ship[]
 function modkit_ship:kamikazi(targets)
-	if (targets.own_group) then
+	if (targets.own_group) then -- need to turn into `Ship[]`
 		return SobGroup_Kamikaze(self.own_group, targets.own_group);
 	end
 
