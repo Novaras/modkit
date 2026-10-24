@@ -1450,6 +1450,7 @@ function modkit_ship:produceShipsQuiet(produce_args)
 	else
 		produce_args = modkit.table:merge(defaults, produce_args);
 	end
+	---@cast produce_args ProduceArgs
 
 	for _ = 1, produce_args.count do
 		local produced_group = SobGroup_CreateShip(self.own_group, produce_args.ship_type);
