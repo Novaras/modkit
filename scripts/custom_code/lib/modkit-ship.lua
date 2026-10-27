@@ -10,6 +10,7 @@
 ---@field _current_tumble Arr3
 ---@field _despawned_at_volume string
 ---@field _move_volume string Used by `:move` and related methods
+---@field _move_event? Event|Rule The event/rule tracking this ship's current `:move` (if it was issued with an event)
 ---@field _default_vol string
 ---@field _auto_launch 0|1
 ---@field _visibility table<Player, Visibility>
@@ -613,6 +614,26 @@ function modkit_ship:move(target, options)
 		SobGroup_MoveToPoint(self.player.id, self.own_group, target);
 	end
 
+	-- this new order replaces any previous move, so reject that move's event (if still running) to settle its chain;
+	-- finished events are cleaned up by the scheduler / campaign driver once their listeners have run
+	local previous = self._move_event;
+	if (previous) then
+		local superseded_msg = "move promise for ship " .. self.own_group .. " rejected: superseded by a new move order";
+		if (Rule_AddInterval) then
+			---@cast previous Rule
+			if (previous.status == "running") then
+				previous.error = superseded_msg;
+				previous:finish("rejected", {});
+			end
+		else
+			---@cast previous Event
+			if (previous.status == EVENT_STATUS.RUNNING) then
+				previous:finish(EVENT_STATUS.REJECTED, superseded_msg);
+			end
+		end
+		self._move_event = nil;
+	end
+
 	if (no_event) then
 		return nil;
 	end
@@ -625,9 +646,10 @@ function modkit_ship:move(target, options)
 		api = modkit.scheduler;
 	end
 
-	-- also we need to clear this if its already running
-	return api:make({
-		name = self.type_group .. "_" .. self.id ..  "_move_command_listener",
+	-- the name must be unique per move: listeners find their event by name, so a shared name would let an old
+	-- chain's `:next`/`:catch` fire on a later move's event
+	self._move_event = api:make({
+		name = self.type_group .. "_" .. self.id ..  "_move_" .. struid(),
 		fn = function (resolve, reject)
 			if (%self:isNear(%target, %distance_threshold)) then
 				return resolve(%self);
@@ -637,7 +659,9 @@ function modkit_ship:move(target, options)
 				return reject("move promise for ship " .. %self.own_group .. " rejected: move order was interrupted before completion (current command: " .. %self:currentCommand() .. ")");
 			end
 		end
-	}):begin();
+	});
+
+	return self._move_event:begin();
 end
 
 --- Returns `1` if this ship is currently moving (`AB_Move` + alive + in real space).

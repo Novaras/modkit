@@ -99,6 +99,7 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 		---@field __level_path string
 		---@field __tick integer
 		---@field __default_interval integer
+		---@field __next_id integer
 		GLOBAL_RULES = modkit.MemGroup.Create("mg-rules-global", {
 			__runner = nil,
 			__rule_pattern = nil,
@@ -106,6 +107,7 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 			__level_path = nil,
 			__tick = 0,
 			__default_interval = 1,
+			__next_id = 0,
 		});
 
 		-- one tag shared by every rule (Lua 4 tags are never freed, so a tag per rule leaked one per `make`)
@@ -305,7 +307,9 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 	---@param new_rule RuleInitConfig|RuleFn
 	---@return Rule
 	function rules:make(new_rule)
-		local id = ("mk_rule__" .. tostring(GLOBAL_RULES.__tick) .. "_" .. tostring(modkit.table.length(GLOBAL_RULES._entities)));
+		-- a counter rather than the entity count, since finished rules are deleted (see `modkit_campaign_driver`)
+		GLOBAL_RULES.__next_id = GLOBAL_RULES.__next_id + 1;
+		local id = ("mk_rule__" .. tostring(GLOBAL_RULES.__tick) .. "_" .. tostring(GLOBAL_RULES.__next_id));
 		if (type(new_rule) == "table" and new_rule.name) then
 			id = id .. "__" .. new_rule.name;
 		end
@@ -454,6 +458,25 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 				print(listener.pattern .." passed conditions!");
 				listener.callback();
 				GLOBAL_RULES.__listeners[listener.pattern] = nil; -- unsubscribe
+			end
+		end
+
+		-- clean up finished rules (their engine rule is already removed by `rule:finish`), otherwise they accumulate forever
+		-- (runs after the listener pass, so listeners still see the final status; rules named in a pending listener's pattern are kept)
+		for id, rule in GLOBAL_RULES:all() do
+			---@cast rule Rule
+			if (rule.status == "resolved" or rule.status == "rejected") then
+				local awaited = nil;
+				for pattern, _ in GLOBAL_RULES.__listeners do
+					if (strfind(pattern, rule.id, 1, 1) or strfind(pattern, rule.api_name, 1, 1)) then
+						awaited = 1;
+						break;
+					end
+				end
+
+				if (not awaited) then
+					GLOBAL_RULES:delete(id);
+				end
 			end
 		end
 

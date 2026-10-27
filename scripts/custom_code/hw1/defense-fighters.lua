@@ -77,7 +77,7 @@ end
 function defense_fighter_proto:strictGuardDistance()
 	if (modkit.table.length(self:guardTargets()) > 0) then -- means we are in an attack phase
 		if (self:distanceTo(self:guardTargets()[1]) > 1000) then
-			self:move(self:nextGuardPos()); -- script tick is 1s, should be fine
+			self:move(self:nextGuardPos(), { no_event = 1 }); -- script tick is 1s, should be fine
 		end
 	end
 end

@@ -72,9 +72,9 @@ function modkit_autoexec:moveActionQueue(move_actions, distance_threshold, defau
 			elseif (%MA:finished(caller) and modkit.table.length(%MA.move_actions) > %MA.index) then -- finished action and not final move-action
 				%MA.index = %MA.index + 1;
 				%MA.actioning = 0;
-				caller:move(%MA:next(caller).position);
+				caller:move(%MA:next(caller).position, { no_event = 1 }); -- arrival is tracked by this runner, not the move event
 			elseif (%MA.index == 1) then -- first move-action, just go
-				caller:move(%MA:next(caller).position);
+				caller:move(%MA:next(caller).position, { no_event = 1 });
 			end
 		end
 	end

@@ -84,6 +84,25 @@ function scheduler:update()
 			GLOBAL_SCHEDULE_EVENTS._listeners[pattern] = nil; -- remove this listener
 		end
 	end
+
+	--- clean up finished events, otherwise every event ever made stays in `GLOBAL_SCHEDULE_EVENTS` and is iterated every tick
+	--- (runs after the listener pass, so listeners still see the final status; events named in a pending listener's pattern are kept)
+	for id, event in GLOBAL_SCHEDULE_EVENTS:all() do
+		---@cast event Event
+		if (event.status == EVENT_STATUS.RESOLVED or event.status == EVENT_STATUS.REJECTED) then
+			local awaited = nil;
+			for pattern, _ in GLOBAL_SCHEDULE_EVENTS._listeners do
+				if (strfind(pattern, event.name, 1, 1)) then
+					awaited = 1;
+					break;
+				end
+			end
+
+			if (not awaited) then
+				GLOBAL_SCHEDULE_EVENTS:delete(id); -- (not `modkit.scheduler:remove`, which prints for every event)
+			end
+		end
+	end
 end
 
 modkit.compose:addShipProto("modkit_scheduler", scheduler);
