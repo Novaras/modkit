@@ -268,6 +268,7 @@ if (H_DRIVER == nil) then
 
 		caller:destroy(); -- run the caller's custom destroy hook
 
+		caller._destroyed = 1; -- lets anything still holding this `Ship` (e.g a `ShipList`) drop it
 		GLOBAL_SHIPS:delete(i);
 		GLOBAL_SHIPS.cache.created_at[i] = nil;
 	end

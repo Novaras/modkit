@@ -51,12 +51,12 @@ modkit_ship = {
 
 --- Converts the given value to a volume (`string` name).
 ---
----@param val string | Ship | Position | Arr3
+---@param val string | Ship | Ship[] | ShipList | Position | Arr3
 function asVol(val)
 	if (type(val) ~= "string") then
-		if (val.own_group) then
-			---@cast val Ship
-			val = val:position();
+		if (modkit.ShipList.isShipLike(val)) then -- use its (average) position
+			---@cast val Ship | Ship[] | ShipList
+			val = modkit.ShipList.positionOf(val, "_asvol-temp-group");
 		end
 		---@cast val Position | Arr3
 
@@ -434,7 +434,7 @@ end
 
 --- Returns the distance between this ship and the given other ship, or the average position if given multiple others.
 ---
----@param other Ship | Ship[] | Position
+---@param other Ship | Ship[] | ShipList | Position
 ---@return number
 function modkit_ship:distanceTo(other)
 	local a = self:position();
@@ -445,11 +445,12 @@ function modkit_ship:distanceTo(other)
 
 	---@type Position|Ship
 	local b = a;
-	if (Vec3:isVec3Like(other)) then
+	if (modkit.ShipList.isShipLike(other)) then -- `Ship[]`/`ShipList`: distance to their average position
+		---@cast other Ship[] | ShipList
+		b = modkit.ShipList.positionOf(other, self.own_group .. "-temp-distance-group");
+	else
 		---@cast other Position
 		b = other;
-	else
-		b = Vec3(SobGroup_GetPosition(SobGroup_FromShips(other)));
 	end
 
 	return sqrt(
@@ -486,16 +487,9 @@ end
 
 --- Causes this ship to attack `targets`.
 ---
----@param targets string|Ship|Ship[]
+---@param targets string|Ship|Ship[]|ShipList
 function modkit_ship:attack(targets)
-	if (type(targets) == "string") then
-		SobGroup_Attack(self.player.id, self.own_group, targets);
-	elseif (targets.own_group) then
-		return SobGroup_Attack(self.player.id, self.own_group, targets.own_group);
-	else
-		local temp_group = SobGroup_FromShips(targets, self.own_group .. "-temp-attack-group");
-		SobGroup_Attack(self.player.id, self.own_group, temp_group);
-	end
+	return SobGroup_Attack(self.player.id, self.own_group, modkit.ShipList.groupOf(targets, self.own_group .. "-temp-attack-group"));
 end
 
 --- Causes this ship to attack all the ships belonging to the given player.
@@ -513,13 +507,9 @@ end
 
 --- Causes this ship to kamikazi into `targets`, which can be one or more ships.
 ---
----@param targets Ship | Ship[]
+---@param targets string | Ship | Ship[] | ShipList
 function modkit_ship:kamikazi(targets)
-	if (targets.own_group) then -- need to turn into `Ship[]`
-		return SobGroup_Kamikaze(self.own_group, targets.own_group);
-	end
-
-	return SobGroup_Kamikaze(self.own_group, SobGroup_FromShips(targets));
+	return SobGroup_Kamikaze(self.own_group, modkit.ShipList.groupOf(targets, self.own_group .. "-temp-kamikaze-group"));
 end
 
 --- Returns the cloak state of this ship, optionally setting it.
@@ -544,26 +534,16 @@ end
 
 --- Causes this ship to begin capturing `targets`, which can be a single ship or a table of ships.
 ---
----@param targets Ship | Ship[]
+---@param targets string | Ship | Ship[] | ShipList
 function modkit_ship:capture(targets)
-	if (targets.own_group) then
-		SobGroup_CaptureSobGroup(self.own_group, targets.own_group);
-	else
-		local temp_group = SobGroup_FromShips(targets, self.own_group .. "-temp-capture-group");
-		SobGroup_CaptureSobGroup(self.own_group, temp_group);
-	end
+	SobGroup_CaptureSobGroup(self.own_group, modkit.ShipList.groupOf(targets, self.own_group .. "-temp-capture-group"));
 end
 
 --- Causes this ship to begin salvaging `targets`, which can be a single ship or a table of ships.
 ---
----@param targets Ship | Ship[]
+---@param targets string | Ship | Ship[] | ShipList
 function modkit_ship:salvage(targets)
-	if (targets.own_group) then
-		SobGroup_SalvageSobGroup(self.own_group, targets.own_group);
-	else
-		local temp_group = SobGroup_FromShips(targets, self.own_group .. "-temp-salvage-group");
-		SobGroup_SalvageSobGroup(self.own_group, temp_group);
-	end
+	SobGroup_SalvageSobGroup(self.own_group, modkit.ShipList.groupOf(targets, self.own_group .. "-temp-salvage-group"));
 end
 
 --- Makes the ship stop (issues a stop command).
@@ -582,7 +562,7 @@ end
 --- - Use `:next(...)` to execute code _after_ the move finishes successfully.
 --- - Use `:catch(...)` to execute code _after_ the move is interrupted or fails.
 ---
----@param target string | Ship | Position | Arr3
+---@param target string | Ship | Ship[] | ShipList | Position | Arr3
 ---@param options? { distance_threshold?: number, no_event: bool }
 ---@return EventChain|RuleChain|nil
 function modkit_ship:move(target, options)
@@ -601,9 +581,9 @@ function modkit_ship:move(target, options)
 	if (type(target) == "string") then -- a volume
 		SobGroup_Move(self.player.id, self.own_group, target);
 	else -- a position
-		if (target.own_group) then
-			---@cast target Ship
-			target = target:position();
+		if (modkit.ShipList.isShipLike(target)) then -- move to its (average) position
+			---@cast target Ship | Ship[] | ShipList
+			target = modkit.ShipList.positionOf(target, self.own_group .. "-temp-move-group");
 		end
 		---@cast target Position | Arr3
 
@@ -674,7 +654,7 @@ end
 
 --- Returns `1` if this ship is within `threshold` units of `where`.
 --- 
----@param where string | Ship | Position | Arr3
+---@param where string | Ship | Ship[] | ShipList | Position | Arr3
 ---@param threshold? number 2000
 ---@return bool
 function modkit_ship:isNear(where, threshold)
@@ -685,19 +665,17 @@ end
 
 --- Makes this ship guard `target`, which may be one or multiple other ships.
 ---
----@param target Ship | Ship[]
+---@param target string | Ship | Ship[] | ShipList
 function modkit_ship:guard(target)
-	if (target.own_group) then
-		self._guard_group = target.own_group;
-	else -- collection of ships
-		self._guard_group = SobGroup_FromShips({ target }, self.own_group .. "_guard_group");
-	end
+	self._guard_group = modkit.ShipList.groupOf(target, self.own_group .. "_guard_group");
 	return SobGroup_GuardSobGroup(self.own_group, self._guard_group);
 end
 
+---@param other string | Ship | Ship[] | ShipList
+---@param mode? integer
 function modkit_ship:parade(other, mode)
 	mode = mode or 0;
-	return SobGroup_ParadeSobGroup(self.own_group, other.own_group, mode);
+	return SobGroup_ParadeSobGroup(self.own_group, modkit.ShipList.groupOf(other, self.own_group .. "-temp-parade-group"), mode);
 end
 
 --- Causes the ship to dock with `target`.
@@ -713,7 +691,7 @@ end
 --- @field instant? bool
 --- @field stay_docked? bool 
 
----@param target? Ship
+---@param target? string | Ship | Ship[] | ShipList
 ---@param options? DockTargetOptions
 function modkit_ship:dock(target, options)
 	options = options or {};
@@ -723,12 +701,13 @@ function modkit_ship:dock(target, options)
 	if (target == nil) then -- if no target, target = closest ship
 		SobGroup_DockSobGroupWithAny(self.own_group);
 	else
+		local target_group = modkit.ShipList.groupOf(target, self.own_group .. "-temp-dock-group");
 		if (instant) then
-			SobGroup_DockSobGroupInstant(self.own_group, target.own_group);
+			SobGroup_DockSobGroupInstant(self.own_group, target_group);
 		elseif (stay_docked) then
-			SobGroup_DockSobGroupAndStayDocked(self.own_group, target.own_group);
+			SobGroup_DockSobGroupAndStayDocked(self.own_group, target_group);
 		else
-			SobGroup_DockSobGroup(self.own_group, target.own_group);
+			SobGroup_DockSobGroup(self.own_group, target_group);
 		end
 	end
 end
@@ -796,14 +775,15 @@ function modkit_ship:ghost(enabled)
 	return self._ghosted;
 end
 
---- Launches `docked` from this ship, if `docked` is currently docked with this ship.
+--- Launches `docked` from this ship, if `docked` is currently docked with this ship. If `docked` is omitted, launches
+--- any of the player's ships docked with this ship.
 ---
----@param docked? Ship
+---@param docked? string|Ship|Ship[]|ShipList
 ---@return nil
 function modkit_ship:launch(docked)
 	local group_to_launch = self.player:shipsGroup();
 	if (docked) then
-		group_to_launch = docked.own_group;
+		group_to_launch = modkit.ShipList.groupOf(docked, self.own_group .. "-temp-launch-group");
 	end
 	return SobGroup_Launch(group_to_launch, self.own_group);
 end
@@ -1013,24 +993,24 @@ function modkit_ship:stunned(stunned)
 end
 
 --- Returns whether or not this ship is docked with anything. Optionally, checks if this ship is docked with a specific ship.
----@param with? Ship
+---@param with? string | Ship | Ship[] | ShipList
 ---@return bool
 function modkit_ship:docked(with)
 	if (with) then
-		return SobGroup_IsDockedSobGroup(self.own_group, with.own_group) == 1;
+		return SobGroup_IsDockedSobGroup(self.own_group, modkit.ShipList.groupOf(with, self.own_group .. "-temp-docked-group")) == 1;
 	end
 	return SobGroup_IsDocked(self.own_group) == 1;
 end
 
 --- Returns `1` if this ship is attacking anything, else `nil`. If `target` is provided, check instead if
 -- this ship is attacking that target (instead of anything).
----@param target? Ship
+---@param target? string | Ship | Ship[] | ShipList
 ---@return bool
 function modkit_ship:attacking(target)
 	if (target) then
 		local targets_group = SobGroup_Fresh("targets-group-" .. self.id .. "-" .. COMMAND_Attack);
 		SobGroup_GetCommandTargets(targets_group, self.own_group, COMMAND_Attack);
-		return SobGroup_GroupInGroup(target.own_group, targets_group) == 1;
+		return SobGroup_GroupInGroup(modkit.ShipList.groupOf(target, self.own_group .. "-temp-attacking-group"), targets_group) == 1;
 	else
 		return SobGroup_AnyAreAttacking(self.own_group) == 1;
 	end
@@ -1094,11 +1074,22 @@ end
 --- Returns `1` if this ship is under attack from any source, else `nil`. If `attacker` is provided, check instead if
 --- this ship is under attack by that attacker (instead of anything).
 ---
----@param attacker? Ship
+---@param attacker? Ship | Ship[] | ShipList If multiple ships, checks if _any_ of them are attacking this ship
 ---@return bool
 function modkit_ship:underAttack(attacker)
 	if (attacker) then
-		return attacker:attacking(self);
+		if (attacker.own_group) then
+			---@cast attacker Ship
+			return attacker:attacking(self);
+		end
+
+		local attackers = attacker;
+		if (attacker.__is_ship_list) then
+			attackers = attacker:ships();
+		end
+		return modkit.table.any(attackers, function (ship)
+			return ship:attacking(%self);
+		end);
 	end
 	return SobGroup_UnderAttack(self.own_group) == 1;
 end
@@ -1262,15 +1253,15 @@ end
 --- For each axis, you can provie a 'leeway' to provide a range around the position of this ship for that axis. Otherwise,
 --- checks the value of each axis being exactly equal.
 ---
----@param other Ship|Position
+---@param other Ship|Ship[]|ShipList|Position
 ---@param leeways? { x: number?, y:  number?, z: number? } | number
 function modkit_ship:positionEq(other, leeways)
 	leeways = leeways or {};
 	local p1 = self:position();
 	local p2 = other;
-	if (p2.position) then
-		---@cast p2 Ship
-		p2 = p2:position();
+	if (modkit.ShipList.isShipLike(p2)) then -- compare against its (average) position
+		---@cast p2 Ship|Ship[]|ShipList
+		p2 = modkit.ShipList.positionOf(p2, self.own_group .. "-temp-position-group");
 	end
 	---@cast p2 Position
 

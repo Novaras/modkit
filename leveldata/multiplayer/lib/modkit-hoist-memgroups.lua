@@ -94,6 +94,7 @@ function modkit_hoist_memgroups()
 	for id, ship in GLOBAL_SHIPS:all() do
 		---@cast ship Ship
 		if (type(ship.HP) == "function" and ship:HP() <= 0 or ship:count() <= 0) then
+			ship._destroyed = 1; -- (see `destroy` in driver.lua)
 			GLOBAL_SHIPS:delete(id);
 		end
 	end

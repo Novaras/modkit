@@ -13,6 +13,7 @@ dofilepath("data:scripts/modkit/research.lua"); -- research...
 ---@field _tick integer
 ---@field _hoisted bool
 ---@field created_at number
+---@field _destroyed? 1 Set when the ship dies (by the driver's `destroy` hook, or the rules-scope hoist rule)
 
 ---@class Base : Attribs
 modkit_base = {

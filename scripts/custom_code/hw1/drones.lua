@@ -5,10 +5,12 @@
 -- unlike the stock code which issues parade commands (which interrupt anything the drone is doing such as orienting, tracking, attcking, etc...)
 
 ---@class DroneFrigAttribs
----@field live_drones drone_proto[]
+---@field live_drones ShipList Keyed by drone type index (`"0"`..`"13"`); dead drones drop out automatically
 ---@field _init integer
 ---@field new_drones drone_proto[]
 ---@field targets_group string
+---@field _cached_position? Position
+---@field _cached_position_tick? integer
 
 ---@class DroneFrigate : Ship, DroneFrigAttribs
 local drones_proto = {
@@ -32,7 +34,7 @@ local drones_proto = {
 	},
 	attribs = function (g, p, s)
 		return {
-			live_drones = {},
+			live_drones = modkit.ShipList("drone-frig-drones-" .. s),
 			_init = 0,
 			new_drones = {},
 			targets_group = SobGroup_Fresh("drone-frig-targets-" .. s),
@@ -44,19 +46,19 @@ local drones_proto = {
 
 function drones_proto:killDrones()
 	-- self:print("kill!");
-	for i, drone in self.live_drones do
-		drone:HP(0);
-		self.live_drones[i] = nil;
-	end
+	self.live_drones:HP(0);
+	self.live_drones:clear();
 end
 
-function drones_proto:pruneDeadDrones()
-	for i, drone in self.live_drones do
-		if (drone:alive() == nil) then
-			-- self:print("prune drone " .. drone.own_group);
-			self.live_drones[i] = nil;
-		end
+--- Returns this frigate's position, cached for the current tick: the frigate and each of its drones need it every tick.
+---
+---@return Position
+function drones_proto:cachedPosition()
+	if (self._cached_position_tick ~= self:tick()) then
+		self._cached_position = self:position();
+		self._cached_position_tick = self:tick();
 	end
+	return self._cached_position;
 end
 
 --- Returns `nil` if the frigate is not 'ready', meaning it is not capable of fighting with drones.
@@ -87,7 +89,7 @@ end
 ---@return Position
 function drones_proto:droneParadePos(drone)
 	local parade_pos = {};
-	for i, value in self:position() do
+	for i, value in self:cachedPosition() do
 		parade_pos[i] = (value + self.parade_positions[tonumber(self:droneTypeIndex(drone)) + 1][i]); -- drone x, y, z pos is frigate pos + offsets in table
 	end
 	return parade_pos;
@@ -105,11 +107,11 @@ function drones_proto:produceMissingDrones()
 	-- 	};
 	-- end), "live drones")
 	-- print("[" .. Universe_GameTime() .. "] produce missing drones call for " .. self.own_group);
-	if (modkit.table.length(self.new_drones) == 0 and modkit.table.length(self.live_drones) < modkit.table.length(self.parade_positions)) then
+	if (modkit.table.length(self.new_drones) == 0 and self.live_drones:length() < modkit.table.length(self.parade_positions)) then
 		self.new_drones = {};
 		-- print("[" .. Universe_GameTime() .. "] frigate " .. self.own_group .. " has no drones! (tick: " .. self:tick() .. ")");
 		for i = 0, modkit.table.length(self.parade_positions) - 1 do
-			if (self.live_drones[tostring(i)] == nil) then
+			if (self.live_drones:get(tostring(i)) == nil) then
 				-- self:print("im missing drone " .. tostring(i));
 				self:produceShipsQuiet("kus_drone" .. i);
 				self.new_drones[modkit.table.length(self.new_drones) + 1] = tostring(i);
@@ -126,18 +128,22 @@ function drones_proto:addProducedDronesToList()
 	-- self:print("new_drones? " .. modkit.table.length(self.new_drones));
 
 	if (modkit.table.length(self.new_drones) > 0) then
-		local our_docked_drones = GLOBAL_SHIPS:allied(self, function (ship)
-			return ship:docked(%self);
+		-- cheap Lua checks first (type, not yet linked), so the engine call is only made for candidate drones rather than every ship
+		local our_docked_drones = GLOBAL_SHIPS:filter(function (ship)
+			return ship.frigate == nil and strfind(ship.type_group, "^kus_drone%d") and ship:docked(%self);
 		end);
 		---@cast our_docked_drones drone_proto[]
 		-- print("begin assigning new drones...");
 		for i, drone_type_index in self.new_drones do
 			-- print("drone " .. i);
-			self.live_drones[drone_type_index] = modkit.table.findVal(our_docked_drones, function (drone)
+			local produced = modkit.table.findVal(our_docked_drones, function (drone)
 				return %self:droneTypeIndex(drone) == %drone_type_index;
-			end) or self.live_drones[drone_type_index];
+			end);
+			if (produced) then
+				self.live_drones:add(produced, drone_type_index);
+			end
 
-			local drone = self.live_drones[drone_type_index];
+			local drone = self.live_drones:get(drone_type_index);
 			if (drone) then
 				-- print("drone link phase for drone " .. drone.own_group);
 				self.new_drones[i] = nil;
@@ -150,27 +156,23 @@ function drones_proto:addProducedDronesToList()
 	-- print("collection done!");
 end
 
+-- the commands below act on `live_drones` as a whole (a `ShipList`, so one engine call each rather than one per drone)
+
 --- Launches any drones currently docked.
 function drones_proto:launchDrones()
-	for _, drone in self.live_drones do
-		self:launch(drone);
-	end
+	self:launch(self.live_drones);
 end
 
 --- Syncs the ROE of all alive drones to the frigate's ROE
 ---
 ---@param ROE? ROE
 function drones_proto:syncDroneROEs(ROE)
-	for _, drone in self.live_drones do
-		drone:ROE(ROE or self:ROE());
-	end
+	self.live_drones:ROE(ROE or self:ROE());
 end
 
 --- Syncs the Stance of all alive drones to the frigate's Stance
 function drones_proto:syncDroneStances()
-	for _, drone in self.live_drones do
-		drone:stance(self:stance());
-	end
+	self.live_drones:stance(self:stance());
 end
 
 --- If the frigate has an attack target (it was told to attack by its player), the drones will focus on these targets.
@@ -181,26 +183,22 @@ function drones_proto:manageDroneTargets()
 		-- in this case `manageDroneTargets` was producing a bottleneck, so we use direct sobgroups for performance here
 		SobGroup_Clear(self.targets_group);
 		SobGroup_GetCommandTargets(self.targets_group, self.own_group, COMMAND_Attack);
-		for _, drone in self.live_drones do
-			drone:attack(self.targets_group);
-		end
+		self.live_drones:attack(self.targets_group);
 	end
 end
 
 --- Issues each drone a soft move command to its matching parade position. This allows the drones to move while firing.
 function drones_proto:positionLaunchedDrones()
-	local position_index = 1;
-	for _, drone in self.live_drones do
+	for _, drone in self.live_drones:ships() do
 		if (drone:docked(self) == nil) then
-			local pos = self:droneParadePos(drone);
 			if (drone:attacking()) then
+				local pos = self:droneParadePos(drone);
 				if (drone:distanceTo(pos) > 100) then
-					drone:move(pos);
+					drone:move(pos, { no_event = 1 }); -- the move's promise isn't used, and creating one each tick is costly
 				end
-			else
+			elseif (drone:currentCommand() ~= COMMAND_Parade) then -- don't re-issue the parade each tick (it interrupts the drone)
 				drone:parade(self);
 			end
-			position_index = position_index + 1;
 		end
 	end
 end
@@ -223,7 +221,6 @@ function drones_proto:update()
 		-- print("update tick, ready?: " .. (self:frigateReady() or "nil"));
 		if (self:frigateReady()) then
 			-- print("main run");
-			self:pruneDeadDrones();
 			self:addProducedDronesToList();
 			self:launchDrones();
 
@@ -243,9 +240,7 @@ function drones_proto:update()
 end
 
 function drones_proto:destroy()
-	for _, drone in self.live_drones do
-		drone:HP(0);
-	end
+	self.live_drones:HP(0);
 end
 
 -- function drones_proto:start()
@@ -293,10 +288,10 @@ function drone_proto:update()
 			self:die();
 		else
 			local distance_to_position = self:distanceTo(self.frigate:droneParadePos(self));
-			if (distance_to_position > 750) then
-				self:speed(1.3);
-			elseif (distance_to_position > 1500) then -- things look bad, just teleport into position
+			if (distance_to_position > 1500) then -- things look bad, just teleport into position (checked first, else the 750 branch always wins)
 				self:position(self.frigate:droneParadePos(self));
+			elseif (distance_to_position > 750) then
+				self:speed(1.3);
 			else -- close
 				self:speed(1);
 			end
