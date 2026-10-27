@@ -2,17 +2,20 @@
 -- By: Fear (Novaras)
 
 if (H_SOBGROUP ~= 1) then
-	if (hyperTableHandle == nil) then
-		dofilepath("data:scripts/modkit/hypertable.lua");
+	if (struid == nil) then
+		dofilepath("data:scripts/modkit/string_util.lua");
 	end
-	local state = hyperTableHandle();
-	local freshGroupIndex = function ()
-		local current = %state().__group_fresh_index or 1;
-		%state({
-			__group_fresh_index = current + 1
-		});
 
-		return current;
+	--- Returns a unique suffix for generated sobgroup/volume names. Tagged with the Lua scope (rules/ship), since
+	--- sobgroups are shared engine-wide but each scope has its own `random` state, which may be seeded identically.
+	---
+	---@return string
+	local freshUid = function ()
+		local scope_tag = "ship";
+		if (Rule_AddInterval) then
+			scope_tag = "rules";
+		end
+		return scope_tag .. "_" .. struid();
 	end
 
 	--- Creates a new sobgroup if one doesn't exist, then clears the group to ensure the group referenced by the return string is clear.
@@ -20,7 +23,7 @@ if (H_SOBGROUP ~= 1) then
 	---@return string
 	function SobGroup_Fresh(name)
 		if (name == nil) then
-			name = ("_SobGroup_Fresh_" .. %freshGroupIndex());
+			name = ("_SobGroup_Fresh_" .. %freshUid());
 		end
 		SobGroup_CreateIfNotExist(name);
 		SobGroup_Clear(name);
@@ -228,7 +231,7 @@ if (H_SOBGROUP ~= 1) then
 	---@param vol_type? string
 	---@return string
 	function Volume_Fresh(name, position, radius, vol_type)
-		name = name or ("_Volume_Fresh_" .. %freshGroupIndex());
+		name = name or ("_Volume_Fresh_" .. %freshUid());
 		position = position or Vec3({ 0, 0, 0 });
 		if (not Vec3:isVec3(position)) then
 			position = Vec3(position);

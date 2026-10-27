@@ -68,6 +68,25 @@ function strimplode(arr, delimeter)
 	return str;
 end
 
+--- Returns a random id string of `length` characters (default `8`) from `[0-9a-z]`, in the style of nanoid.
+---
+--- Lowercase only, since names passed to the engine (sobgroups etc.) are often lowercased.
+--- 8 chars gives ~2.8e12 possible ids; ids are random, not guaranteed unique, so don't go much shorter for frequently generated names.
+---
+---@param length? integer
+---@return string
+function struid(length)
+	length = length or 8;
+	local alphabet = "0123456789abcdefghijklmnopqrstuvwxyz";
+	local alphabet_len = strlen(alphabet);
+	local id = "";
+	for _ = 1, length do
+		local n = random(1, alphabet_len);
+		id = id .. strsub(alphabet, n, n);
+	end
+	return id;
+end
+
 function strtrim(str)
 	return gsub(str, '^%s*(.-)%s*$', '%1');
 end
