@@ -831,8 +831,9 @@ end
 
 ---@return bool
 function modkit_ship:isAnyFamilyOf(families)
-	for k, v in families do
-		if (self:attackFamily() == v) then
+	local family = self:attackFamily(); -- one engine call, rather than one per family checked
+	for _, v in families do
+		if (family == v) then
 			return 1;
 		end
 	end
