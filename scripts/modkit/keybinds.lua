@@ -8,6 +8,10 @@ if (MODKIT_KEYBINDS == nil) then
                 end
                 UI_ToggleScreen("MK_ConsoleScreen", ePopup);
                 textCaptureMode();
+                if (MK_CONSOLE_HINT_SHOWN == nil and consoleLog) then
+                    consoleLog("Type 'help' for help, or 'help [command]' for details on a command.");
+                    MK_CONSOLE_HINT_SHOWN = 1;
+                end
             end
         },
     };

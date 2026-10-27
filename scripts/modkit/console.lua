@@ -7,9 +7,8 @@ if (MODKIT_CONSOLE == nil) then
 	dofilepath("data:scripts/modkit/hypertable.lua");
 	doscanpath("data:scripts/modkit/console", "*.lua");
 
-	if (consoleLog) then
-		consoleLog("Type 'help' for help, or 'help [command]' for details on a command.");
-	end
+	-- no `consoleLog` here: this file loads during level load, before the UI screens exist, so any UI
+	-- calls just spam 'screen does not exist' warnings. The help hint is logged on first open (see `keybinds.lua`).
 
 	local CONSOLE = {
 		log = consoleLog,
