@@ -11,6 +11,7 @@
 ---@field _despawned_at_volume string
 ---@field _move_volume string Used by `:move` and related methods
 ---@field _move_event? Event|Rule The event/rule tracking this ship's current `:move` (if it was issued with an event)
+---@field _move_seq? integer Counts this ship's evented `:move` calls, to give each move event a unique (deterministic) name
 ---@field _default_vol string
 ---@field _auto_launch 0|1
 ---@field _visibility table<Player, Visibility>
@@ -633,9 +634,11 @@ function modkit_ship:move(target, options)
 	end
 
 	-- the name must be unique per move: listeners find their event by name, so a shared name would let an old
-	-- chain's `:next`/`:catch` fire on a later move's event
+	-- chain's `:next`/`:catch` fire on a later move's event. A per-ship sequence rather than random, since in the rules
+	-- scope this becomes an engine rule name (sim state, which must match on every client)
+	self._move_seq = (self._move_seq or 0) + 1;
 	self._move_event = api:make({
-		name = self.type_group .. "_" .. self.id ..  "_move_" .. struid(),
+		name = self.type_group .. "_" .. self.id ..  "_move_" .. self._move_seq,
 		fn = function (resolve, reject)
 			if (%self:isNear(%target, %distance_threshold)) then
 				return resolve(%self);

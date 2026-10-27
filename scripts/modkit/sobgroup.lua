@@ -2,12 +2,12 @@
 -- By: Fear (Novaras)
 
 if (H_SOBGROUP ~= 1) then
-	if (struid == nil) then
-		dofilepath("data:scripts/modkit/string_util.lua");
-	end
-
-	--- Returns a unique suffix for generated sobgroup/volume names. Tagged with the Lua scope (rules/ship), since
-	--- sobgroups are shared engine-wide but each scope has its own `random` state, which may be seeded identically.
+	--- Returns a unique suffix for generated sobgroup/volume names: a per-scope counter, tagged with the Lua scope (rules/ship),
+	--- since sobgroups are shared engine-wide but each scope counts separately.
+	---
+	--- Deliberately deterministic, not random: sobgroup names are part of the synced sim state (they appear in out-of-sync
+	--- dumps), so every client must generate the same names, and `random` shares C `rand()` with engine code (e.g particle FX).
+	--- Clients stay in step as long as unnamed `_Fresh` calls aren't made from client-local code (UI, selection, console).
 	---
 	---@return string
 	local freshUid = function ()
@@ -15,7 +15,8 @@ if (H_SOBGROUP ~= 1) then
 		if (Rule_AddInterval) then
 			scope_tag = "rules";
 		end
-		return scope_tag .. "_" .. struid();
+		MK_FRESH_NAME_COUNT = (MK_FRESH_NAME_COUNT or 0) + 1; -- a global: Lua 4 upvalues are read-only copies
+		return scope_tag .. "_" .. MK_FRESH_NAME_COUNT;
 	end
 
 	--- Creates a new sobgroup if one doesn't exist, then clears the group to ensure the group referenced by the return string is clear.
