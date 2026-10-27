@@ -110,6 +110,12 @@ if (H_DRIVER == nil) then
 			modkit.compose:instantiate(own_group, player_index, ship_id)
 		);
 
+		-- keep the creation time recorded by `create`, not the time of this (later) registration
+		local cache = GLOBAL_SHIPS.cache;
+		if (cache and cache.created_at and cache.created_at[ship_id]) then
+			caller.created_at = cache.created_at[ship_id];
+		end
+
 		---@cast caller DriverShip
 		local l = {};
 		local f = function (...)
@@ -137,7 +143,7 @@ if (H_DRIVER == nil) then
 
 
 			if (not caller._hoisted) then
-				local data = caller.own_group .. "," .. player_index .. "," .. caller.ship_type;
+				local data = caller.own_group .. "," .. player_index .. "," .. caller.ship_type .. "," .. caller.created_at;
 
 				local new_state = hypertable_handle().GLOBAL_SHIPS;
 				new_state[ship_id] = data;
@@ -176,6 +182,7 @@ if (H_DRIVER == nil) then
 
 	GLOBAL_SHIPS.cache = GLOBAL_SHIPS.cache or {};
 	GLOBAL_SHIPS.cache.newly_created = GLOBAL_SHIPS.cache.newly_created or {};
+	GLOBAL_SHIPS.cache.created_at = GLOBAL_SHIPS.cache.created_at or {}; -- [ship_id] = gametime at `create`, read by `register`
 
 	--- The global `create` hook called by all ships correctly linked to modkit.
 	---
@@ -187,6 +194,8 @@ if (H_DRIVER == nil) then
 	create = create or function(g, p, i)
 		local caller = modkit.compose:instantiate(g, p, i); -- avoid registering the ship on this hook, let the first update tick do it
 		---@cast caller DriverShip
+
+		GLOBAL_SHIPS.cache.created_at[i] = caller.created_at;
 
 		if (caller.create) then
 			caller:create(); -- run the caller's custom create hook
@@ -260,6 +269,7 @@ if (H_DRIVER == nil) then
 		caller:destroy(); -- run the caller's custom destroy hook
 
 		GLOBAL_SHIPS:delete(i);
+		GLOBAL_SHIPS.cache.created_at[i] = nil;
 	end
 
 	-- === start, go, finish ===

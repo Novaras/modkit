@@ -57,6 +57,7 @@ function modkit_hoist_memgroups()
 			local own_group = data_str[1];
 			local player_index = tonumber(data_str[2]);
 			local ship_type = data_str[3];
+			local created_at = tonumber(data_str[4] or "");
 
 			-- consoleLog("trying with " .. line);
 			-- consoleLog("og: \t" .. tostring(own_group));
@@ -66,6 +67,7 @@ function modkit_hoist_memgroups()
 				local new_ship = register(SobGroup_Overwrite(ship_type, own_group), player_index, ship_id);
 
 				new_ship.player = GLOBAL_PLAYERS:get(player_index);
+				new_ship.created_at = created_at or new_ship.created_at; -- use the ship scope's creation time, not the time of hoisting
 			end
 		end
 
