@@ -49,10 +49,16 @@ modkit_ship = {
 };
 -- === Util ===
 
---- Converts the given value to a volume (`string` name).
+--- Converts the given value to a volume (`string` name). A `string` is assumed to already be a volume and is returned as-is.
+---
+--- Otherwise a volume is (re)created at the position, named `vol_name`. Reusing a name replaces the old volume rather than
+--- leaking a new one per call, so callers should pass a name unique to their use (e.g based on the ship's `own_group`).
+--- The default name is shared by all callers, so only use it if the volume is used immediately and not kept.
 ---
 ---@param val string | Ship | Ship[] | ShipList | Position | Arr3
-function asVol(val)
+---@param vol_name? string
+---@return string
+function asVol(val, vol_name)
 	if (type(val) ~= "string") then
 		if (modkit.ShipList.isShipLike(val)) then -- use its (average) position
 			---@cast val Ship | Ship[] | ShipList
@@ -60,7 +66,7 @@ function asVol(val)
 		end
 		---@cast val Position | Arr3
 
-		val = Volume_Fresh(nil, val);
+		val = Volume_Fresh(vol_name or "_asvol-temp-vol", val);
 	end
 	---@cast val string
 	
@@ -660,7 +666,7 @@ end
 function modkit_ship:isNear(where, threshold)
 	threshold = threshold or 2000;
 
-	return SobGroup_IsShipNearPoint(self.own_group, asVol(where), threshold) == 1;
+	return SobGroup_IsShipNearPoint(self.own_group, asVol(where, self.own_group .. "-isnear-vol"), threshold) == 1;
 end
 
 --- Makes this ship guard `target`, which may be one or multiple other ships.
@@ -1405,7 +1411,7 @@ end
 ---@param volume? string | Position
 ---@return string
 function modkit_ship:spawn(spawn, volume)
-	volume = asVol(volume or self._despawned_at_volume);
+	volume = asVol(volume or self._despawned_at_volume, self.own_group .. "-spawn-vol");
 
 	if (spawn == 1) then
 		SobGroup_Spawn(self.own_group, volume);
