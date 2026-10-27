@@ -142,7 +142,11 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 
 			-- consoleLog("> " .. command_str);
 			-- COMMANDS[command].fn(line, words);
-			command.fn(param_values, words, flags, line);
+			-- protected call: this runs from a key binding (`flushKeyBuffer`), where an uncaught error is a FATAL EXIT for the game
+			call(command.fn, { param_values, words, flags, line; n = 4 }, "x", function (message) -- (Lua 4: `;` separates list and record parts)
+				local printErr = consoleError or print;
+				printErr("command '" .. %command_str .. "' failed: " .. tostring(message));
+			end);
 		else
 			consoleLog("no such command: '" .. command_str .. "'");
 		end
@@ -193,7 +197,10 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 				PARAMS.vec3(names, default),
 				{
 					transform = function (value)
-						return Vec3:create(strsplit(value, "%s+", 1));
+						-- components arrive as strings; convert them, so the result is a proper (numeric) Vec3
+						return Vec3:create(modkit.table.map(strsplit(value, "%s+", 1), function (component)
+							return tonumber(component);
+						end));
 					end
 				}
 			);
