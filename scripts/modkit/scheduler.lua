@@ -1,7 +1,7 @@
 if (modkit == nil) then
 	modkit = {};
 	dofilepath("data:scripts/modkit/table_util.lua");
-	dofilepath("data:scripts/modkit/scopes.lua");
+	dofilepath("data:scripts/modkit/hypertable.lua");
 end
 
 -- events repeat by default, optionally can specify the amount with `iterations`

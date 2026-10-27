@@ -14,7 +14,7 @@ if (modkit.compose == nil) then
 			"destroy",
 			"start",
 			"go",
-			"destroy",
+			"finish",
 			-- extras
 			"beforeUpdate",
 			"afterUpdate",
