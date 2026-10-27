@@ -34,6 +34,26 @@ if (MODKIT_OBJECTIVES == nil) then
 	GLOBAL_OBJECTIVES = modkit.MemGroup.Create("mg-objectives-global");
 	GLOBAL_OBJECTIVES._saved_states = {};
 
+	-- one tag shared by every objective object (Lua 4 tags are never freed, so a tag per object leaked one each time
+	-- an objective was wrapped, which `:all`/`:find`/`:filter` do for every objective on every call)
+	--
+	-- prints a warning if the objective object is being used to access an objective def which no longer exists
+	-- (so the log is more understandable, reference errors can be confusing)
+	-- doesn't take any action to prevent an error occuring; this is probably the desired behavior
+	GLOBAL_OBJECTIVES._objective_tag = newtag();
+	settagmethod(GLOBAL_OBJECTIVES._objective_tag, "gettable", function (ref, key)
+		-- looked up by id (rather than an upvalue of the def, which Lua 4 copies at closure creation, so it never became nil)
+		if (GLOBAL_OBJECTIVES._entities[rawget(ref, "__def_id")] == nil) then
+			local output = consoleError or print;
+
+			output("Warning: attempted to use an Objective who's underlying data was deleted!");
+			output("\tA call to `GLOBAL_OBJECTIVES:delete` was probably called on the target objective's ID previously.");
+			return nil;
+		end
+
+		return rawget(ref, key);
+	end);
+
 	--- Converts an `ObjectiveDef` (data object) to an `Objective` (api wrapper).
 	---@param def ObjectiveDef
 	---@return Objective
@@ -41,6 +61,7 @@ if (MODKIT_OBJECTIVES == nil) then
 
 		---@type Objective
 		local objective = {
+			__def_id = def.id, -- read (raw) by the shared tag's hook, to check the def still exists
 			id = function (_)
 				return %def.id;
 			end,
@@ -128,24 +149,7 @@ if (MODKIT_OBJECTIVES == nil) then
 			end
 		};
 
-		-- tag method which prints a warning if the objective object is being used to access an objective def which is no longer existing
-		-- (so the log is more understandable, reference errors can be confusing)
-		-- doesn't take any action to prevent an error occuring; this is probably the desired behavior
-
-		local reference_checker_tag = newtag();
-		local referenceCheckerHook = function (ref, key)
-			if (not %def) then
-				local output = consoleError or print;
-
-				output("Warning: attempted to use an Objective who's underlying data was deleted!");
-				output("\tA call to `GLOBAL_OBJECTIVES:delete` was probably called on the target objective's ID previously.");
-				return nil;
-			end
-
-			return rawget(ref, key);
-		end
-		settagmethod(reference_checker_tag, "gettable", referenceCheckerHook);
-		settag(objective, reference_checker_tag);
+		settag(objective, GLOBAL_OBJECTIVES._objective_tag); -- see `_objective_tag`
 
 		return objective;
 	end
@@ -174,7 +178,7 @@ if (MODKIT_OBJECTIVES == nil) then
 	end
 
 	function GLOBAL_OBJECTIVES:get(id)
-		local found = this._entities[id];
+		local found = self._entities[id];
 
 		if (found) then
 			return objectiveDefToObjective(found);

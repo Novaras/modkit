@@ -108,6 +108,15 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 			__default_interval = 1,
 		});
 
+		-- one tag shared by every rule (Lua 4 tags are never freed, so a tag per rule leaked one per `make`)
+		-- the 'function' event receives the called table (the rule) as its first argument
+		if (GLOBAL_RULES.__rule_callable_tag == nil) then
+			GLOBAL_RULES.__rule_callable_tag = newtag();
+			settagmethod(GLOBAL_RULES.__rule_callable_tag, "function", function (rule)
+				return rule:begin();
+			end);
+		end
+
 		---
 		---@param id string
 		---@param rule_init_conf RuleInitConfig|RuleFn
@@ -252,12 +261,8 @@ if (H_CAMPAIGN == nil or (modkit ~= nil and modkit.campaign == nil)) then
 				return _makeRuleChain(self);
 			end
 
-			-- here we add a tag on the rule which lets you call the rule like a function: `myrule:begin();` equivalent to `myrule();`
-			local rule_callable_tag = newtag();
-			settagmethod(rule_callable_tag, "function", function ()
-				return %rule:begin();
-			end);
-			settag(rule, rule_callable_tag);
+			-- the shared callable tag lets you call the rule like a function: `myrule:begin();` equivalent to `myrule();`
+			settag(rule, GLOBAL_RULES.__rule_callable_tag);
 
 			if (rule.awaits_rules) then
 				modkit.campaign.rules:on(new_rule.awaits_rules, created);

@@ -157,6 +157,16 @@ if (modkit.scheduler == nil) then
 		default_interval = 10,
 	};
 
+	-- one tag shared by every event (Lua 4 tags are never freed, so a tag per event leaked one per `make`)
+	-- it adds a special key `__is_event`, which we can use to check if a table var is a `ScheduleEvent`
+	scheduler_lib._event_tag = newtag();
+	settagmethod(scheduler_lib._event_tag, "gettable", function (ev, key)
+		if (key == "__is_event") then
+			return 1;
+		end
+		return rawget(ev, key);
+	end);
+
 	---@param event EventLike
 	---@return EventChain
 	function _makeEventChain(event)
@@ -303,16 +313,7 @@ if (modkit.scheduler == nil) then
 
 		---@cast new_event Event
 
-		-- set up a special key `__is_event`, which we can use to check if a table var is a `ScheduleEvent`.
-		local identifier_tag = newtag();
-		local identifier_hook = function (ev, key)
-			if (key == "__is_event") then
-				return 1;
-			end
-			return rawget(ev, key);
-		end
-		settagmethod(identifier_tag, "gettable", identifier_hook);
-		settag(new_event, identifier_tag);
+		settag(new_event, self._event_tag); -- gives the event the `__is_event` key (see `_event_tag`)
 
 		return GLOBAL_SCHEDULE_EVENTS:set(new_event.id, new_event);
 	end

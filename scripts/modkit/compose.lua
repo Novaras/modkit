@@ -179,26 +179,26 @@ if (modkit.compose == nil) then
 		);
 		-- modkit.table.printTbl(out_ship, "newly instantiated " .. ship_type .. ", sid = " .. id);
 
-		local tag = newtag();
-
-		local concatHook = function (lhs, rhs)
-			local toStr = function (arg)
-				if (type(arg) == "table" and arg.own_group) then
-					return arg.own_group;
-				end
-
-				return tostring(arg);
-			end
-
-			return toStr(lhs) .. toStr(rhs);
-		end
-		settagmethod(tag, "concat", concatHook);
-
-		settag(out_ship, tag);
+		settag(out_ship, self._ship_tag); -- shared tag (see `_ship_tag` below)
 
 		return out_ship;
 	end
 
+
+	-- one tag shared by every instantiated `Ship` (Lua 4 tags are never freed, so a tag per instance leaked one per instantiation)
+	-- the concat hook lets `"..." .. ship` produce the ship's `own_group`
+	compose._ship_tag = newtag();
+	settagmethod(compose._ship_tag, "concat", function (lhs, rhs)
+		local toStr = function (arg)
+			if (type(arg) == "table" and arg.own_group) then
+				return arg.own_group;
+			end
+
+			return tostring(arg);
+		end
+
+		return toStr(lhs) .. toStr(rhs);
+	end);
 
 	modkit.compose = compose;
 

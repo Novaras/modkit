@@ -77,6 +77,135 @@ function Vec3:isVec3(t)
 	return 1;
 end
 
+-- === Instance tag ===
+-- One tag shared by every Vec3 instance. Lua 4 tags are never freed, so creating one per vector (as `Vec3:create` used to)
+-- leaked a tag, plus its tag methods, on every `Vec3(...)` (e.g every `ship:position()` call).
+-- The hooks only use their arguments and globals, so they don't need to be per-vector.
+if (VEC3_INSTANCE_TAG == nil) then
+	VEC3_INSTANCE_TAG = newtag();
+end
+local vector_tag = VEC3_INSTANCE_TAG;
+
+
+-- === Math Operators ===
+local unm_hook = function (v1)
+	local negation = {};
+	for k, _ in v1 do
+		negation[k] = -v1[k];
+	end
+	return Vec3(negation);
+end
+settagmethod(vector_tag, "unm", unm_hook);
+
+local add_hook = function (lh, rh, o)
+	lh = Vec3(lh);
+	rh = Vec3(rh);
+
+	local sum = {};
+	for k, _ in lh do
+		sum[k] = lh[k] + rh[k];
+	end
+	return Vec3(sum);
+end
+settagmethod(vector_tag, "add", add_hook);
+
+local sub_hook = function (lh, rh)
+	lh = Vec3(lh);
+	rh = Vec3(rh);
+
+	local sum = {};
+	for k, _ in lh do
+		sum[k] = lh[k] - rh[k];
+	end
+	return Vec3(sum);
+end
+settagmethod(vector_tag, "sub", sub_hook);
+
+local scalar_mul_hook = function (lh, rh)
+	if (type(lh) ~= "number" and type(rh) ~= "number") then -- trying to multiply a Vec3 with a non-number if neither operand is a number
+		print("ERROR: Tried to multiply a Vec3 with a non-numeric type:");
+		print("\tlh = " .. tostring(lh) .. ", of type '" .. type(lh) .. "'");
+		print("\trh = " .. tostring(rh) .. ", of type '" .. type(rh) .. "'");
+		return nil;
+	end
+
+	lh = Vec3(lh);
+	rh = Vec3(rh);
+
+	local prod = {};
+	for k, _ in lh do
+		prod[k] = lh[k] * rh[k];
+	end
+	return Vec3(prod);
+end
+settagmethod(vector_tag, "mul", scalar_mul_hook);
+
+local scalar_div_hook = function (lh, rh)
+	if (type(lh) ~= "number" and type(rh) ~= "number") then -- trying to divide a Vec3 with a non-number if neither operand is a number
+		print("ERROR: Tried to divide a Vec3 with a non-numeric type:");
+		print("\tlh = " .. tostring(lh) .. ", of type '" .. type(lh) .. "'");
+		print("\trh = " .. tostring(rh) .. ", of type '" .. type(rh) .. "'");
+		return nil;
+	end
+
+	lh = Vec3(lh);
+	rh = Vec3(rh);
+
+	local prod = {};
+	for k, _ in lh do
+		prod[k] = lh[k] / rh[k];
+	end
+	return Vec3(prod);
+end
+settagmethod(vector_tag, "div", scalar_div_hook);
+
+local pow_hook = function(lh, rh)
+	lh = Vec3(lh);
+	rh = Vec3(rh);
+
+	local prod = {};
+	for k, _ in lh do
+		prod[k] = lh[k] ^ rh[k];
+	end
+	return Vec3(prod);
+end
+settagmethod(vector_tag, "pow", pow_hook);
+
+
+local concat_hook = function (lh, rh)
+	return Vec3:toStr(lh) .. Vec3:toStr(rh);
+end
+settagmethod(vector_tag, "concat", concat_hook);
+
+
+--- Helper
+
+--- === Prevent setting other keys, & maps sets on x, y, z to the number keys ===
+
+local settable_protect_hook = function (tbl, key, val)
+	local mapped = Vec3._key_mappings[key];
+
+	if (not mapped) then
+		return nil;
+	end
+
+	rawset(tbl, mapped, val);
+end
+settagmethod(vector_tag, "settable", settable_protect_hook);
+
+--- === Special behavior when accessing keys x, y, and z ===
+
+local gettable_hook = function (tbl, key)
+	local mapped = Vec3._key_mappings[key];
+
+	if (not mapped) then
+		return nil;
+	end
+
+	return rawget(tbl, mapped);
+end
+settagmethod(vector_tag, "gettable", gettable_hook);
+
 ---@param init Vec3Like|number
 ---@return Vec3
 function Vec3:create(init)
@@ -91,130 +220,8 @@ function Vec3:create(init)
 		new_vec[i] = init[i] or 0;
 	end
 
-	-- === TAG SETUP === --
-	local vector_tag = newtag();
-
-	-- === Math Operators ===
-	local unm_hook = function (v1)
-		local negation = {};
-		for k, _ in v1 do
-			negation[k] = -v1[k];
-		end
-		return Vec3(negation);
-	end
-	settagmethod(vector_tag, "unm", unm_hook);
-
-	local add_hook = function (lh, rh, o)
-		lh = Vec3(lh);
-		rh = Vec3(rh);
-
-		local sum = {};
-		for k, _ in lh do
-			sum[k] = lh[k] + rh[k];
-		end
-		return Vec3(sum);
-	end
-	settagmethod(vector_tag, "add", add_hook);
-
-	local sub_hook = function (lh, rh)
-		lh = Vec3(lh);
-		rh = Vec3(rh);
-
-		local sum = {};
-		for k, _ in lh do
-			sum[k] = lh[k] - rh[k];
-		end
-		return Vec3(sum);
-	end
-	settagmethod(vector_tag, "sub", sub_hook);
-
-	local scalar_mul_hook = function (lh, rh)
-		if (type(lh) ~= "number" and type(rh) ~= "number") then -- trying to multiply a Vec3 with a non-number if neither operand is a number
-			print("ERROR: Tried to multiply a Vec3 with a non-numeric type:");
-			print("\tlh = " .. tostring(lh) .. ", of type '" .. type(lh) .. "'");
-			print("\trh = " .. tostring(rh) .. ", of type '" .. type(rh) .. "'");
-			return nil;
-		end
-
-		lh = Vec3(lh);
-		rh = Vec3(rh);
-
-		local prod = {};
-		for k, _ in lh do
-			prod[k] = lh[k] * rh[k];
-		end
-		return Vec3(prod);
-	end
-	settagmethod(vector_tag, "mul", scalar_mul_hook);
-
-	local scalar_div_hook = function (lh, rh)
-		if (type(lh) ~= "number" and type(rh) ~= "number") then -- trying to divide a Vec3 with a non-number if neither operand is a number
-			print("ERROR: Tried to divide a Vec3 with a non-numeric type:");
-			print("\tlh = " .. tostring(lh) .. ", of type '" .. type(lh) .. "'");
-			print("\trh = " .. tostring(rh) .. ", of type '" .. type(rh) .. "'");
-			return nil;
-		end
-
-		lh = Vec3(lh);
-		rh = Vec3(rh);
-
-		local prod = {};
-		for k, _ in lh do
-			prod[k] = lh[k] / rh[k];
-		end
-		return Vec3(prod);
-	end
-	settagmethod(vector_tag, "div", scalar_div_hook);
-
-	local pow_hook = function(lh, rh)
-		lh = Vec3(lh);
-		rh = Vec3(rh);
-
-		local prod = {};
-		for k, _ in lh do
-			prod[k] = lh[k] ^ rh[k];
-		end
-		return Vec3(prod);
-	end
-	settagmethod(vector_tag, "pow", pow_hook);
-
-
-	local concat_hook = function (lh, rh)
-		return Vec3:toStr(lh) .. Vec3:toStr(rh);
-	end
-	settagmethod(vector_tag, "concat", concat_hook);
-
-
-	--- Helper
-
-	--- === Prevent setting other keys, & maps sets on x, y, z to the number keys ===
-
-	local settable_protect_hook = function (tbl, key, val)
-		local mapped = Vec3._key_mappings[key];
-
-		if (not mapped) then
-			return nil;
-		end
-
-		rawset(tbl, mapped, val);
-	end
-	settagmethod(vector_tag, "settable", settable_protect_hook);
-
-	--- === Special behavior when accessing keys x, y, and z ===
-
-	local gettable_hook = function (tbl, key)
-		local mapped = Vec3._key_mappings[key];
-
-		if (not mapped) then
-			return nil;
-		end
-
-		return rawget(tbl, mapped);
-	end
-	settagmethod(vector_tag, "gettable", gettable_hook);
-
-	-- === Set the tag on the vector table ===
-	settag(new_vec, vector_tag);
+	-- === Set the (shared) tag on the vector table ===
+	settag(new_vec, VEC3_INSTANCE_TAG);
 
 	return new_vec;
 end
@@ -328,7 +335,7 @@ function Vec3:toStr(val)
 end
 
 -- === Here we allow the `vec3` table to be called like a constructor fn i.e "`local v = Vec3(...)`" ===
-vec3_tag = newtag();
+vec3_tag = vec3_tag or newtag(); -- once: this file is loaded repeatedly (per scope / dofilepath)
 vec3_fn_call_hook = function (fn, ...)
 	---@diagnostic disable-next-line
 	return Vec3:create(arg[1]);
