@@ -111,7 +111,7 @@ function drones_proto:produceMissingDrones()
 		for i = 0, modkit.table.length(self.parade_positions) - 1 do
 			if (self.live_drones[tostring(i)] == nil) then
 				-- self:print("im missing drone " .. tostring(i));
-				self:produceShip("kus_drone" .. i);
+				self:produceShipsQuiet("kus_drone" .. i);
 				self.new_drones[modkit.table.length(self.new_drones) + 1] = tostring(i);
 			end
 		end
