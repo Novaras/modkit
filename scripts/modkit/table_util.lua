@@ -222,8 +222,12 @@ if (modkit.table == nil) then
 			return v;
 		end,
 		shift = function (tbl)
-			local v = tbl[modkit.table.firstKey(tbl)];
-			tbl[modkit.table.firstKey(tbl)] = nil;
+			local key = modkit.table.firstKey(tbl);
+			if (key == nil) then -- empty table (indexing with a nil key is an error in Lua 4)
+				return nil;
+			end
+			local v = tbl[key];
+			tbl[key] = nil;
 			return v;
 		end,
 		unshift = function (tbl, value)
@@ -320,14 +324,22 @@ if (modkit.table == nil) then
 	end
 
 	function table.firstValue(tbl)
-		return tbl[%table.firstKey(tbl)];
+		local key = %table.firstKey(tbl);
+		if (key == nil) then -- empty table (indexing with a nil key is an error in Lua 4)
+			return nil;
+		end
+		return tbl[key];
 	end
 
 	---@generic K, V
 	---@param tbl table<K, V>
 	---@return V|nil
 	function table.first(tbl)
-		return tbl[%table.firstKey(tbl)];
+		local key = %table.firstKey(tbl);
+		if (key == nil) then -- empty table (indexing with a nil key is an error in Lua 4)
+			return nil;
+		end
+		return tbl[key];
 	end
 
 	--- Returns a string representation of a table. Whitespace and newlines are removed.
