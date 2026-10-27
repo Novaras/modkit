@@ -31,14 +31,17 @@ if (not MK_hypertable) then
 		---@diagnostic disable-next-line: return-type-mismatch
 		if (not Universe_GameTime) then return nil; end
 
-		if (UI_GetElementCustomData and UI_GetElementCustomData(screen_name, dropdown_host_el) ~= 1) then
-			UI_AddDropDownListboxItem(screen_name, dropdown_host_el, "_", "", 0, "{}");
-			UI_SetElementCustomData(screen_name, dropdown_host_el, 1); -- 1 = init
-		end
-
 		return function(new_state, custom_key_behaviors, overwrite)
+			-- The engine's selected-item getter doesn't null-check the item, so reading an empty dropdown is an access violation.
+			-- We can't query the item count, and the dropdown can be emptied between levels, so always append a fallback
+			-- item first: index 0 is then either the stored state, or this "{}" if the list was empty.
+			UI_AddDropDownListboxItem(%screen_name, %dropdown_host_el, "_", "", 0, "{}");
 			UI_SelectDropDownListboxItemIndex(%screen_name, %dropdown_host_el, 0);
 			local ui_str = UI_GetDropdownListBoxSelectedCustomDataString(%screen_name, %dropdown_host_el) or "";
+
+			-- collapse back to the single state item (drops the fallback we just appended)
+			UI_ClearDropDownListbox(%screen_name, %dropdown_host_el);
+			UI_AddDropDownListboxItem(%screen_name, %dropdown_host_el, "_", "", 0, ui_str);
 
 			local parsePayload = function ()
 				if (not type(%ui_str) == "string" or strlen(%ui_str) < 1) then
