@@ -1,6 +1,6 @@
 # Console
 
-See the [main readme](https://github.com/Novaras/modkit/blob/console-update/Console.md) for an overview of the functionality.
+See the [main console readme](https://github.com/Novaras/modkit/blob/master/Console.md) for an overview of the functionality.
 
 - The functionality defined in `modkit/console/*.lua`
 - The UI screen, `mk_consolescreen.lua`
