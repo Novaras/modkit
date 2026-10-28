@@ -1,7 +1,7 @@
-// link-all.js
+// link.js
 // Node script which links every ship in the stock lineup to modkit's driver
 // Without this, modkit is still extremely useful for code organisation, but ships which are not
-// linked to modkit will not appear in the `GLOBAL_REGISTRY` (you can obviously still work with them via
+// linked to modkit will not appear in `GLOBAL_SHIPS` (you can obviously still work with them via
 // plain SobGroup_ calls).
 
 const fs = require("fs").promises;

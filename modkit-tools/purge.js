@@ -11,13 +11,12 @@ const root = path.resolve(__dirname, "../");
 const rmReadmes = () => {
 	return Promise.all([
 		".gitignore",
-		"Driver.md",
-		"MemGroup.md",
+		"Console.md",
 		"README.md",
 		"init.bat"
 	].map(file_name => {
 		return new Promise((res, rej) => {
-			rimraf(file_name, (err) => {
+			rimraf(path.resolve(root, file_name), (err) => {
 				if (err) rej(err);
 				res();
 			});
