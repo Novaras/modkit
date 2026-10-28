@@ -110,7 +110,6 @@ const logLinkResults = (results) => {
 
 	const only = process.argv[2];
 
-	console.log(`DIRNAME: ${__dirname}`);
 	const src_ships_dir = path.resolve(__dirname, `./ship`);
 
 	const full_content = (await prompts([
@@ -131,8 +130,6 @@ const logLinkResults = (results) => {
 		}
 	])).full;
 
-	console.log(full_content);
-
 	if (full_content) {
 		const emitter = degit(`novaras/ships-vanilla#all-ships`, {
 			force: true,
@@ -148,12 +145,12 @@ const logLinkResults = (results) => {
 		console.log('done');
 
 		if (only) {
-			const root = path.resolve(__dirname, `./ship`);
-			const paths = await globby([`${root}/**/*.ship`]);
-			for (const path of paths) {
-				const parts = path.split(`/`);
-				if (parts[parts.length - 2] == only) continue;
-				rimraf.sync(parts.slice(0, parts.length - 1).join(`/`));
+			// only keep the `only` ship's directory
+			const ship_dirs = await globby(`ship/*`, { cwd: __dirname, onlyDirectories: true });
+			for (const ship_dir of ship_dirs) {
+				if (path.basename(ship_dir) !== only) {
+					rimraf.sync(path.resolve(__dirname, ship_dir));
+				}
 			}
 		}
 	}
@@ -163,7 +160,8 @@ const logLinkResults = (results) => {
 		const link_results = new Map();
 
 		if (full_content) {
-			const paths = await globby([`./modkit-tools/ship/**/*.ship`, `./modkit-tools/resources/**/*.*`]);
+			// relative to `modkit-tools`, with `/` separators: `<ship|resources>/<dir>/<file>.<ext>`
+			const paths = await globby([`ship/**/*.ship`, `resources/**/*.*`], { cwd: __dirname });
 			const progress_bar = new cli_prog.SingleBar({
 				format: `Writing .ship files: [{bar}] {percentage}% | {value}/{total} (ETA: {eta}s)`,
 				clearOnComplete: false,
@@ -172,44 +170,32 @@ const logLinkResults = (results) => {
 			let didnt_exist_count = 0;
 			let already_existed_count = 0;
 			progress_bar.start(paths.length, 0);
-			for (const [index, file_path] of paths.entries()) {
+			for (const [index, relative_path] of paths.entries()) {
 				progress_bar.update(index);
 
-				/**
-				 * @type string[]
-				 */
-				const parts = file_path.split(`/`);
-				
-				const extension = parts[parts.length - 1].split('.')[1];
+				const file_path = path.resolve(__dirname, relative_path);
+				const parts = relative_path.split(`/`);
+				const extension = path.extname(relative_path);
 
 				// clone any .lua scripts
-				if (extension == 'lua') {
-					const target_file = path.resolve(__dirname, `../${parts.slice(-3).join('/')}`);
-					const target_dir = path.resolve(__dirname, `${parts.slice(-3, -1).join(`/`)}`);
+				if (extension === `.lua`) {
+					const target_file = path.resolve(__dirname, `../${parts.slice(-3).join(`/`)}`);
 
 					try {
-						await fs.mkdir(target_dir, { recursive: true });
+						await fs.mkdir(path.dirname(target_file), { recursive: true });
 						await fs.copyFile(file_path, target_file);
 					} catch (err) {
 						console.error(err);
 					}
 				} else {
-
-					// parts: `['.', 'modkit-tools', '<ship|resources>', '<ship_name>', '<ship_name'>.<ext>]`
-
 					const target_file = path.resolve(__dirname, `../ship/${parts.slice(-2).join(`/`)}`);
-					const target_dir = path.resolve(__dirname, `../ship/${parts.slice(-2, -1).join(`/`)}`);
-					const type = parts.slice(-1)[0].split(`.`)[0]; // i.e 'hgn_scout' from 'hgn_scout.ship'
+					const type = path.basename(relative_path, extension); // i.e 'hgn_scout' from 'hgn_scout.ship'
 
 					try {
-						await fs.mkdir(target_dir, { recursive: true });
-					} catch (err) {
-						console.error(err);
-					}
-	
-					try {
+						await fs.mkdir(path.dirname(target_file), { recursive: true });
+
 						let content = await fs.readFile(file_path);
-						
+
 						// cleanse original calls if present
 						if (type !== "modkit_scheduler") {
 							content = content.toString();
@@ -220,7 +206,7 @@ const logLinkResults = (results) => {
 						if (type.substring(4) === 'defensefighter') {
 							content = content.replace(/Fighter_vs_Fighter/gmi, 'frontal_defensefighter');
 						}
-	
+
 						// create the .ship file
 						await fs.writeFile(
 							target_file,
@@ -235,26 +221,26 @@ const logLinkResults = (results) => {
 							already_existed_count += 1;
 						} else {
 							console.error(err);
+							continue; // no file to link
 						}
 					}
-					
+
 					// link custom code & custom ability calls
-					if (parts[2] === 'ship') {
+					if (parts[0] === `ship`) {
 						link_results.set(type, await linkShipFile(target_file, type));
 					}
 				}
-
-
 			}
 			progress_bar.stop();
 			console.log(`[modkit] link.js: ${already_existed_count} .ship files already existed; ${didnt_exist_count} newly created`);
 			logLinkResults(link_results);
-			console.log(`[modkit] link.js: \t(Pre-existing .ship files have had lines appended but are otherwise unharmed!)`);
+			console.log(`[modkit] link.js: \t(Pre-existing .ship files only had modkit's lines appended, if missing, and are otherwise unharmed!)`);
 		} else {
 			// link the mod's own .ship files only
 			const ship_files = await globby(`**/*.ship`, { cwd: path.resolve(__dirname, `../ship`), absolute: true });
 			for (const target_file of ship_files) {
 				const type = path.basename(target_file, `.ship`); // i.e 'hgn_scout' from 'hgn_scout.ship'
+				if (only && type !== only) continue;
 				link_results.set(type, await linkShipFile(target_file, type));
 			}
 			logLinkResults(link_results);
