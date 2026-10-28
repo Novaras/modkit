@@ -1,5 +1,6 @@
 if (modkit == nil) then modkit = {}; end
 if (modkit.table == nil) then dofilepath("data:scripts/modkit/table_util.lua"); end
+if (modkit.custom_code_dirs == nil) then dofilepath("data:scripts/modkit/custom_code_dirs.lua"); end
 
 if (modkit.compose == nil) then
 	local compose = {
@@ -21,7 +22,11 @@ if (modkit.compose == nil) then
 		}
 	};
 
-	--- Adds a 'base' prototype, which will affect all ship types not included in `type_filter`.
+	--- Adds a 'base' prototype, which will affect all ship types matching `type_filter` (or all ship types, if there's no filter);
+	--- with `inverse_filter`, it instead affects all ship types _not_ matching it.
+	---
+	--- Filter entries are Lua patterns matched anywhere in the ship type, so `"kus_researchship"` also matches `"kus_researchship_1"`;
+	--- anchor them (`"kus_researchship$"`, `"^kus_"`) to avoid that.
 	---
 	--- All the bases are availble in `_base`; when a ship's final definition is constructed all the recorded
 	--- bases will be overlayed to produce the final base. The specific prototypes for individual ship types
@@ -29,7 +34,7 @@ if (modkit.compose == nil) then
 	---
 	---@param proto table
 	---@param type_filter? string[]
-	---@param inverse_filter bool
+	---@param inverse_filter? bool
 	function compose:addBaseProto(proto, type_filter, inverse_filter)
 		self._base[modkit.table.length(self._base) + 1] = {
 			proto = proto,
@@ -39,6 +44,10 @@ if (modkit.compose == nil) then
 	end
 
 	--- Defines a specific ship type's properties & methods.
+	---
+	--- `type` is a Lua pattern matched anywhere in the ship type, like `addBaseProto`'s filters: `"kus_researchship"` would also
+	--- match `"kus_researchship_1"`, so anchor it (`"kus_researchship$"`) if another ship type starts with it.
+	---
 	---@param type string
 	---@param proto table
 	function compose:addShipProto(type, proto)
@@ -204,13 +213,11 @@ if (modkit.compose == nil) then
 
 	print("== modkit: load ship scripts... ==");
 
+	-- `doscanpath` doesn't recurse, so subdirectories are loaded from a list (see `custom_code_dirs.lua`)
 	doscanpath("data:scripts/custom_code", "*.lua");
-	doscanpath("data:scripts/custom_code/lib", "*.lua");
-
-	doscanpath("data:scripts/custom_code/hw1", "*.lua");
-	doscanpath("data:scripts/custom_code/hw2", "*.lua");
-
-	-- add extras here
+	for i = 1, getn(modkit.custom_code_dirs) do
+		doscanpath("data:scripts/custom_code/" .. modkit.custom_code_dirs[i], "*.lua");
+	end
 
 	print("== modkit: ship scripts loaded ==")
 

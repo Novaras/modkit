@@ -30,6 +30,6 @@ end
 modkit.compose:addBaseProto(ai_parade_proto, {
 	"kus_sensorarray",
 	"tai_sensorarray",
-	"kus_researchship",
-	"tai_researchship"
+	"kus_researchship$", -- anchored, so the aux hubs (which dock with this) don't parade too
+	"tai_researchship$"
 });
