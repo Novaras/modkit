@@ -139,6 +139,7 @@ If you kept `modkit-tools`, its scripts can be re-run from that directory (`cd m
 - [Console internals](modkit-tools/docs/Console.md): how the console is implemented
 - The modkit source is annotated for the [Lua language server](https://luals.github.io/), so hovering/completion in an editor like VS Code is the best way to explore the API
 - For the stock game API, see the community wiki, [Karos Graveyard](https://github.com/HWRM/KarosGraveyard/wiki)
+- The game uses Lua 4, which differs a lot from modern Lua (no `local function`, `#`, `pairs`/`ipairs`, or metatables): see the [Lua 4.0 manual](https://www.lua.org/manual/4.0/manual.html)
 
 ## Contributing to modkit
 
