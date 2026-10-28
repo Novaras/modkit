@@ -6,6 +6,7 @@ if (modkit.compose == nil) then
 	local compose = {
 		_base = {}, -- base are { proto: table, filter = table } proto is a proto, filter is a table of ship types to apply to (or nil)
 		_ship = {},
+		_ship_order = {}, -- keys of `_ship`, in the order they were registered
 		_cache = {},
 		_lifetime_hooks = {
 			-- actual hooks
@@ -45,13 +46,34 @@ if (modkit.compose == nil) then
 
 	--- Defines a specific ship type's properties & methods.
 	---
-	--- `type` is a Lua pattern matched anywhere in the ship type, like `addBaseProto`'s filters: `"kus_researchship"` would also
-	--- match `"kus_researchship_1"`, so anchor it (`"kus_researchship$"`) if another ship type starts with it.
+	--- A ship type gets the proto registered under its exact name, if there is one. Otherwise, `type` is treated as a Lua pattern
+	--- matched anywhere in the ship type, like `addBaseProto`'s filters: `"kus_researchship"` would also match `"kus_researchship_1"`
+	--- (if that has no proto of its own), so anchor it (`"kus_researchship$"`) if another ship type starts with it.
+	--- If several patterns match, the first one registered wins.
 	---
 	---@param type string
 	---@param proto table
 	function compose:addShipProto(type, proto)
+		if (self._ship[type] == nil) then
+			self._ship_order[getn(self._ship_order) + 1] = type;
+		end
 		self._ship[type] = proto;
+	end
+
+	--- Returns the ship proto for `ship_type`: the one registered under its exact name, else the first registered whose pattern matches it.
+	---
+	---@param ship_type string
+	---@return table|nil
+	function compose:_findShipProto(ship_type)
+		if (self._ship[ship_type]) then
+			return self._ship[ship_type];
+		end
+		-- `_ship_order` rather than `for k, v in self._ship`, since Lua's table iteration order is undefined
+		for i = 1, getn(self._ship_order) do
+			if (strfind(ship_type, self._ship_order[i])) then
+				return self._ship[self._ship_order[i]];
+			end
+		end
 	end
 
 	--- **Returns a new `Ship` of the given type. This `Ship` object is a rich representation of the actual ship ingame.**
@@ -125,9 +147,7 @@ if (modkit.compose == nil) then
 		local source = modkit.table:merge(
 			base_protos,
 			{
-				[getn(self._base) + 1] = modkit.table.findVal(self._ship, function (ship_proto, filter_str)
-					return strfind(%ship_type, filter_str);
-				end)
+				[getn(self._base) + 1] = self:_findShipProto(ship_type)
 			}
 		);
 
