@@ -44,6 +44,67 @@ const linkAbilityCode = (type) => {
 	return `\naddAbility(NewShipType, "CustomCommand", 1, ${conf.label}, ${conf.energy_params}, "data:scripts/driver.lua", "start", "go", "finish", "${type}", ${conf.extra});`;
 };
 
+/**
+ * The possible results of `linkShipFile`.
+ *
+ * @readonly
+ * @enum { string }
+ */
+const LinkResult = Object.freeze({
+	/** modkit's lines were appended */
+	LINKED: `linked`,
+	/** the ship already had modkit's `addCustomCode` line, so nothing was appended */
+	ALREADY_LINKED: `already_linked`,
+	/** modkit's lines were appended, but the ship already had its own (non-modkit) `addCustomCode` call, which the modder should check */
+	OWN_CUSTOM_CODE: `own_custom_code`,
+});
+
+/**
+ * Appends modkit's `addCustomCode` (and custom ability, if any) lines to a `.ship` file, unless it's already linked,
+ * so re-running this script doesn't link a ship twice.
+ *
+ * @param { string } target_file
+ * @param { string } type i.e 'hgn_scout'
+ * @returns { Promise<LinkResult> }
+ */
+const linkShipFile = async (target_file, type) => {
+	const content = (await fs.readFile(target_file)).toString();
+	const custom_code_calls = content.match(/^\s*addCustomCode.+$/gmi) || [];
+	if (custom_code_calls.some(call => call.includes(`data:scripts/driver.lua`))) {
+		return LinkResult.ALREADY_LINKED;
+	}
+
+	await fs.appendFile(target_file, `\n\n${linkCustomCode(type)}`);
+
+	const ab_code = linkAbilityCode(type);
+	if (ab_code && !/^\s*addAbility\(NewShipType,\s*"CustomCommand"/mi.test(content)) {
+		await fs.appendFile(target_file, ab_code);
+	}
+
+	return custom_code_calls.length > 0 ? LinkResult.OWN_CUSTOM_CODE : LinkResult.LINKED;
+};
+
+/**
+ * Logs a summary of `linkShipFile` results.
+ *
+ * @param { Map<string, LinkResult> } results ship type => result
+ */
+const logLinkResults = (results) => {
+	const typesWith = (result) => [...results].filter(([, r]) => r === result).map(([type]) => type);
+
+	const linked = typesWith(LinkResult.LINKED);
+	const already_linked = typesWith(LinkResult.ALREADY_LINKED);
+	const own_custom_code = typesWith(LinkResult.OWN_CUSTOM_CODE);
+
+	console.log(`[modkit] link.js: ${linked.length + own_custom_code.length} ships linked; ${already_linked.length} skipped (already linked)`);
+	if (own_custom_code.length > 0) {
+		console.log(`[modkit] link.js: these ships already had their own addCustomCode call as well, so check they still behave as intended:`);
+		for (const type of own_custom_code) {
+			console.log(`\t${type}`);
+		}
+	}
+};
+
 (async () => {
 	console.log("[modkit] link.js: start! 🔗");
 
@@ -98,6 +159,9 @@ const linkAbilityCode = (type) => {
 	}
 
 	try {
+		/** @type { Map<string, LinkResult> } ship type => result */
+		const link_results = new Map();
+
 		if (full_content) {
 			const paths = await globby([`./modkit-tools/ship/**/*.ship`, `./modkit-tools/resources/**/*.*`]);
 			const progress_bar = new cli_prog.SingleBar({
@@ -176,26 +240,24 @@ const linkAbilityCode = (type) => {
 					
 					// link custom code & custom ability calls
 					if (parts[2] === 'ship') {
-						// custom code hook
-						await fs.appendFile(target_file, `\n\n${linkCustomCode(type)}`);
-	
-						// custom ability hook
-						const ab_code = linkAbilityCode(type);
-						if (ab_code) {
-							await fs.appendFile(target_file, ab_code);
-						}
-	
-						// register the ship's filename in modkit.ship_types
-						// await fs.appendFile(target_file, linkModkitRegister(type));
+						link_results.set(type, await linkShipFile(target_file, type));
 					}
 				}
 
-				
+
 			}
-			rimraf.sync(path.resolve(__dirname, `/ship`));
 			progress_bar.stop();
-			console.log(`[modkit] link.js: ${already_existed_count} files appended; ${didnt_exist_count} files newly created`);
-			console.log(`[modkit] link.js: \t(Pre-existing .ship files have had a line appended but are otherwise unharmed!)`);
+			console.log(`[modkit] link.js: ${already_existed_count} .ship files already existed; ${didnt_exist_count} newly created`);
+			logLinkResults(link_results);
+			console.log(`[modkit] link.js: \t(Pre-existing .ship files have had lines appended but are otherwise unharmed!)`);
+		} else {
+			// link the mod's own .ship files only
+			const ship_files = await globby(`**/*.ship`, { cwd: path.resolve(__dirname, `../ship`), absolute: true });
+			for (const target_file of ship_files) {
+				const type = path.basename(target_file, `.ship`); // i.e 'hgn_scout' from 'hgn_scout.ship'
+				link_results.set(type, await linkShipFile(target_file, type));
+			}
+			logLinkResults(link_results);
 		}
 		console.log(`[modkit] link.js: remove src: ${src_ships_dir}`);
 		rimraf.sync(src_ships_dir);
