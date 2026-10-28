@@ -1,16 +1,15 @@
 ---@class ResShipAttribs
 ---@field next_to_build_index integer
----@field spinning 0|1
----@field spin_start_event_id 'nil'|integer
 
 --- Proto for res ships for both tai and kus (only for res ship 0, which drives the others).
+---
+--- Note: unlike Homeworld Classic, the complete Kushan ring doesn't spin. Vanilla RM has no animation for it, and a tumble only turns
+--- this ship around its own centre (swinging the docked aux hubs around it) rather than the whole ring around the ring's centre.
 ---@class ResShip : Ship, AIParader
 res_ships_proto = {
 	attribs = function ()
 		return {
 			next_to_build_index = 0,
-			spinning = 0,
-			spin_start_event_id = nil,
 		};
 	end
 };
@@ -27,7 +26,6 @@ function res_ships_proto:update()
 	self:dockAnyUndocked();
 	self:manageSubsHP();
 	self:manageEngineGlow();
-	-- self:spinIfComplete(); -- looks bad
 end
 
 function res_ships_proto:destroy()
@@ -103,7 +101,8 @@ end
 
 function res_ships_proto:dockAnyUndocked()
 	for _, res_ship in self:getOurResShips() do
-		if (res_ship.own_group ~= self.own_group and res_ship:docked() ~= 1) then -- if not docked, dock it and stay docked
+		-- only the aux hubs dock with this (the primary); dock and stay docked, unless already docked/docking
+		if (res_ship.ship_type ~= self.ship_type and res_ship:docked() ~= 1 and res_ship:isDocking() ~= 1) then
 			res_ship:dock(self, { stay_docked = 1 });
 		end
 	end
@@ -138,25 +137,6 @@ end
 -- 	end
 -- end
 
----@deprecated MAD animation looks ass from far away
---- Spins kushan research ships when they form a complete ring.
-function res_ships_proto:spinIfComplete()
-	-- if we have all the ships, aren't already spinning, are kushan, and aren't moving:
-	if (self:racePrefix() == "kus" and self.spinning == 0 and self:dockedAuxHubCount() == 5 and self:actualSpeedSq() == 0) then
-		local res_ships = self:getOurResShips(); -- poll this on our normal tick rate, it won't change much nor does it need precision
-		-- schedule every 60 seconds, call `SobGroup_SetMadState()` on all ships with "NIS00":
-		self.spin_start_event_id = modkit.scheduler:every(60 / modkit.scheduler.seconds_per_tick, function ()
-			for _, res_ship in %res_ships do
-				res_ship:madState("NIS00");
-			end
-		end);
-		self.spinning = 1;
-	elseif (self.spin_start_event_id ~= nil) then -- otherwise if we have a spin event scheduled, clear it
-		modkit.scheduler:clear(self.spin_start_event_id);
-		self.spin_start_event_id = nil;
-		self.spinning = 0;
-	end
-end
-
-modkit.compose:addShipProto("kus_researchship", res_ships_proto);
-modkit.compose:addShipProto("tai_researchship", res_ships_proto);
+-- anchored (`$`), since types are matched as patterns and the aux hubs (`kus_researchship_1` etc) must not get this proto
+modkit.compose:addShipProto("kus_researchship$", res_ships_proto);
+modkit.compose:addShipProto("tai_researchship$", res_ships_proto);
