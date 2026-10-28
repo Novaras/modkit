@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "link.js",
+  "scripts": {
+    "link": "cd .. && node ./modkit-tools/link.js",
+    "ship-types": "node ship-types.js",
+    "dirs": "node custom-code-dirs.js"
+  },
   "author": {
     "name": "Novaras (Fear)",
     "email": "tfear091@gmail.com"
