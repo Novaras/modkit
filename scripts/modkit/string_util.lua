@@ -73,6 +73,9 @@ end
 --- Lowercase only, since names passed to the engine (sobgroups etc.) are often lowercased.
 --- 8 chars gives ~2.8e12 possible ids; ids are random, not guaranteed unique, so don't go much shorter for frequently generated names.
 ---
+--- **Not for anything that's sim state** (sobgroup/volume/rule names etc): `random` is C `rand()`, whose sequence engine code
+--- (e.g particle FX) also draws from, so it can differ between clients and cause out-of-sync errors. Use a deterministic counter.
+---
 ---@param length? integer
 ---@return string
 function struid(length)
