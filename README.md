@@ -44,14 +44,14 @@ init.bat
 On Linux or macOS, run the same steps `init.bat` does:
 
 ```bash
-cd modkit-tools && npm i && cd .. && node ./modkit-tools/link.js && node ./modkit-tools/ship-types.js && node ./modkit-tools/purge.js
+cd modkit-tools && npm i && cd .. && node ./modkit-tools/link.js && node ./modkit-tools/ship-types.js && node ./modkit-tools/custom-code-dirs.js && node ./modkit-tools/purge.js
 ```
 
 When asked whether to generate missing vanilla ship files, I recommend the first option ("Generate missing vanilla ship files where needed") if starting a new mod:
 
 <img src="https://i.imgur.com/cWq7AOs.png">
 
-This links every ship to modkit (by adding an `addCustomCode` line to its `.ship` file), so all ships appear in modkit's ship registry (`GLOBAL_SHIPS`). Choose the second option instead if your mod already has its own `.ship` files.
+This links every ship to modkit (by adding an `addCustomCode` line to its `.ship` file), so all ships appear in modkit's ship registry (`GLOBAL_SHIPS`). Choose the second option instead if your mod already has its own `.ship` files: it only links the `.ship` files already in your `ship` directory. Either way, ships that already have their own `addCustomCode` call are listed at the end, so you can check them.
 
 Your custom code will live in any file you like within the `scripts/custom_code` directory:
 
@@ -61,7 +61,30 @@ scripts/
     |- my_script.lua
 ```
 
-You can name these files however you like. Note that only files directly in `scripts/custom_code` are loaded, not subdirectories (modkit's own `lib`, `hw1` and `hw2` subdirectories are loaded explicitly by `scripts/modkit/compose.lua`; add yours there if you want to use subdirectories). The scripts in `hw1` and `hw2` (e.g `hw1/drones.lua`, the Kushan drone frigate) are good examples of real modkit code.
+You can name these files however you like. The scripts in `hw1` and `hw2` (e.g `hw1/drones.lua`, the Kushan drone frigate) are good examples of real modkit code.
+
+### Subdirectories
+
+Files directly in `scripts/custom_code` are always loaded. The game has no way to list directories from Lua, so subdirectories are loaded from a list, `modkit.custom_code_dirs` in `scripts/modkit/custom_code_dirs.lua`. There are two ways to get yours loaded:
+
+**Generate the list (recommended):** after adding or removing a subdirectory, run:
+
+```bash
+cd modkit-tools
+npm run dirs
+```
+
+This finds every subdirectory of `scripts/custom_code` (at any depth) containing `.lua` files and rewrites the list. Setup (`init.bat`) runs it once for you. You need to keep `modkit-tools` for this (setup asks whether to delete it at the end).
+
+**Load it yourself:** from any file directly in `scripts/custom_code`, scan the directory with the stock `doscanpath`:
+
+```lua
+-- scripts/custom_code/my_mod.lua:
+doscanpath("data:scripts/custom_code/my_mod", "*.lua");
+doscanpath("data:scripts/custom_code/my_mod/fighters", "*.lua"); -- doscanpath doesn't recurse, so scan nested directories too
+```
+
+(You can also just add the directory to the list in `custom_code_dirs.lua` by hand.) Use one approach per directory: if a directory is both in the list and scanned by your own code, its files run twice.
 
 Finally, I usually initialise the project's current state as a new git repo:
 
@@ -97,6 +120,16 @@ modkit.compose:addShipProto("tai_fieldfrigate", tai_fields_prototype);
 This setup process is much faster than extracting big files etc., and the amount of tooling in addition to the large library make modkit a great option for any new mod author!
 
 We don't need to worry about editing the `.ship` file or anything - the setup process earlier should already have linked field frigates to modkit for you.
+
+## Tools
+
+If you kept `modkit-tools`, its scripts can be re-run from that directory (`cd modkit-tools`):
+
+| Command | What it does |
+|---|---|
+| `npm run dirs` | Regenerates the list of `scripts/custom_code` subdirectories to load (see [Subdirectories](#subdirectories)) |
+| `npm run ship-types` | Regenerates `modkit.ship_types` (`scripts/modkit/ship-types.lua`) from the `.ship` files in `ship/`; run it after adding ship types |
+| `npm run link` | Links ships to modkit by adding its `addCustomCode` line to their `.ship` files (the first step of setup); ships already linked are skipped, so it's safe to re-run after adding ships |
 
 ## Documentation
 
