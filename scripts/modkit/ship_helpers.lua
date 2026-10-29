@@ -59,7 +59,7 @@ if (modkit.shipGroup == nil) then
 
 	--- Spawns new ships, as specified by `spawn_args`.
 	---
-	--- Returns a `RuleChain|EventChain` which resolves with the newly spawned ships.
+	--- Returns an `EventChain` which resolves with the newly spawned ships.
 	---
 	--- @class SpawnArgs
 	--- @field ship_type ShipType

@@ -1,9 +1,9 @@
 if (not modkit) then modkit = {} end
 
-if (not modkit.campaign) then dofilepath("data:scripts/modkit/campaign.lua"); end
+if (not modkit.events) then dofilepath("data:scripts/modkit/events.lua"); end
 if (not modkit.objectives) then dofilepath("data:scripts/modkit/objectives.lua"); end
+if (not displayMessage) then dofilepath("data:scripts/modkit/campaign-util.lua"); end
 
-local rules = modkit.campaign.rules;
 
 ---@alias DataType "number"|"string"|"nil"|"function"|"table"|"userdata"
 
@@ -152,7 +152,7 @@ _TESTS = {
 		end
 	},
 	feature = {
-		main_operations = modkit.campaign.rules:make(function (res, _, state)
+		main_operations = modkit.events:make(function (res, _, state)
 			-- 1. make N objectives
 			-- 2. after Xs, show every other one
 			-- 3. after Xs, hide half the shown objectives
@@ -163,8 +163,12 @@ _TESTS = {
 			-- 8. hide all objectives, show an objective which is completed with the name 'TEST SUITE', description 'FEATURE TESTS FINISHED!'
 			-- 9. select it
 
-			if (not state._value) then
-				state._value = "running";
+			---@class ObjectivesFeatureTestState : { started?: 1, finished?: 1 }, EventState
+			---@cast state ObjectivesFeatureTestState
+
+			-- (own fields, rather than `_value`, which is overwritten with the callback's return value every run)
+			if (not state.started) then
+				state.started = 1;
 
 				local N = 12;
 				---@type Objective[]
@@ -182,7 +186,8 @@ _TESTS = {
 
 				local wait_time = 5;
 
-				displayMessage({ duration = wait_time, message = "== BEGINNING OBJECTIVES FEATURE TESTS ==", driver = "rules", value = state })
+				-- this event's state is passed down the chain, so the last link can mark the test finished
+				displayMessage({ duration = wait_time, message = "== BEGINNING OBJECTIVES FEATURE TESTS ==", value = state })
 					:begin()
 					:next(function (res, _, state)
 						modkit.table.forEach(%objectives, function (objective, idx)
@@ -199,20 +204,20 @@ _TESTS = {
 						consoleLog("made visible objectives (" .. tostring(visible_objectives) .. ")");
 						modkit.table.printTbl(visible_objectives, "visible objectives");
 
-						res({ visible_objectives = visible_objectives, outer_state = state._value });
+						res({ visible_objectives = visible_objectives, outer_state = state._previous_result });
 					end)
-					:next(displayMessage({ duration = wait_time, driver = "rules" }))
+					:next(displayMessage({ duration = wait_time }))
 					:next(function (res, _, state)
-						consoleLog("in the next rule, after the grace period seperator");
+						consoleLog("in the next event, after the pause");
 
-						modkit.table.printTbl(state._previous_return or {}, "passed through");
+						modkit.table.printTbl(state._previous_result.visible_objectives, "visible objectives passed through"); -- (not `outer_state`, which holds the whole outer event)
 
-						state._previous_return.outer_state._value = "finished";
+						state._previous_result.outer_state.finished = 1;
 						res();
 					end);
 			end
 
-			if (state._value == "finished") then
+			if (state.finished) then
 				res();
 			end
 		end);

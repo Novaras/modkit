@@ -4,13 +4,19 @@
 
 --- Prints the given `table`, recursively if necessary. The output can be any function accepting varargs (i.e `print`, which is default).
 ---
+--- Tables already being printed further up (cycles, like an event and its state, which refer to each other) are printed
+--- as `<cycle: table: ...>` instead of recursing forever (a stack overflow).
+---
 ---@param table table
 ---@param indent integer
 ---@param output fun(...: any): nil
 ---@param no_recurse bool
-function _printTbl(table, indent, output, no_recurse)
+---@param printing? table<table, 1> The tables currently being printed, up the recursion
+function _printTbl(table, indent, output, no_recurse, printing)
 	output = output or print;
-	index = indent or 0;
+	indent = indent or 0;
+	printing = printing or {};
+	printing[table] = 1;
 	local indent_str = "";
 	if (indent > 0) then
 		local cur_indents = 0;
@@ -24,9 +30,11 @@ function _printTbl(table, indent, output, no_recurse)
 			if type(v) == "table" then
 				if (no_recurse) then
 					output(indent_str .. tostring(v)); -- just print address
+				elseif (printing[v]) then
+					output(indent_str .. "\"" .. k .. "\": <cycle: " .. tostring(v) .. ">,");
 				else
 					output(indent_str .. "\"" .. k .. "\": {");
-					_printTbl(v, indent + 1, output, no_recurse);
+					_printTbl(v, indent + 1, output, no_recurse, printing);
 					output(indent_str .. "},");
 				end
 			else
@@ -39,6 +47,7 @@ function _printTbl(table, indent, output, no_recurse)
 			output(indent_str .. "\"" .. k .. "\": " .. tostring(v) .. ',');
 		end
 	end
+	printing[table] = nil; -- (only tables up the recursion count; the same table can appear in sibling branches)
 end
 
 if (modkit == nil) then modkit = {}; end
