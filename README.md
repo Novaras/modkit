@@ -7,7 +7,7 @@ A new way to write custom code for HWRM.
 - A large and growing library of utility functions for working with ships and players
 - A new way to write code, which works with _ships_ instead of SobGroups
 - `ShipList`s: call any ship method on a whole list of ships at once (e.g `my_ships:attack(target)`)
-- A promise-like [rules API](modkit-tools/docs/Rules-API.md) for mission scripting (`rule_a():next(rule_b):catch(...)`)
+- A promise-like [events API](modkit-tools/docs/Events-API.md) for code which plays out over time, in any scope (`event_a():next(event_b):catch(...)`)
 - State shared between the game's separate Lua scopes (custom code, rules, UI), see [Hypertable](modkit-tools/docs/Hypertable.md) and [Hoisting](modkit-tools/docs/Hoisting.md)
 - An [ingame console window](Console.md)
 - Math, table, string, Vec3 and other utils
@@ -134,7 +134,7 @@ If you kept `modkit-tools`, its scripts can be re-run from that directory (`cd m
 ## Documentation
 
 - [Console](Console.md): using the ingame console
-- [Rules API](modkit-tools/docs/Rules-API.md): promise-like rules for mission scripting
+- [Events API](modkit-tools/docs/Events-API.md): promise-like events, for missions and ship code alike
 - [Hypertable](modkit-tools/docs/Hypertable.md) and [Hoisting](modkit-tools/docs/Hoisting.md): how state is shared between the game's Lua scopes
 - [Console internals](modkit-tools/docs/Console.md): how the console is implemented
 - The modkit source is annotated for the [Lua language server](https://luals.github.io/), so hovering/completion in an editor like VS Code is the best way to explore the API

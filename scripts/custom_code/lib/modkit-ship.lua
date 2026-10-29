@@ -10,7 +10,7 @@
 ---@field _current_tumble Arr3
 ---@field _despawned_at_volume string
 ---@field _move_volume string Used by `:move` and related methods
----@field _move_event? Event|Rule The event/rule tracking this ship's current `:move` (if it was issued with an event)
+---@field _move_event? Event The event tracking this ship's current `:move` (if it was issued with an event)
 ---@field _move_seq? integer Counts this ship's evented `:move` calls, to give each move event a unique (deterministic) name
 ---@field _default_vol string
 ---@field _auto_launch 0|1
@@ -213,7 +213,10 @@ end
 --- 'Repositions' this ship to the given `target` position, in increments from its current location to the target.
 ---
 ---@param target Ship|Vec3Like
----@param options? { increment?: number, success_threshold?: number, others_to_drag?: Ship[], increment?: number, interval?: integer, stubborn?: bool }
+--- `options.interval` is the seconds between increments (default `0.05`, i.e every scheduler tick).
+---
+---@param options? { increment?: number, success_threshold?: number, others_to_drag?: Ship[], interval?: number, stubborn?: bool }
+---@return Event
 function modkit_ship:respositionTo(target, options)
 	options = options or {};
 
@@ -224,7 +227,7 @@ function modkit_ship:respositionTo(target, options)
 
 	self._resposition_target = target;
 
-	local new_ev = modkit.scheduler:make({
+	local new_ev = modkit.events:make({
 		fn = function (resolveReposition, rejectReposition, resposition_state)
 			-- print("reposition event for " .. %self);
 			-- modkit.table.printTbl(resposition_state._event, "respositionTo event", 1);
@@ -316,7 +319,7 @@ function modkit_ship:respositionTo(target, options)
 				return resolveReposition(%self);
 			end
 		end,
-		interval = options.interval or 1,
+		interval = options.interval or 0.05,
 	});
 
 	return new_ev;
@@ -565,13 +568,13 @@ end
 --- - `distance_threshold`: allow the move to mark as 'complete' so long as within this proximity of target
 --- - `no_event`: don't fire an event; return `nil` instead
 --- 
---- Returns an `EventChain` or a `RuleChain` if `options.no_event` is `nil` (default):
+--- Returns an `EventChain` if `options.no_event` is `nil` (default):
 --- - Use `:next(...)` to execute code _after_ the move finishes successfully.
 --- - Use `:catch(...)` to execute code _after_ the move is interrupted or fails.
 ---
 ---@param target string | Ship | Ship[] | ShipList | Position | Arr3
 ---@param options? { distance_threshold?: number, no_event: bool }
----@return EventChain|RuleChain|nil
+---@return EventChain|nil
 function modkit_ship:move(target, options)
 	options = modkit.table:merge(
 		{
@@ -602,21 +605,11 @@ function modkit_ship:move(target, options)
 	end
 
 	-- this new order replaces any previous move, so reject that move's event (if still running) to settle its chain;
-	-- finished events are cleaned up by the scheduler / campaign driver once their listeners have run
+	-- finished events are cleaned up by `modkit.events:tick` once their listeners have run
 	local previous = self._move_event;
 	if (previous) then
-		local superseded_msg = "move promise for ship " .. self.own_group .. " rejected: superseded by a new move order";
-		if (Rule_AddInterval) then
-			---@cast previous Rule
-			if (previous.status == "running") then
-				previous.error = superseded_msg;
-				previous:finish("rejected", {});
-			end
-		else
-			---@cast previous Event
-			if (previous.status == EVENT_STATUS.RUNNING) then
-				previous:finish(EVENT_STATUS.REJECTED, superseded_msg);
-			end
+		if (previous.status == EVENT_STATUS.RUNNING) then
+			previous:finish(EVENT_STATUS.REJECTED, "move promise for ship " .. self.own_group .. " rejected: superseded by a new move order");
 		end
 		self._move_event = nil;
 	end
@@ -625,19 +618,11 @@ function modkit_ship:move(target, options)
 		return nil;
 	end
 
-	local api = nil;
 	-- return a promise which resolves if we moved successfully, or rejects if the move was interrupted, or we were moved out of normal space, or we died
-	if (Rule_AddInterval) then
-		api = modkit.campaign.rules;
-	else
-		api = modkit.scheduler;
-	end
-
 	-- the name must be unique per move: listeners find their event by name, so a shared name would let an old
-	-- chain's `:next`/`:catch` fire on a later move's event. A per-ship sequence rather than random, since in the rules
-	-- scope this becomes an engine rule name (sim state, which must match on every client)
+	-- chain's `:next`/`:catch` fire on a later move's event. A per-ship sequence rather than random, so every client names it the same
 	self._move_seq = (self._move_seq or 0) + 1;
-	self._move_event = api:make({
+	self._move_event = modkit.events:make({
 		name = self.type_group .. "_" .. self.id ..  "_move_" .. self._move_seq,
 		fn = function (resolve, reject)
 			if (%self:isNear(%target, %distance_threshold)) then
@@ -1428,10 +1413,10 @@ end
 
 --- Spawns new ships, as specified by `spawn_args`.
 ---
---- Returns a `RuleChain|EventChain` which resolves with the newly spawned ships.
+--- Returns an `EventChain` which resolves with the newly spawned ships.
 ---
 ---@param spawn_args (SpawnArgs|string)|(SpawnArgs|string)[]
----@return EventChain|RuleChain
+---@return EventChain
 function modkit_ship:spawnShip(spawn_args)
 	return modkit.ships():spawnShips(spawn_args);
 end

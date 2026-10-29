@@ -143,10 +143,20 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 			-- consoleLog("> " .. command_str);
 			-- COMMANDS[command].fn(line, words);
 			-- protected call: this runs from a key binding (`flushKeyBuffer`), where an uncaught error is a FATAL EXIT for the game
-			call(command.fn, { param_values, words, flags, line; n = 4 }, "x", function (message) -- (Lua 4: `;` separates list and record parts)
+			-- `call` returns `nil` on an error, so the wrapper returns `1` to tell success apart; `call`'s error handler argument is useless
+			-- here, since the game refuses to overwrite global functions like `_ERRORMESSAGE` (it logs the error and traceback itself)
+			local succeeded = call(
+				function (fn, param_values, words, flags, line)
+					fn(param_values, words, flags, line);
+					return 1;
+				end,
+				{ command.fn, param_values, words, flags, line; n = 5 }, -- (Lua 4: `;` separates list and record parts)
+				"x"
+			);
+			if (not succeeded) then
 				local printErr = consoleError or print;
-				printErr("command '" .. %command_str .. "' failed: " .. tostring(message));
-			end);
+				printErr("command '" .. command_str .. "' failed (see the game log for the error)");
+			end
 		else
 			consoleLog("no such command: '" .. command_str .. "'");
 		end

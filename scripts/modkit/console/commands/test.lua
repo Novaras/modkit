@@ -12,7 +12,7 @@ COMMANDS.test = COMMANDS.test or {
 
 			consoleLog("Rules_?: " .. tostring(Rule_AddInterval or 'nil'));
 
-			modkit.campaign.rules:make(function (res)
+			modkit.events:make(function (res)
 				consoleLog("<b><c=2266AA>Unit Tests:</c></b>");
 				for field, _ in _TESTS.unit do
 					local result_line = "<c=AA6622>" .. tostring(field) .. "</c>";
