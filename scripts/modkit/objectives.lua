@@ -19,20 +19,18 @@ if (MODKIT_OBJECTIVES == nil) then
 	---@class Objective
 	---@field id fun(self): integer
 	---@field name fun(self, name?: string|userdata): string|userdata
-	---@field description fun(self, description?: string|userdata, overwrite: bool): string|userdata
-	---@field visible fun(self, visible?: 0|1): bool
+	---@field description fun(self, description?: string|userdata, append?: bool): string|userdata Sets the description (or appends to it, with `append`); no argument just reads it
+	---@field visible fun(self, visible?: 0|1): bool Hides (`0`) the objective, or reads whether it's shown (no argument). **Hiding is permanent**: the engine won't show it again, so `1` only works on an objective that isn't hidden
 	---@field completed fun(self, completed?: 0|1): bool
 	---@field failed fun(self): bool
-	---@field off fun(self): bool
+	---@field off fun(self): bool Hides the objective, permanently (like `visible(0)`)
 	---@field type fun(self, type?: ObjectiveType): ObjectiveType
 	---@field select fun(self): nil
 
 	---@class GlobalObjectives: MemGroupInst
 	---@field _entities table<integer, ObjectiveDef>
-	---@field _saved_states table<integer, ObjectiveState>
 	---@field all fun(self): table<integer, Objective>
 	GLOBAL_OBJECTIVES = modkit.MemGroup.Create("mg-objectives-global");
-	GLOBAL_OBJECTIVES._saved_states = {};
 
 	-- one tag shared by every objective object (Lua 4 tags are never freed, so a tag per object leaked one each time
 	-- an objective was wrapped, which `:all`/`:find`/`:filter` do for every objective on every call)
@@ -73,13 +71,13 @@ if (MODKIT_OBJECTIVES == nil) then
 				return %def.name;
 			end,
 			visible = function (_, visible)
-				-- when hiding an objective, we save whatever state it was previously in so we can reset to that state when unhiding
-				if (visible == 1 and %def.state == OBJECTIVE_STATE.OS_Off) then -- if making visible, and currently hidden
-					local previous_state = GLOBAL_OBJECTIVES._saved_states[%def.id]; -- load the previous state before we were hidden, if any
-					Objective_SetState(%def.id, previous_state or OBJECTIVE_STATE.OS_Incomplete);
-				elseif (visible == 0 and %def.state ~= OBJECTIVE_STATE.OS_Off) then -- if making invisible, and currently NOT hidden
-					GLOBAL_OBJECTIVES._saved_states[%def.id] = Objective_GetState(%def.id); -- save the current state against the id
-					Objective_SetState(%def.id, OBJECTIVE_STATE.OS_Off); -- set the state to off (hidden)
+				-- hiding is permanent: the engine won't take an objective out of `OS_Off` once it's there (tested 2026-10-28, and
+				-- vanilla treats `OS_Off` as removal, see `KASObjective_Destroy`), so `visible(1)` can't show a hidden objective
+				if (visible == 0 and %def.state ~= OBJECTIVE_STATE.OS_Off) then
+					Objective_SetState(%def.id, OBJECTIVE_STATE.OS_Off);
+				elseif (visible == 1 and %def.state == OBJECTIVE_STATE.OS_Off) then
+					local output = consoleError or print;
+					output("objective " .. %def.id .. " (" .. tostring(%def.name) .. ") can't be shown again: hiding an objective is permanent");
 				end
 
 				%def.state = Objective_GetState(%def.id); -- update the def
@@ -87,15 +85,11 @@ if (MODKIT_OBJECTIVES == nil) then
 				return %def.state ~= OBJECTIVE_STATE.OS_Off;
 			end,
 			completed = function (_, completed)
-				local state = nil;
+				-- (no argument just reads the state)
 				if (completed == 0) then
-					state = OBJECTIVE_STATE.OS_Incomplete;
-				else
-					state = OBJECTIVE_STATE.OS_Complete;
-				end
-
-				if (state) then
-					Objective_SetState(%def.id, state);
+					Objective_SetState(%def.id, OBJECTIVE_STATE.OS_Incomplete);
+				elseif (completed) then
+					Objective_SetState(%def.id, OBJECTIVE_STATE.OS_Complete);
 				end
 
 				%def.state = Objective_GetState(%def.id); -- update the def
@@ -116,24 +110,31 @@ if (MODKIT_OBJECTIVES == nil) then
 
 				return %def.state == OBJECTIVE_STATE.OS_Off;
 			end,
-			description = function (_, description, overwrite)
-				if (not description) then
-					Objective_SetDescription(%def.id, '');
-				elseif (type(description) == "string") then
-					if (overwrite) then
-						Objective_SetDescription(%def.id, description);
-					else
+			description = function (_, description, append)
+				-- (no argument just reads it; pass `""` to clear it)
+				if (description == nil) then
+					return %def.description;
+				end
+
+				if (type(description) == "string") then
+					if (append) then
 						Objective_AddDescription(%def.id, description);
+					else
+						Objective_SetDescription(%def.id, description);
 					end
 				else
-					if (overwrite) then
-						Objective_SetDescriptionw(%def.id, description);
-					else
+					if (append) then
 						Objective_AddDescriptionw(%def.id, description);
+					else
+						Objective_SetDescriptionw(%def.id, description);
 					end
 				end
 
-				%def.description = description;
+				if (append and type(description) == "string" and type(%def.description) == "string") then
+					%def.description = %def.description .. description;
+				else
+					%def.description = description; -- (a wide string can't be concatenated, so only the latest part is kept)
+				end
 
 				return %def.description;
 			end,
@@ -156,21 +157,48 @@ if (MODKIT_OBJECTIVES == nil) then
 
 	--- Sets a new objective.
 	---
+	--- The engine numbers objectives either sequentially (`Objective_Add`, which picks the ID) or by preset IDs
+	--- (`Objective_AddPresetID`), and **mixing the two in one game is a FATAL EXIT**. Without an `id`, this adds the objective
+	--- sequentially (like vanilla, including the multiplayer rules' own "destroy enemy motherships" objective), and uses the
+	--- engine's ID; with an `id`, it uses that preset ID. Mixing the two through this function prints an error and returns `nil`
+	--- instead of crashing (calls made outside modkit can't be checked).
+	---
 	---@param fields ObjectiveDefPartial
-	---@return Objective
+	---@return Objective|nil
 	function GLOBAL_OBJECTIVES:set(fields)
 		fields = modkit.table:merge({
-			id = modkit.table.length(self._entities),
 			name = "mk-objective-" .. modkit.table.length(self._entities),
 			description = "",
-			state = OBJECTIVE_STATE.OS_Off,
+			state = OBJECTIVE_STATE.OS_Incomplete, -- (shown, like the engine's own default; hiding with `OS_Off` is permanent, see `visible`)
 			type = OBJECTIVE_TYPE.OT_Primary,
 		}, (fields or {}));
 
-		-- avoid using `Objective_Add`; if we used `_AddPresetID` in-between those calls, it throws an error
-		-- complaining about non-sequential objective IDs (dumbest possible behavior)
+		local id_mode = "sequential";
+		if (fields.id) then
+			id_mode = "preset";
+		end
+		if (self._id_mode and self._id_mode ~= id_mode) then
+			local output = consoleError or print;
+			output("modkit.objectives:set: can't add objective '" .. tostring(fields.name) .. "' with a " .. id_mode .. " ID, since " .. self._id_mode .. " IDs are already in use (mixing them is a FATAL EXIT)");
+			return nil;
+		end
+		self._id_mode = id_mode;
 
-		Objective_AddPresetID(fields.id, fields.name, fields.type);
+		if (fields.id) then
+			Objective_AddPresetID(fields.id, fields.name, fields.type);
+		else
+			fields.id = Objective_Add(fields.name, fields.type);
+		end
+
+		-- apply the rest, so the engine matches the def (the accessors read the def)
+		Objective_SetState(fields.id, fields.state);
+		if (fields.description ~= "") then
+			if (type(fields.description) == "string") then
+				Objective_SetDescription(fields.id, fields.description);
+			else
+				Objective_SetDescriptionw(fields.id, fields.description);
+			end
+		end
 
 		self._entities[fields.id] = fields;
 
