@@ -27,6 +27,10 @@ COMMANDS.test = COMMANDS.test or {
 					end
 				end
 
+				if (_TESTS.cleanup) then
+					_TESTS.cleanup();
+				end
+
 				res();
 			end):begin()
 				:next(function (resolveCallback)

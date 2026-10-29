@@ -84,26 +84,49 @@ function checkAccessor(objective, accessor_field, options)
 	return nil;
 end
 
+--- Logs a feature test step's result, like the unit tests' PASS/FAIL lines.
+---
+---@param step string
+---@param passed any
+---@param detail? string
+function featureResult(step, passed, detail)
+	local result = "<b><c=2222FF>PASS</c></b>";
+	if (not passed) then
+		result = "<b><c=ff5555>FAIL</c></b>";
+	end
+	local line = "<c=AA6622>" .. step .. "</c> " .. result;
+	if (detail) then
+		line = line .. " " .. detail;
+	end
+	consoleLog(line);
+end
+
 _TESTS = {
 	seed = function ()
-		local id = modkit.table.length(GLOBAL_OBJECTIVES._entities);
 		local def = {
-			id = id,
-			name = "test " .. id,
+			name = "test " .. modkit.table.length(GLOBAL_OBJECTIVES._entities),
 			description = "test descr.",
 			state = OBJECTIVE_STATE.OS_Incomplete,
 			type = OBJECTIVE_TYPE.OT_Primary
 		};
 
+		-- no `id`, so the engine picks it (preset IDs are a FATAL EXIT in skirmish, whose rules add an objective sequentially)
+		local objective = modkit.objectives:set(def);
+		def.id = objective:id();
+		modkit.table.push(_TESTS.seeded, objective);
+
 		return {
 			objective_def = def,
-			objective = modkit.objectives:set(def)
+			objective = objective
 		};
 	end,
+	-- the objectives made by `seed`, switched off by `cleanup` so they don't stay in the objectives list
+	seeded = {},
 	cleanup = function ()
-		for id, ev in modkit.objectives:all() do
-			
+		for i = 1, getn(_TESTS.seeded) do
+			_TESTS.seeded[i]:off();
 		end
+		_TESTS.seeded = {};
 	end,
 	unit = {
 		-- tests follow
@@ -153,15 +176,11 @@ _TESTS = {
 	},
 	feature = {
 		main_operations = modkit.events:make(function (res, _, state)
-			-- 1. make N objectives
-			-- 2. after Xs, show every other one
-			-- 3. after Xs, hide half the shown objectives
-			-- 4. select a shown objective
-			-- 5. after Xs, mark one shown objective as complete, and one as failed
-			-- 6. set the description of the completed objective to some value
-			-- 7. select the completed objective
-			-- 8. hide all objectives, show an objective which is completed with the name 'TEST SUITE', description 'FEATURE TESTS FINISHED!'
-			-- 9. select it
+			-- 1. make N objectives (shown, the default)
+			-- 2. after Xs, hide every other one
+			--    (hiding is permanent, so there's no step showing them again: the engine keeps an objective in `OS_Off`)
+			-- 3. after Xs, mark one shown objective as complete, and one as failed, and select the completed one
+			-- 4. hide them all
 
 			---@class ObjectivesFeatureTestState : { started?: 1, finished?: 1 }, EventState
 			---@cast state ObjectivesFeatureTestState
@@ -190,28 +209,46 @@ _TESTS = {
 				displayMessage({ duration = wait_time, message = "== BEGINNING OBJECTIVES FEATURE TESTS ==", value = state })
 					:begin()
 					:next(function (res, _, state)
-						modkit.table.forEach(%objectives, function (objective, idx)
-							---@cast idx number
-							if (mod(idx, 2) == 0) then
-								objective:visible(1);
+						for i = 1, getn(%objectives) do
+							if (mod(i, 2) == 1) then
+								%objectives[i]:visible(0);
 							end
-						end);
+						end
 
-						local visible_objectives = modkit.table.filter(%objectives, function (val, index, tbl)
-							return val:visible();
-						end);
+						local shown = {}; -- (a list, in order; `modkit.table.filter` keeps the original keys)
+						for i = 1, getn(%objectives) do
+							if (%objectives[i]:visible()) then
+								shown[getn(shown) + 1] = %objectives[i];
+							end
+						end
+						featureResult("hide every other one", getn(shown) == getn(%objectives) / 2, getn(shown) .. " of " .. getn(%objectives) .. " shown");
 
-						consoleLog("made visible objectives (" .. tostring(visible_objectives) .. ")");
-						modkit.table.printTbl(visible_objectives, "visible objectives");
-
-						res({ visible_objectives = visible_objectives, outer_state = state._previous_result });
+						res({ shown = shown, outer_state = state._previous_result });
 					end)
 					:next(displayMessage({ duration = wait_time }))
 					:next(function (res, _, state)
-						consoleLog("in the next event, after the pause");
+						local shown = state._previous_result.shown;
+						local completed = shown[1];
+						local failed = shown[2];
 
-						modkit.table.printTbl(state._previous_result.visible_objectives, "visible objectives passed through"); -- (not `outer_state`, which holds the whole outer event)
+						completed:completed(1);
+						failed:failed();
+						completed:select();
+						featureResult("complete one", completed:completed(), completed:name());
+						featureResult("fail one", Objective_GetState(failed:id()) == OBJECTIVE_STATE.OS_Failed, failed:name());
 
+						res(state._previous_result);
+					end)
+					:next(displayMessage({ duration = wait_time }))
+					:next(function (res, _, state)
+						for i = 1, getn(%objectives) do
+							%objectives[i]:off();
+						end
+						featureResult("hide all", modkit.table.length(modkit.table.filter(%objectives, function (objective)
+							return objective:visible();
+						end)) == 0);
+
+						consoleLog("<b>Feature tests finished.</b>");
 						state._previous_result.outer_state.finished = 1;
 						res();
 					end);
