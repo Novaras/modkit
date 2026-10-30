@@ -219,15 +219,18 @@ if (modkit.table == nil) then
 			table[modkit.table.length(table) + 1] = value;
 			return table;
 		end,
-		pop = function (table)
-			local original = table[modkit.table.length(table)];
-			local out = {};
-			for k, v in table do
-				if (k ~= modkit.table.firstKey(table)) then
-					out[k] = v;
-				end
+		--- Removes and returns the last value of the list `tbl` (in place).
+		---
+		---@generic V
+		---@param tbl V[]
+		---@return V|nil
+		pop = function (tbl)
+			local last = modkit.table.length(tbl); -- (the same index `push` uses, minus one; not `tremove`, which also writes an `n` field)
+			if (last == 0) then
+				return nil;
 			end
-			table = out;
+			local v = tbl[last];
+			tbl[last] = nil;
 			return v;
 		end,
 		shift = function (tbl)
