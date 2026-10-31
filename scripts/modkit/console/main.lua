@@ -77,7 +77,7 @@ if (MK_CONSOLE == nil) then
 
 				-- ensure log length does not exceed `MK_CONSOLE_MAX_LINES` by removing oldest lines first
 				if (modkit.table.length(lines) > MK_CONSOLE_MAX_LINES) then
-					modkit.table.pop(lines);
+					modkit.table.shift(lines);
 				end
 			end
 
