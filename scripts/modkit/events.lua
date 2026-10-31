@@ -9,6 +9,7 @@
 if (modkit == nil) then modkit = {}; end
 if (modkit.table == nil) then dofilepath("data:scripts/modkit/table_util.lua"); end
 if (modkit.MemGroup == nil) then dofilepath("data:scripts/modkit/memgroup.lua"); end
+if (protectedCall == nil) then dofilepath("data:scripts/modkit/protected_call.lua"); end
 
 ---@enum EventStatus
 EVENT_STATUS = {
@@ -221,6 +222,7 @@ if (modkit.events == nil) then
 		if (type(config) == "function") then
 			config = { fn = config };
 		end
+		---@cast config EventConfig
 
 		%store._next_id = %store._next_id + 1;
 		local id = %store._next_id;
@@ -324,6 +326,7 @@ if (modkit.events == nil) then
 		---@type Event|nil
 		local found = nil;
 		if (type(event) == "table") then
+			---@cast event Event
 			found = event;
 		else
 			---@cast event string|integer
@@ -347,6 +350,7 @@ if (modkit.events == nil) then
 			if (type(definition) == "function") then
 				config.fn = definition;
 			else
+				---@cast definition EventConfig
 				for field, value in definition do
 					config[field] = value;
 				end
@@ -429,6 +433,7 @@ if (modkit.events == nil) then
 	---@return EventListener
 	function events:on(pattern, target, options)
 		if (modkit.events:isEvent(pattern)) then
+			---@cast pattern Event
 			pattern = pattern.name;
 		end
 		---@cast pattern string
@@ -513,7 +518,9 @@ if (modkit.events == nil) then
 			awaited[i] = modkit.events:get(listener.names[i]) or 0; -- (0 for missing events, since a `nil` would end the list)
 		end
 
-		if (type(listener.target) == "function") then
+		local target = listener.target; -- (a local, since `---@cast` can't narrow a field)
+		if (type(target) == "function") then
+			---@cast target function
 			local args = {};
 			for i = 1, getn(awaited) do
 				if (awaited[i] ~= 0) then
@@ -521,17 +528,18 @@ if (modkit.events == nil) then
 				end
 			end
 			args.n = getn(awaited);
-			call(listener.target, args, "x", function (message)
+			protectedCall(target, args, function (message)
 				print("[modkit.events] error in listener for '" .. %listener.pattern .. "': " .. tostring(message));
 			end);
 		else
+			---@cast target Event
 			local previous_result = nil;
 			if (listener.options.computePreviousResolve) then
 				previous_result = listener.options.computePreviousResolve();
 			elseif (getn(awaited) == 1 and awaited[1] ~= 0) then
 				previous_result = awaited[1].result;
 			end
-			listener.target:begin(previous_result);
+			target:begin(previous_result);
 		end
 	end
 
@@ -543,14 +551,9 @@ if (modkit.events == nil) then
 	local runEvent = function (event)
 		local state = event.state;
 		local caught = {}; -- (a table, since upvalues can't be assigned to)
-		-- the wrapper's leading `1` tells success apart from an error (`call` returns `nil`); the error handler can't be relied on,
-		-- since the game refuses to overwrite global functions ("Cannot overwrite function _ERRORMESSAGE"), so `call` can't install it
-		local succeeded, value = call(
-			function (fn, resolve, reject, fn_state)
-				return 1, fn(resolve, reject, fn_state);
-			end,
-			{ event.fn, %makeResolver(event), %makeRejecter(event), state },
-			"x",
+		local succeeded, value = protectedCall(
+			event.fn,
+			{ %makeResolver(event), %makeRejecter(event), state },
 			function (message)
 				%caught.message = message;
 			end

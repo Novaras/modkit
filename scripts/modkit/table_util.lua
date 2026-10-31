@@ -219,33 +219,49 @@ if (modkit.table == nil) then
 			table[modkit.table.length(table) + 1] = value;
 			return table;
 		end,
-		pop = function (table)
-			local original = table[modkit.table.length(table)];
-			local out = {};
-			for k, v in table do
-				if (k ~= modkit.table.firstKey(table)) then
-					out[k] = v;
-				end
-			end
-			table = out;
-			return v;
-		end,
-		shift = function (tbl)
-			local key = modkit.table.firstKey(tbl);
-			if (key == nil) then -- empty table (indexing with a nil key is an error in Lua 4)
+		--- Removes and returns the last value of the list `tbl` (in place).
+		---
+		---@generic V
+		---@param tbl V[]
+		---@return V|nil
+		pop = function (tbl)
+			local last = modkit.table.length(tbl); -- (the same index `push` uses, minus one; not `tremove`, which also writes an `n` field)
+			if (last == 0) then
 				return nil;
 			end
-			local v = tbl[key];
-			tbl[key] = nil;
+			local v = tbl[last];
+			tbl[last] = nil;
 			return v;
 		end,
-		unshift = function (tbl, value)
-			local out = {};
-			modkit.table.push(out, value);
-			for k, v in tbl do
-				out[k + 1] = v;
+		--- Removes and returns the first value of the list `tbl` (in place), moving the rest down so it stays `1..n` for `push`.
+		---
+		---@generic V
+		---@param tbl V[]
+		---@return V|nil
+		shift = function (tbl)
+			local count = modkit.table.length(tbl); -- (not `tremove`, which also writes an `n` field)
+			if (count == 0) then
+				return nil;
 			end
-			return out;
+			local v = tbl[1];
+			for i = 1, count - 1 do
+				tbl[i] = tbl[i + 1];
+			end
+			tbl[count] = nil;
+			return v;
+		end,
+		--- Adds `value` to the start of the list `tbl` (in place), moving the rest up. Returns `tbl`, like `push`.
+		---
+		---@generic V
+		---@param tbl V[]
+		---@param value V
+		---@return V[]
+		unshift = function (tbl, value)
+			for i = modkit.table.length(tbl), 1, -1 do -- (from the end, so nothing is overwritten; not `tinsert`, which also writes an `n` field)
+				tbl[i + 1] = tbl[i];
+			end
+			tbl[1] = value;
+			return tbl;
 		end,
 		---@generic K, V
 		---@param tbl table<K, V>
