@@ -5,6 +5,9 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 	if (strsplit == nil) then
 		dofilepath("data:scripts/modkit/string_util.lua");
 	end
+	if (protectedCall == nil) then
+		dofilepath("data:scripts/modkit/protected_call.lua");
+	end
 
 	---@class ParamConfig
 	---@field names string[] The param name(s), i.e 'p' in 'p=10'
@@ -143,19 +146,17 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 			-- consoleLog("> " .. command_str);
 			-- COMMANDS[command].fn(line, words);
 			-- protected call: this runs from a key binding (`flushKeyBuffer`), where an uncaught error is a FATAL EXIT for the game
-			-- `call` returns `nil` on an error, so the wrapper returns `1` to tell success apart; `call`'s error handler argument is useless
-			-- here, since the game refuses to overwrite global functions like `_ERRORMESSAGE` (it logs the error and traceback itself)
-			local succeeded = call(
-				function (fn, param_values, words, flags, line)
-					fn(param_values, words, flags, line);
-					return 1;
-				end,
-				{ command.fn, param_values, words, flags, line; n = 5 }, -- (Lua 4: `;` separates list and record parts)
-				"x"
+			local caught = {}; -- (a table, since upvalues can't be assigned to)
+			local succeeded = protectedCall(
+				command.fn,
+				{ param_values, words, flags, line; n = 4 }, -- (Lua 4: `;` separates list and record parts)
+				function (message)
+					%caught.message = message;
+				end
 			);
 			if (not succeeded) then
 				local printErr = consoleError or print;
-				printErr("command '" .. command_str .. "' failed (see the game log for the error)");
+				printErr("command '" .. command_str .. "' failed: " .. tostring(caught.message or "unknown error") .. " (see the game log for the traceback)");
 			end
 		else
 			consoleLog("no such command: '" .. command_str .. "'");
