@@ -144,10 +144,11 @@ if (modkit.table == nil) then
 			return entries;
 		end,
 
-		--- Finds a value in the given table. The returned value is the first in the table which satisfies the supplied predicate.
+		--- Finds a value in the given table. The returned value is the first in the table which satisfies the supplied predicate
+		--- (or equals it, if it isn't a function).
 		---
 		---@param table table
-		---@param predicate fun(val: any, idx: TableKey, tbl: table<TableKey, any>): bool
+		---@param predicate (fun(val: any, idx: TableKey, tbl: table<TableKey, any>): bool)|any
 		---@return any|nil
 		findVal = function (table, predicate)
 			for i, v in table do
@@ -315,7 +316,8 @@ if (modkit.table == nil) then
 		---@param tbl_b table
 		difference = function (tbl_a, tbl_b)
 			return modkit.table.filter(tbl_a, function (a_val)
-				return modkit.table.findVal(%tbl_b, a_val) == nil; -- elements in A, but not B
+				-- elements in A, but not B (by equality; not `findVal`, which would call function values as predicates)
+				return modkit.table.includesValue(%tbl_b, a_val) == nil;
 			end);
 		end,
 
@@ -328,11 +330,16 @@ if (modkit.table == nil) then
 			return out;
 		end,
 
+		--- Returns a new list with the values of the list `tbl` in reverse order (1-based, like `tbl`).
+		---
+		---@generic V
+		---@param tbl V[]
+		---@return V[]
 		reverse = function (tbl)
 			local out = {};
 			local l = modkit.table.length(tbl);
-			for i = l, 0, -1 do
-				out[i] = tbl[l - i];
+			for i = 1, l do
+				out[i] = tbl[l - i + 1];
 			end
 			return out;
 		end
@@ -373,25 +380,28 @@ if (modkit.table == nil) then
 	---@return string
 	function table.stringify(tbl)
 		local result = "{";
+		-- (new locals for the strings: assigning to the loop's `k` breaks the iteration, since `next` is then given a key not in the table)
 		for k, v in tbl do
 			-- convert the key to a string
+			local key_str = tostring(k);
 			if (type(k) == "number") then
-				k = "[" .. k .. "]";
+				key_str = "[" .. k .. "]";
 			elseif (type(k) == "string") then
-				k = '["' .. k .. '"]';
+				key_str = "[" .. format("%q", k) .. "]";
 			end
 
 			-- convert the value to a string
+			local value_str = nil;
 			if (type(v) == "table") then
-				v = %table.stringify(v);
+				value_str = %table.stringify(v);
 			elseif (type(v) == "string") then
-				v = '"' .. v .. '"';
+				value_str = format("%q", v); -- (quoted and escaped)
 			else
-				v = tostring(v);
+				value_str = tostring(v);
 			end
 
 			-- add the key-value pair to the result string
-			result = result .. k .. "=" .. v .. ",";
+			result = result .. key_str .. "=" .. value_str .. ",";
 		end
 		result = result .. "}";
 
@@ -503,13 +513,12 @@ if (modkit.table == nil) then
 	---@param recursive? bool Whether or not to call recursively
 	---@param recursePredicate? fun(v: any, k: string|number, tbl: T[]) If `recursive`, this function decides which key-vals to recurse on. By default, recurse when value is a table type.
 	function table.forEach(tbl, callback, recursive, recursePredicate)
-		recursive = recursive or nil;
 		recursePredicate = recursePredicate or function (v)
-			return v and type(v) == "function";
+			return type(v) == "table";
 		end
 
 		for k, v in tbl do
-			if (recursePredicate(v, k, tbl)) then
+			if (recursive and recursePredicate(v, k, tbl)) then
 				modkit.table.forEach(v, callback, recursive, recursePredicate);
 			else
 				callback(v, k, tbl);
