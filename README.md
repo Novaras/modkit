@@ -147,4 +147,14 @@ Firstly, feel free to create issues: https://github.com/Novaras/modkit/issues
 
 You can also fork the repo and make pull requests.
 
+### Offline tests
+
+modkit's library code has offline unit tests in `modkit-tools/tests/lua` (`*.test.lua`, using the small harness in `harness.lua`). They run outside the game, with a Lua 4.0 interpreter:
+
+1. Build Lua **4.0** (not 4.0.1, which fixed parser bugs the game still has) from https://www.lua.org/ftp/lua-4.0.tar.gz.
+2. From `modkit-tools`, run `LUA4=<path to lua-4.0>/bin/lua npm test` (or put the interpreter on your `PATH` as `lua4`).
+   Add a name to only run matching files, i.e `npm test -- table_util`.
+
+These are separate from the ingame tests in `scripts/modkit/tests`, which run through the console's `test` command.
+
 Talk to me on [Discord](https://discord.gg/homeworld) if you want to contribute directly to modkit (or just ask me (Fear) anything :+1:). 
