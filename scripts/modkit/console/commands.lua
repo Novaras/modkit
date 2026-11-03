@@ -73,33 +73,48 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 		return src;
 	end
 
-	---comment
+	--- Escapes `str`'s pattern characters, so it matches literally inside a pattern.
+	---
+	---@param str string
+	---@return string
+	function escapePattern(str)
+		local escaped = gsub(str, "(%W)", "%%%1"); -- (a local, so only the string is returned, not `gsub`'s count too)
+		return escaped;
+	end
+
+	--- Finds `pattern` in `str` only where it starts `str` or follows whitespace (so a name isn't found inside a longer word).
+	--- Returns the match's start and end, like `strfind` (not including the whitespace).
+	---
+	---@param str string
+	---@param pattern string
+	---@return integer|nil start
+	---@return integer|nil finish
+	function findAtWordStart(str, pattern)
+		local s, e = strfind(str, "^" .. pattern);
+		if (s == nil) then
+			s, e = strfind(str, "%s" .. pattern);
+			if (s) then
+				s = s + 1;
+			end
+		end
+		return s, e;
+	end
+
+	--- Reads each param in `params` from `line`, as `name=value` (for any of the param's names). Names are matched case-insensitively,
+	--- and must start the line or follow whitespace. Values keep their case. Missing params use their default (if any).
+	---
 	---@param line string
 	---@param params ParamConfig[]
 	function parseParams(line, params)
 		local res = {};
-
-		-- int = function (names, default)
-		-- 	names = names or { 'n' };
-		-- 	return {
-		-- 		names = names,
-		-- 		default = default,
-		-- 		pattern = "%d+"
-		-- 	};
-		-- end,
+		local lower_line = strlower(line); -- (the same length as `line`, so positions found in it can be read from `line`)
 
 		for label, conf in params do
 			local value = nil;
 			for _, name in conf.names do
-				local s, e = strfind(line, name .. "=" .. conf.pattern);
-				e = e or strlen(line);
+				local s, e = findAtWordStart(lower_line, escapePattern(strlower(name)) .. "=" .. conf.pattern);
 				if (s) then
-					-- print("OK GOT CAPTURE FROM " .. s .. " TO " .. e .. " (label is " .. label .. ")");
-					local capture = strsub(line, s, e);
-					-- consoleLog("\tcapture: " .. capture);
-					local parts = strsplit(capture, "=", 1);
-					value = parts[2];
-					-- consoleLog("\t\tval = " .. tostring(value));
+					value = strsub(line, s + strlen(name) + 1, e); -- (after `name=`)
 					print("parsed val for name " .. name .. " as " .. tostring(value));
 				end
 			end
@@ -120,11 +135,18 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 		return res;
 	end
 
+	--- Returns `{ [flag] = 1 }` for each of `flags` found in `line` as a whole word, `--flag` (case-insensitively).
+	---
+	---@param line string
+	---@param flags string[]
+	---@return table<string, 1>
 	function parseFlags(line, flags)
 		local res = {};
+		local lower_line = strlower(line);
 		for _, flag in flags do
-			-- print("look for " .. '--' .. flag);
-			if (strfind(line, '--' .. flag, 1, 1)) then
+			-- (followed by whitespace or the end of the line, so `--forceful` doesn't set `force`)
+			local flag_pattern = "%-%-" .. escapePattern(strlower(flag));
+			if (findAtWordStart(lower_line, flag_pattern .. "%s") or findAtWordStart(lower_line, flag_pattern .. "$")) then
 				res[flag] = 1;
 			end
 		end
@@ -169,7 +191,7 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 			return {
 				names = names,
 				default = default,
-				pattern = "%d+",
+				pattern = "[+-]?%d+", -- (an integer, with an optional sign)
 				transform = function (number_str)
 					return tonumber(number_str);
 				end
@@ -200,7 +222,8 @@ if (MODKIT_CONSOLE_COMMANDS == nil) then
 			return {
 				names = names,
 				default = default,
-				pattern = "[%d-]+%s+[%d-]+%s+[%d-]+",
+				-- three numbers, each with an optional sign and decimal part (i.e `10 -5.5 +.25`)
+				pattern = "[+-]?%d*%.?%d+%s+[+-]?%d*%.?%d+%s+[+-]?%d*%.?%d+",
 			};
 		end,
 		strToVec3 = function (names, default)

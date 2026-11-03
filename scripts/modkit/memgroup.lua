@@ -55,7 +55,7 @@ if (modkit.MemGroup == nil) then
 			--- Sets the entity with the given id, overriding if already set.
 			---@generic EntityType
 			---@param entityID number|string
-			---@param entity EntityType
+			---@param entity? EntityType Default `{}`
 			---@return EntityType
 			function new_group:set(entityID, entity)
 				if (entity == nil) then
@@ -96,7 +96,7 @@ if (modkit.MemGroup == nil) then
 
 			--- Returns a copy of this group with the existing entities replaced by new collection given. If no new entities are given,
 			--- returns a copy of this group unaltered.
-			---@param new_entities table
+			---@param new_entities? table Default: this group's entities
 			---@return table
 			function new_group:shallowCopy(new_entities)
 				new_entities = new_entities or self._entities;

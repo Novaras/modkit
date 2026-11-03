@@ -1,36 +1,42 @@
---- Returns a table containing string fragments produced by breaking `str` on every `delimeter`.
---- If the string contains no delimeters, the whole string is returned in one entry.
+--- Returns a table containing the words of `str`: the text between each match of the `delimeter` pattern.
+--- Empty words (from repeated, leading or trailing delimiters) are skipped. If `str` has no words, the whole string is returned in one entry.
+---
+--- `delimeter` is a Lua pattern, i.e `"%s+"` splits on runs of whitespace, and `"%."` on a literal `.`. It must match at least one character
+--- (a pattern which can match nothing, like `"%s*"`, is treated as matching nowhere).
+---
 ---@param str string
----@param delimeter string
+---@param delimeter? string Default `"%s"` (any whitespace character)
+---@param return_words_only? any If set, the entries are the words; otherwise they're `{ start, finish, str }` tables
 ---@return table
 function strsplit(str, delimeter, return_words_only)
 	delimeter = delimeter or "%s";
 
-	local i = 1;
-	local s, f;
 	local matches = {};
-	while(i < strlen(str)) do
-		s, f = strfind(str, "([^"..delimeter.."]+)", i);
-		if (s) then
-			local part = strsub(str, s, f);
+	local len = strlen(str);
+	local i = 1; -- the start of the current word
+	while (i <= len) do
+		local delim_start, delim_end = strfind(str, delimeter, i);
+		if (delim_start == nil or delim_end < delim_start) then -- no more delimiters (an empty match counts as none): the rest is the last word
+			delim_start = len + 1;
+			delim_end = len;
+		end
+
+		if (delim_start > i) then -- (no word between back-to-back delimiters)
+			local part = strsub(str, i, delim_start - 1);
 			local payload;
 			if (return_words_only) then
 				payload = part;
 			else
 				payload = {
-					start = s,
-					finish = f,
+					start = i,
+					finish = delim_start - 1,
 					str = part
 				};
 			end
-			modkit.table.push(
-				matches,
-				payload
-			);
-			i = f + 1;
-		else
-			break;
+			modkit.table.push(matches, payload);
 		end
+
+		i = delim_end + 1;
 	end
 	if (modkit.table.length(matches) == 0) then
 		if (return_words_only) then
@@ -38,7 +44,7 @@ function strsplit(str, delimeter, return_words_only)
 		else
 			matches[1] = {
 				start = 1,
-				finish = strlen(str),
+				finish = len,
 				str = str
 			};
 		end
@@ -90,6 +96,11 @@ function struid(length)
 	return id;
 end
 
+--- Returns `str` without leading or trailing whitespace.
+---
+---@param str string
+---@return string
 function strtrim(str)
-	return gsub(str, '^%s*(.-)%s*$', '%1');
+	local trimmed = gsub(str, '^%s*(.-)%s*$', '%1'); -- (a local, so only the string is returned, not `gsub`'s count too)
+	return trimmed;
 end

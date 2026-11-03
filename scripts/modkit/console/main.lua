@@ -44,7 +44,7 @@ if (MK_CONSOLE == nil) then
 		lines = lines or {};
 		local rev = modkit.table.reverse(lines);
 		for k, line in rev do
-			local ui_el = "line" .. (MK_CONSOLE_MAX_LINES - k);
+			local ui_el = "line" .. (MK_CONSOLE_MAX_LINES - k + 1); -- (the newest line, `rev[1]`, goes on the bottom label)
 			UI_SetTextLabelText(MK_CONSOLE_SCREEN_NAME, ui_el, line);
 		end
 	end

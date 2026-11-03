@@ -6,7 +6,7 @@ COMMANDS.move = COMMANDS.move or {
     example = "move type=tai_assaultfrigate p=0 pos=0 0 0 --force",
     params = {
         type = PARAMS.str({ 't', 'type' }),
-        family = PARAMS.str({ 'f', 'family '}),
+        family = PARAMS.str({ 'f', 'family' }),
         player = PARAMS.intToPlayer(),
         position = PARAMS.strToVec3({ 'pos', 'position' })
     },

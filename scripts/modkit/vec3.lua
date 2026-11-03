@@ -66,12 +66,8 @@ function Vec3:isVec3(t)
 
 	for k, _ in t do
 		---@cast k any
-		local idx = modkit.table.findIndex(Vec3._key_mappings, k);
-		if (idx) then
-			if (not type(t[idx]) == "number") then return nil; end
-		else
-			return nil;
-		end
+		if (modkit.table.findIndex(Vec3._key_mappings, k) == nil) then return nil; end -- (only the keys 1, 2 and 3)
+		if (type(t[k]) ~= "number") then return nil; end
 	end
 
 	return 1;
@@ -241,11 +237,11 @@ end
 ---@return Vec3
 function Vec3:abs(vec3)
 	vec3 = Vec3(vec3);
-	local abs = {};
+	local out = {}; -- (not named `abs`, which would hide the global `abs` function)
 	for k, _ in vec3 do
-		abs[k] = abs(vec3[k]);
+		out[k] = abs(vec3[k]);
 	end
-	return Vec3(abs);
+	return Vec3(out);
 end
 
 --- Returns the mangitude of the given vector.
@@ -266,7 +262,7 @@ function Vec3:mag(vec3)
 	return Vec3:magnitude(vec3);
 end
 
---- Returns the angle between v1 and v2, in radians.
+--- Returns the angle between v1 and v2, in degrees (Lua 4's trig functions, like the game's, work in degrees).
 ---
 --- This is a pretty expensive operation.
 ---

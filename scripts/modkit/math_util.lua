@@ -20,18 +20,8 @@ if (modkit.math == nil) then
 		end,
 		modulo = function (n, m)
 			return n - floor(n / m) * m
-		end,
-		--- Raises `n` to the integer power `m`.
-		---@param n number
-		---@param m integer
-		---@return number
-		pow = function (n, m)
-			local out = 1
-			for i = 0, m do
-				out = out * n
-			end
-			return out
 		end
+		-- (no `pow`: use Lua's `^`, i.e `n ^ m`, which handles any power)
 	}
 	print("math_util init")
 end
